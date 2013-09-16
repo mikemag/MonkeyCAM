@@ -14,6 +14,10 @@ MonkeyCAM is licensed under the Apache License, Version 2.0 except as otherwise 
 
 The G-code programs **output** from MonkeyCAM are license-free.
 
+### Disclaimer
+
+I am providing code in this repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not from my employer (Facebook).
+
 ## Features and Current Status
 
 MonkeyCAM is currently a command-line program distributed in source-form only. It currently compiles with GCC 4.8.1 for Mac OSX. The program takes configuration files to describe the ski or snowboard shape via a small set of parameters and generates the follow G-code programs:
