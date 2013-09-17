@@ -22,11 +22,11 @@ More information about ski and snowboard construction can be found at
 ## License
 
 MonkeyCAM is licensed under the Apache License, Version 2.0 except as
-otherwise notes. See
+otherwise noted. See
 [LICENSE](https://github.com/mikemag/MonkeyCAM/blob/master/LICENSE)
 for details.
 
-The G-code programs **output** from MonkeyCAM are license-free.
+The G-code programs **generated** by MonkeyCAM are license-free.
 
 ### Disclaimer
 
@@ -39,7 +39,7 @@ receive to my code is from me and not from my employer (Facebook).
 MonkeyCAM is currently a command-line program distributed in
 source-form only. It currently compiles with GCC 4.8.1 for Mac
 OSX. The program takes configuration files to describe the ski or
-snowboard shape via a small set of parameters and generates the follow
+snowboard shape via a small set of parameters and generates the following
 G-code programs:
 
 * Base cutout
@@ -96,7 +96,7 @@ Why not just open source MonkeyCAM v3? Honestly, the code for my
 personal version of MonkeyCAM has grown rather organically over almost
 10 years and three major revisions. It is a huge mess of C#, WinForms,
 and Managed DirectX, and I'd really prefer no one but me ever sees
-that code again :)
+that code again. :)
 
 ## Dependencies
 
