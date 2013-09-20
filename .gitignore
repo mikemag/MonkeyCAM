@@ -11,3 +11,11 @@
 *.lai
 *.la
 *.a
+
+# Makefiles and targets
+Makefile
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+cli/MonkeyCAM
+test/test

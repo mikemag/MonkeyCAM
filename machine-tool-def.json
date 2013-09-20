@@ -1,0 +1,57 @@
+{
+  // All measurements for the machine and tools are in inches.
+  "machine":
+  {
+    "rapid speed": 100,
+    "normal speed": 70,
+    "bottom rapid height": 0.100,
+    "top rapid height": 0.600,
+    "core blank thickness": 0.420,
+
+    "base cutout tool": 2,
+
+    "guide hole tool": 1,
+    "guide hole depth": -0.600,
+    "guide hole diameter": 0.505,
+
+    "alignment mark tool": 3,
+    "alignment mark offset": 1.5,
+    "alignment mark depth": 0.030,
+    "alignment mark deep depth": 0.100,
+
+    "edge groove tool": 1,
+
+    "insert holes tool": 1,
+
+    "top profile tool": 4,
+    "top profile transition speed": 20,
+
+    "tools":
+    [
+      {
+        "id": 1,
+        "name": "Quarter Inch Upcut Spiral",
+        "diameter": 0.247,
+        "G-code #": 1
+      },
+      {
+        "id": 2,
+        "name": "Quarter Inch Straight",
+        "diameter": 0.250,
+        "G-code #": 1
+      },
+      {
+        "id": 3,
+        "name": "Quarter Inch V",
+        "diameter": 0.250,
+        "G-code #": 1
+      },
+      {
+        "id": 4,
+        "name": "1.5 Inch Straight",
+        "diameter": 1.496,
+        "G-code #": 1
+      }
+    ]
+  }
+}

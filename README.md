@@ -48,22 +48,24 @@ G-code programs:
   * Alignment marks to transfer key design points to the bottom of the core
   * Edge relief to leave room for steel edges
   * Insert holes for standard snowboard inserts (T-nuts) in a variety of patterns
-  * Top profile to impart the taper to the core **(not yet complete)**
+  * Top profile to impart the taper to the core
   * Cutout, allowing for sidewall overhang and nose/tail spacers
 **(not yet complete)**
 * Nose and tail spacers which match the core **(not yet complete)**
 * Edge trenches to enable inlay of different edge wood and/or sidewall
 material along the effective edge of the core **(not yet complete)**
 
-So far the G-code programs have been tested only on my CNC machine and
-control software. There is no UI, and all configuration and results
-are in files.
+The G-code programs emitted at this time have had only basic
+testing. I will cut real parts with them very soon and refine them a
+bit, and update this when they are verified.
+
+There is no UI, and all configuration and results are in files.
 
 ## Future Work
 
-MonkeyCAM v4.0 is a work in-progress. It is an incomplete port of
-MonkeyCAM, developed by [Mike Magruder](https://github.com/mikemag)
-for [Happy Monkey Snowboards,
+MonkeyCAM v4.0 is a work in-progress. It is an incomplete (~30% so
+far) port of MonkeyCAM, developed by [Mike
+Magruder](https://github.com/mikemag) for [Happy Monkey Snowboards,
 Inc.](http://www.happymonkeysnowboards.com/) from 2003 to 2012. The
 valuable parts of the MonkeyCAM v3 backend (shape and G-code
 generation) will be ported to this version over the next many
@@ -74,6 +76,8 @@ order:
 above.
 * Target more G-code controllers with different formats and requirements.
 * Provide distribution of binaries for Mac OSX and Windows 8.
+* More options for effective edge, nose, and tail. (MonkeyCAM v3, for instance, had 6 tail options.)
+* Port the code to soften the transition between edge and nose/tail. (You can work around this with a sandblock and two min of your time for now.)
 * Port the MonkeyCAM design UI to a web-based UI built on HTML 5, and enable
 local execution.
   * The UI will include easy controls for inputting the shape
@@ -91,6 +95,12 @@ as the design UI.
 * Host MonkeyCAM on servers in something like AWS or Google Apps;
   serve the UI while running the engine on the server, provide local
   storage for board configurations.
+* Read the overall board shape from other CAD programs (DXF at least).
+* Output the overall shape, insert locations, etc. to PDF/DXF for
+  printing or use in other CAD programs.
+* Mold design and program to cut molds.
+* Rouging passes for the core profile.
+* Adapt for other kinds of 'boards': kite boards, skate boards, etc.
 
 Why not just open source MonkeyCAM v3? Honestly, the code for my
 personal version of MonkeyCAM has grown rather organically over almost
