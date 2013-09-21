@@ -18,6 +18,7 @@ set(MONKEYCAM_CORE_SRCS
     mcfixed.cpp
     paths.cpp
     point.cpp
+    shape-parts.cpp
     shapes.cpp
     )
 add_library(core ${MONKEYCAM_CORE_SRCS})

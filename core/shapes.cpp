@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "shapes.h"
+#include "shape-parts.h"
 #include "svg-writer.h"
 
 namespace MonkeyCAM {
@@ -34,8 +35,12 @@ BoardShape::BoardShape(std::string name,
                        MCFixed noseLength, MCFixed effectiveEdge,
                        MCFixed tailLength, MCFixed sidecutRadius,
                        MCFixed waistWidth, MCFixed taper,
+                       std::unique_ptr<ShapeEndPart>& nosePart,
+                       std::unique_ptr<ShapeEdgePart>& edgePart,
+                       std::unique_ptr<ShapeEndPart>& tailPart,
                        MCFixed refStance, MCFixed setback,
-                       InsertPack nosePack, InsertPack tailPack)
+                       std::unique_ptr<InsertPack>& nosePack,
+                       std::unique_ptr<InsertPack>& tailPack)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -43,10 +48,13 @@ BoardShape::BoardShape(std::string name,
     , m_waistWidth(waistWidth)
     , m_sidecutRadius(sidecutRadius)
     , m_taper(taper)
+    , m_nosePart(std::move(nosePart))
+    , m_edgePart(std::move(edgePart))
+    , m_tailPart(std::move(tailPart))
     , m_setback(setback)
     , m_refStance(refStance)
-    , m_noseInserts(nosePack)
-    , m_tailInserts(tailPack)
+    , m_noseInserts(std::move(nosePack))
+    , m_tailInserts(std::move(tailPack))
     , m_maxCoreX(0)
 {
   // Node and tail width come from the sidecut depth...
@@ -72,17 +80,13 @@ Path BoardShape::buildOverallPath() {
   MCFixed noseHalfWidth = m_noseWidth / 2;
   MCFixed waistHalfWidth = m_waistWidth / 2;
   MCFixed tailHalfWidth = m_tailWidth / 2;
-  BezierPath np(Point(noseEndX, 0),
-                Point(noseEndX, -noseHalfWidth * 0.5),
-                Point(noseTranX - m_noseLength * 0.75, -noseHalfWidth),
-                Point(noseTranX, -noseHalfWidth));
-  ArcPath ep(Point(noseTranX, -noseHalfWidth),
-             Point(eeCenterX, -waistHalfWidth),
-             Point(tailTranX, -tailHalfWidth), ArcPath::Clockwise);
-  BezierPath tp(Point(tailTranX, -tailHalfWidth),
-                Point(tailTranX + m_tailLength * 0.75, -tailHalfWidth),
-                Point(tailEndX, -tailHalfWidth * 0.5),
-                Point(tailEndX, 0));
+  auto np = m_nosePart->generate(Point(noseEndX, 0),
+                                 Point(noseTranX, -noseHalfWidth));
+  auto ep = m_edgePart->generate(Point(noseTranX, -noseHalfWidth),
+                                 Point(eeCenterX, -waistHalfWidth),
+                                 Point(tailTranX, -tailHalfWidth));
+  auto tp = m_tailPart->generate(Point(tailEndX, 0),
+                                 Point(tailTranX, -tailHalfWidth));
   m_overallPath.push_back_path(np);
   m_overallPath.push_back_path(ep);
   m_overallPath.push_back_path(tp);
@@ -108,13 +112,14 @@ void BoardShape::setupInserts() {
   auto stanceX = (m_refStance / 2);
   auto boardLength = m_noseLength + m_effectiveEdge + m_tailLength;
   auto boardCenterX = boardLength / 2;
-  m_noseInserts.moveIntoPosition(Point(-stanceX + m_setback + boardCenterX, 0));
-  m_tailInserts.moveIntoPosition(Point(stanceX + m_setback + boardCenterX, 0));
-  auto p = m_noseInserts.insertsPath();
+  m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + boardCenterX,
+                                        0));
+  m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + boardCenterX, 0));
+  auto p = m_noseInserts->insertsPath();
   m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
-  m_insertsPath.push_back(Point(m_noseInserts.maxPoint().X + 4, 0));
-  m_insertsPath.push_back(Point(m_tailInserts.minPoint().X - 4, 0));
-  p = m_tailInserts.insertsPath();
+  m_insertsPath.push_back(Point(m_noseInserts->maxPoint().X + 4, 0));
+  m_insertsPath.push_back(Point(m_tailInserts->minPoint().X - 4, 0));
+  p = m_tailInserts->insertsPath();
   m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
 }
 

@@ -36,7 +36,36 @@ using std::vector;
 
 namespace MonkeyCAM {
 
-// @TODO: need control points and kinds for nose, tail, and ee.
+// @TODO: load more parts
+std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
+  auto type = config.get<std::string>("type");
+  auto endHandle = config.get<double>("end handle");
+  auto transitionHandle = config.get<double>("transition handle");
+  assert(type == "Basic Bezier");
+  return std::unique_ptr<ShapeEndPart> {
+    new BasicBezier { endHandle, transitionHandle } };
+}
+
+// @TODO: load more parts
+std::unique_ptr<ShapeEdgePart> loadEdgePart(
+  boost::property_tree::ptree& config)
+{
+  auto type = config.get<std::string>("type");
+  assert(type == "Basic Arc");
+  return std::unique_ptr<ShapeEdgePart> { new BasicArc };
+}
+
+std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
+  auto countNose = config.get<int>("count nose");
+  auto countTail = config.get<int>("count tail");
+  auto offset = config.get<double>("offset", 4);
+  auto hSpacing = config.get<double>("horizontal spacing", 4);
+  auto vSpacing = config.get<double>("vertical spacing", 4);
+  return std::unique_ptr<InsertPack> {
+    new SnowboardInsertPack { countNose, countTail, offset,
+        hSpacing, vSpacing } };
+}
+
 BoardShape loadBoard(boost::property_tree::ptree& config) {
   auto name = config.get<std::string>("board.name");
   auto noseLength = config.get<double>("board.nose length");
@@ -45,30 +74,27 @@ BoardShape loadBoard(boost::property_tree::ptree& config) {
   auto sidecutRadius = config.get<double>("board.sidecut radius");
   auto waistWidth = config.get<double>("board.waist width");
   auto taper = config.get<double>("board.taper");
+  auto nose = loadEndPart(config.get_child("board.nose shape"));
+  auto edge = loadEdgePart(config.get_child("board.edge shape"));
+  auto tail = loadEndPart(config.get_child("board.tail shape"));
+
   auto refStance = config.get<double>("board.reference stance width");
   auto setback = config.get<double>("board.stance setback");
-
-  auto countNose = config.get<int>("board.nose insert pack.count nose");
-  auto countTail = config.get<int>("board.nose insert pack.count tail");
-  auto offset = config.get<double>("board.nose insert pack.offset", 4);
-  auto hSpacing =
-    config.get<double>("board.nose insert pack.horizontal spacing", 4);
-  auto vSpacing =
-    config.get<double>("board.nose insert pack.vertical spacing", 4);
-  SnowboardInsertPack nosePack { countNose, countTail, offset,
-      hSpacing, vSpacing };
-
-  countNose = config.get<int>("board.tail insert pack.count nose");
-  countTail = config.get<int>("board.tail insert pack.count tail");
-  offset = config.get<double>("board.tail insert pack.offset", 4);
-  hSpacing = config.get<double>("board.tail insert pack.horizontal spacing", 4);
-  vSpacing = config.get<double>("board.tail insert pack.vertical spacing", 4);
-  SnowboardInsertPack tailPack { countNose, countTail, offset,
-      hSpacing, vSpacing };
+  auto nosePack = loadInserts(config.get_child("board.nose insert pack"));
+  auto tailPack = loadInserts(config.get_child("board.tail insert pack"));
 
   BoardShape board { name, noseLength, eeLength, tailLength, sidecutRadius,
-      waistWidth, taper, refStance, setback, nosePack, tailPack };
+      waistWidth, taper, nose, edge, tail, refStance, setback,
+      nosePack, tailPack };
   return board;
+}
+
+BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
+  auto taperStart = config.get<double>("taper start");
+  auto pullStart = config.get<double>("start handle");
+  auto pullEnd = config.get<double>("end handle");
+  auto taperEnd = config.get<double>("taper end");
+  return BoardProfile::End { taperStart, pullStart, pullEnd, taperEnd };
 }
 
 BoardProfile loadProfile(boost::property_tree::ptree& config,
@@ -76,18 +102,8 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
   auto noseThickness = config.get<double>("profile.nose thickness");
   auto centerThickness = config.get<double>("profile.center thickness");
   auto tailThickness = config.get<double>("profile.tail thickness");
-
-  auto taperStart = config.get<double>("profile.nose taper.taper start");
-  auto pullStart = config.get<double>("profile.nose taper.start handle");
-  auto pullEnd = config.get<double>("profile.nose taper.end handle");
-  auto taperEnd = config.get<double>("profile.nose taper.taper end");
-  BoardProfile::End noseEnd { taperStart, pullStart, pullEnd, taperEnd };
-
-  taperStart = config.get<double>("profile.tail taper.taper start");
-  pullStart = config.get<double>("profile.tail taper.start handle");
-  pullEnd = config.get<double>("profile.tail taper.end handle");
-  taperEnd = config.get<double>("profile.tail taper.taper end");
-  BoardProfile::End tailEnd { taperStart, pullStart, pullEnd, taperEnd };
+  auto noseEnd = loadProfileEnd(config.get_child("profile.nose taper"));
+  auto tailEnd = loadProfileEnd(config.get_child("profile.tail taper"));
 
   BoardProfile profile { noseThickness, centerThickness, tailThickness,
       noseEnd, tailEnd, shape.eeLength(), shape.overallLength(),

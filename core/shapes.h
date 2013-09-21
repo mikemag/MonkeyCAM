@@ -19,11 +19,13 @@
 
 #include <cassert>
 #include <string>
+#include <memory>
 
 #include "board-profile.h"
 #include "gcode-writer.h"
 #include "insert-pack.h"
 #include "paths.h"
+#include "shape-parts.h"
 
 namespace MonkeyCAM {
 
@@ -34,8 +36,12 @@ class BoardShape {
   BoardShape(std::string name,
              MCFixed noseLength, MCFixed effectiveEdge, MCFixed tailLength,
              MCFixed sidecutRadius, MCFixed waistWidth, MCFixed taper,
+             std::unique_ptr<ShapeEndPart>& nosePart,
+             std::unique_ptr<ShapeEdgePart>& edgePart,
+             std::unique_ptr<ShapeEndPart>& tailPart,
              MCFixed refStance, MCFixed setback,
-             InsertPack nosePack, InsertPack tailPack);
+             std::unique_ptr<InsertPack>& nosePack,
+             std::unique_ptr<InsertPack>& tailPack);
   Path buildOverallPath();
   Path buildBasePath();
 
@@ -73,11 +79,14 @@ class BoardShape {
   MCFixed m_sidecutRadius;
   MCFixed m_sidecutDepth;
   MCFixed m_taper;
+  std::unique_ptr<ShapeEndPart> m_nosePart;
+  std::unique_ptr<ShapeEdgePart> m_edgePart;
+  std::unique_ptr<ShapeEndPart> m_tailPart;
 
   MCFixed m_setback;
   MCFixed m_refStance;
-  InsertPack m_noseInserts;
-  InsertPack m_tailInserts;
+  std::unique_ptr<InsertPack> m_noseInserts;
+  std::unique_ptr<InsertPack> m_tailInserts;
   Path m_insertsPath;
 
   Path m_overallPath;
