@@ -52,7 +52,7 @@ class Machine {
   const Tool& tool(int id) { return m_tools[id]; }
 
 #define MPT(_f, _t, _n) _t _f() { return m_config.get<_t>("machine." _n); }
-#define MPI(_f, _n) MCFixed _f() {                      \
+#define MPI(_f, _n) MCFixed _f() {                                 \
   return MCFixed::fromInches(m_config.get<double>("machine." _n)); \
 }
   MPT(rapidSpeed, int, "rapid speed")
@@ -61,6 +61,8 @@ class Machine {
   MPI(topRapidHeight, "top rapid height")
   MPI(coreBlankThickness, "core blank thickness")
   MPT(baseCutoutTool, int, "base cutout tool")
+  MPI(baseRapidHeight, "base rapid height")
+  MPI(baseCutThruHeight, "base cut thru height")
   MPT(guideHoleTool, int, "guide hole tool")
   MPI(guideHoleDepth, "guide hole depth")
   MPI(guideHoleDiameter, "guide hole diameter")
@@ -69,9 +71,15 @@ class Machine {
   MPI(alignmentMarkDepth, "alignment mark depth")
   MPI(alignmentMarkDeepDepth, "alignment mark deep depth")
   MPT(edgeGrooveTool, int, "edge groove tool")
-  MPT(insertHolesTool, int, "insert holes tool")
+  MPI(edgeGrooveDepth, "edge groove depth")
+  MPT(insertHolesTool, int, "insert tool")
+  MPI(insertRimDepth, "insert rim depth")
+  MPI(insertRimDiameter, "insert rim diameter")
+  MPI(insertHoleDiameter, "insert hole diameter")
   MPT(topProfileTool, int, "top profile tool")
   MPT(topProfileTransitionSpeed, int, "top profile transition speed")
+  MPT(topProfileOverlapPercentage, double, "top profile overlap percentage")
+  MPT(coreCutoutTool, int, "core cutout tool")
 #undef MPT
 #undef MPI
 

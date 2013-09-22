@@ -4,27 +4,38 @@
   {
     "rapid speed": 100,
     "normal speed": 70,
+
     "bottom rapid height": 0.100,
     "top rapid height": 0.600,
+
     "core blank thickness": 0.420,
 
     "base cutout tool": 2,
+    "base rapid height": 0.100,
+    "base cut thru height": -0.010,
 
     "guide hole tool": 1,
     "guide hole depth": -0.600,
     "guide hole diameter": 0.505,
 
     "alignment mark tool": 3,
-    "alignment mark offset": 1.5,
-    "alignment mark depth": 0.030,
-    "alignment mark deep depth": 0.100,
+    "alignment mark offset": 0.5,
+    "alignment mark depth": -0.030,
+    "alignment mark deep depth": -0.100,
 
     "edge groove tool": 1,
+    "edge groove depth": -0.025,
 
-    "insert holes tool": 1,
+    "insert tool": 1,
+    "insert rim depth": -0.045,
+    "insert rim diameter": 0.750,
+    "insert hole diameter": 0.373,
 
     "top profile tool": 4,
     "top profile transition speed": 20,
+    "top profile overlap percentage": 0.50,
+
+    "core cutout tool": 1,
 
     "tools":
     [

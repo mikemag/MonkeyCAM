@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
   auto boardDef = vm["board"].as<string>();
   auto machineDef = vm["machine"].as<string>();
   auto outdir = vm["outdir"].as<string>();
-  if (outdir[outdir.size()] != '/') {
+  if (outdir[outdir.size() - 1] != '/') {
     outdir += '/';
   }
   printf("Using board '%s', machine '%s'\n",

@@ -42,8 +42,7 @@ class BoardShape {
              MCFixed refStance, MCFixed setback,
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack);
-  Path buildOverallPath();
-  Path buildBasePath();
+  const Path& buildOverallPath();
 
   const GCodeWriter generateBaseCutout(Machine& machine);
   const GCodeWriter generateNoseTailSpaceCutout(Machine& machine);

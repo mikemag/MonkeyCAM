@@ -28,7 +28,6 @@ namespace MonkeyCAM {
 Machine::Machine(boost::property_tree::ptree& config)
     : m_config(config)
 {
-  //auto guideHoleDepth = config.get<double>("machine.guide hole depth");
   for (auto& tool : config.get_child("machine.tools")) {
     auto id = tool.second.get<int>("id");
     auto name = tool.second.get<std::string>("name");
