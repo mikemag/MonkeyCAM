@@ -204,15 +204,15 @@ ClipperLib::Polygon pathToPolygon(const Path& path) {
   ClipperLib::Polygon poly;
   auto pathStart = path.cbegin();
   auto pathEnd = path.cend();
-  auto lastPoint = pathEnd;
+  Point lastPoint;
+  assert(*(pathEnd - 1) == *pathStart);
   for (auto p = pathStart; p != pathEnd - 1; ++p) {
-    if ((p == pathStart) || (lastPoint != p)) {
+    if ((p == pathStart) || (lastPoint != *p)) {
       poly.push_back(ClipperLib::IntPoint(p->X.scaledInt(),
                                           p->Y.scaledInt()));
     }
-    lastPoint = p;
+    lastPoint = *p;
   }
-  assert(*(pathEnd - 1) == *pathStart);
   return poly;
 }
 
@@ -255,6 +255,27 @@ double Area(const Path& path) {
   assert(ClipperLib::Orientation(poly));
   return ClipperLib::Area(poly) /
     (MCFixed::ScalingFactor * MCFixed::ScalingFactor);
+}
+
+void RemoveShortLines(Path& path, MCFixed minLength) {
+  auto len2 = minLength.dbl() * minLength.dbl(); // Deal in squares below
+  auto lineStart = path.begin();
+  auto lineEnd = lineStart + 1;
+  while (lineEnd != path.end()) {
+    if (lineStart->distance2(*lineEnd) >= len2) {
+      ++lineStart;
+      *lineStart = std::move(*lineEnd);
+    }
+    ++lineEnd;
+  }
+  if (*lineStart != path.back()) {
+    // The end didn't make it in... the line segment is too short. But
+    // the start and end point are special; we want them to both stay
+    // in the path. So force the end back in.
+    *lineStart = std::move(path.back());
+  }
+  assert(lineStart < path.end());
+  path.resize(std::distance(path.begin(), lineStart + 1));
 }
 
 } // namespace PathUtils

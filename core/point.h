@@ -47,6 +47,8 @@ class Point {
     return *this;
   }
 
+  double distance2(Point p);
+
   static Point Intersect(Point p1, Point p2, Point p3, Point p4);
 
   static Point MinPoint;

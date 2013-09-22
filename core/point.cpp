@@ -49,4 +49,12 @@ Point Point::Intersect(Point p1, Point p2, Point p3, Point p4) {
   return Point(ix, iy);
 }
 
+// Computes the distance _squared_.
+double Point::distance2(Point p) {
+  auto xd = (X - p.X).dbl();
+  auto yd = (Y - p.Y).dbl();
+  auto zd = (Z - p.Z).dbl();
+  return (xd * xd) + (yd * yd) + (zd * zd);
+}
+
 }

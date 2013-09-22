@@ -56,8 +56,8 @@ class GCodeWriter {
   void headerCommentF(const char* fmt, ...);
   void line(std::string s = "");
 
-  void emitPath(const Path& path);
-  void emitPath(const Path& path, MCFixed depth);
+  void emitPath(Path& path);
+  void emitPath(Path& path, MCFixed depth);
   void emitSpiralPath(const Path& path, MCFixed startDepth, MCFixed endDepth,
                       int numberOfLevels);
 

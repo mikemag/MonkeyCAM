@@ -253,11 +253,13 @@ void GCodeWriter::feedToPoint(Point p, int feedRate) {
   m_firstMovement = false;
 }
 
-void GCodeWriter::emitPath(const Path& path) {
+void GCodeWriter::emitPath(Path& path) {
+  PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
   for (const auto& p : path) feedToPoint(p);
 }
 
-void GCodeWriter::emitPath(const Path& path, MCFixed depth) {
+void GCodeWriter::emitPath(Path& path, MCFixed depth) {
+  PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
   for (const auto& p : path) {
     Point a = p;
     a.Z = depth;
