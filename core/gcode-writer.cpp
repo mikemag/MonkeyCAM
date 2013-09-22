@@ -111,6 +111,7 @@ void GCodeWriter::commentWrapped(GCodeLines& lines, string s, int indent) {
 
 void GCodeWriter::comment(GCodeLines& lines, const char* s) {
   char buff[81];
+  assert(!strchr(s, '(') && !strchr(s, ')'));
   snprintf(buff, sizeof(buff), "( %-76s )", s);
   lines.push_back(string(buff));
 }
@@ -141,21 +142,21 @@ void GCodeWriter::headerBlock() {
   headerComment("See http://www.github.com/MonkeyCAM for License and "
                 "documentation.");
   headerComment();
-  headerCommentF("* Rapid height: %s\" (%scm)",
+  headerCommentF("* Rapid height: %s\" [%scm]",
                  m_rapidHeight.inchesStr().c_str(),
                  m_rapidHeight.str().c_str());
-  headerCommentF("* Tool: T%d, %s, diameter %s\" (%scm)",
+  headerCommentF("* Tool: T%d, %s, diameter %s\" [%scm]",
                  m_tool.gcodeToolNumber,
                  m_tool.name.c_str(),
                  m_tool.diameter.inchesStr().c_str(),
                  m_tool.diameter.str().c_str());
-  headerCommentF("* Height basline (Z=0.0) is %s.", m_zeroHeight == TableTop ?
+  headerCommentF("* Height basline [Z=0.0] is %s.", m_zeroHeight == TableTop ?
                  "the top of the table" : "the top of the material");
   headerCommentF("* XY origin is %s.", m_xyOrigin == LowerLeft ?
                  "the lower left of the table" :
                  "the left side of the table, Y is center of the part");
   headerComment("* Requires G54 to be the part work coordinate offsets "
-                "(WCO). (0, 0) is the center of the nose, with the board "
+                "[WCO]. [0, 0] is the center of the nose, with the board "
                 "extending to positive X. The cutter may move to negative "
                 "values of X.", 2);
   headerComment("* Requires G55 to be the machine WCO, with Z above the rapid "
@@ -192,7 +193,7 @@ void GCodeWriter::endBlock() {
   line("M30");
 
   headerComment("* Cutter bounding box in G54:");
-  headerCommentF("    X%s Y%s Z%s to X%s Y%s Z%s)",
+  headerCommentF("    X%s Y%s Z%s to X%s Y%s Z%s",
                  m_lowerBoundingBox.X.inchesStr().c_str(),
                  m_lowerBoundingBox.Y.inchesStr().c_str(),
                  m_lowerBoundingBox.Z.inchesStr().c_str(),
