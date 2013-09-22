@@ -47,7 +47,8 @@ class Point {
     return *this;
   }
 
-  double distance2(Point p);
+  double distance(Point p) const;
+  double distance2(Point p) const;
 
   static Point Intersect(Point p1, Point p2, Point p3, Point p4);
 

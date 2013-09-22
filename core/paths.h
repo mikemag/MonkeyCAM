@@ -97,6 +97,7 @@ namespace PathUtils {
 std::vector<Path> OffsetPath(const Path &path, MCFixed offset);
 double Area(const Path& path);
 void RemoveShortLines(Path& path, MCFixed minLength);
+Path SimpleLeadIn(const Path& path, MCFixed startHeight, MCFixed length);
 
 } // namespace PathUtils
 

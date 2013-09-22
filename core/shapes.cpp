@@ -379,7 +379,14 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
     for (auto& path : pathSet) {
       if (rapidMove) {
         rapidMove = false;
-        g.rapidToPoint(path.front());
+        auto leadIn = PathUtils::SimpleLeadIn(path, rapidHeight,
+                                              machine.topProfileLeadinLength());
+        if (leadIn.size() > 0) {
+          g.rapidToPoint(leadIn.front());
+          g.emitPath(leadIn);
+        } else {
+          g.rapidToPoint(path.front());
+        }
       }
       g.feedToPoint(path.front(), machine.topProfileTransitionSpeed());
       g.emitPath(path);

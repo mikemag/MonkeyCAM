@@ -278,6 +278,43 @@ void RemoveShortLines(Path& path, MCFixed minLength) {
   path.resize(std::distance(path.begin(), lineStart + 1));
 }
 
+// Create a simple lead-in path for the given path. We back up from
+// the start of the path at least the given length and start from
+// there, smoothly transitioning from the start height to the height
+// of the first point on the path. If we hit the actual height of the
+// path along the way, we take the rest of the path as-is. If the path
+// is shorter than the lead-in length, then we simply spiral down the
+// path, possibly multiple times.
+Path SimpleLeadIn(const Path& path, MCFixed startHeight, MCFixed length) {
+  assert(path.size() > 1);
+  Path leadIn;
+  const double leadInLen = length.dbl();
+  // Backup until we pass the lead-in length.
+  int i = path.size() - 1;
+  int last = i;
+  double remainingLen = leadInLen;
+  while (remainingLen > 0) {
+    leadIn.push_back(path[last]);
+    if (--i < 0) i = path.size() - 1;
+    remainingLen -= path[i].distance(path[last]);
+    last = i;
+  }
+  leadIn.push_back(path[last]);
+  std::reverse(leadIn.begin(), leadIn.end());
+  // Adjust heights until we hit the path.
+  double heightDelta = (startHeight - path[0].Z).dbl();
+  assert(heightDelta > 0);
+  double usedLen = 0;
+  double currentHeight = startHeight.dbl();
+  for (unsigned int j = 0; j < leadIn.size() - 1; j++) {
+    if (MCFixed(currentHeight) <= leadIn[j].Z) break;
+    usedLen += leadIn[j].distance(leadIn[j + 1]);
+    leadIn[j].Z = currentHeight;
+    currentHeight = startHeight.dbl() - ((usedLen / leadInLen) * heightDelta);
+  }
+  return leadIn;
+}
+
 } // namespace PathUtils
 
 } // namespace MonkeyCAM

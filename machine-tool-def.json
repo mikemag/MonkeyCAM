@@ -34,6 +34,7 @@
     "top profile tool": 4,
     "top profile transition speed": 20,
     "top profile overlap percentage": 0.50,
+    "top profile lead-in length": 4.0,
 
     "core cutout tool": 1,
 

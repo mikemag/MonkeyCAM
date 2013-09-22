@@ -15,6 +15,7 @@
  */
 
 #include <climits>
+#include <cmath>
 
 #include "point.h"
 #include "basic-math.h"
@@ -49,8 +50,13 @@ Point Point::Intersect(Point p1, Point p2, Point p3, Point p4) {
   return Point(ix, iy);
 }
 
+// Distance between two points.
+double Point::distance(Point p) const {
+  return sqrt(distance2(p));
+}
+
 // Computes the distance _squared_.
-double Point::distance2(Point p) {
+double Point::distance2(Point p) const {
   auto xd = (X - p.X).dbl();
   auto yd = (Y - p.Y).dbl();
   auto zd = (Z - p.Z).dbl();

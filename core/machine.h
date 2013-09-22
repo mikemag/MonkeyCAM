@@ -79,6 +79,7 @@ class Machine {
   MPT(topProfileTool, int, "top profile tool")
   MPT(topProfileTransitionSpeed, int, "top profile transition speed")
   MPT(topProfileOverlapPercentage, double, "top profile overlap percentage")
+  MPI(topProfileLeadinLength, "top profile lead-in length")
   MPT(coreCutoutTool, int, "core cutout tool")
 #undef MPT
 #undef MPI
