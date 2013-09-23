@@ -179,9 +179,8 @@ void GCodeWriter::lineF(const char* fmt, ...) {
 
 void GCodeWriter::startBlock() {
   line("G90 G20 G17 G40 G49");
-  line("G00 G55 X0 Y0 Z0"); // Take us home in machine coordinates
   lineF("G43 H1 T%d", m_tool.gcodeToolNumber); // Tool length offset
-  rapidToPoint(Point(0, 0));
+  lineF("G00 G54 X0 Y0 Z%s", m_rapidHeight.inchesStr().c_str()); // NB: sets wco
   line();
 }
 
@@ -218,14 +217,14 @@ void GCodeWriter::rapidToPoint(Point p) {
   if (!m_firstMovement && (m_currentPosition.Z != m_rapidHeight)) {
     Point c = m_currentPosition;
     c.Z = m_rapidHeight;
-    lineF("G00 G54 X%s Y%s Z%s",
+    lineF("G00 X%s Y%s Z%s",
           c.X.inchesStr().c_str(),
           c.Y.inchesStr().c_str(),
           c.Z.inchesStr().c_str());
     updateCurrentPosition(c);
   }
   if (p != m_currentPosition) {
-    lineF("G00 G54 X%s Y%s Z%s",
+    lineF("G00 X%s Y%s Z%s",
           p.X.inchesStr().c_str(),
           p.Y.inchesStr().c_str(),
           p.Z.inchesStr().c_str());
@@ -237,13 +236,13 @@ void GCodeWriter::rapidToPoint(Point p) {
 void GCodeWriter::feedToPoint(Point p, int feedRate) {
   if (feedRate == -1) feedRate = m_defaultSpeed;
   if (feedRate != m_currentSpeed) {
-    lineF("G01 G54 X%s Y%s Z%s F%d",
+    lineF("G01 X%s Y%s Z%s F%d",
           p.X.inchesStr().c_str(),
           p.Y.inchesStr().c_str(),
           p.Z.inchesStr().c_str(),
           feedRate);
   } else {
-    lineF("G01 G54 X%s Y%s Z%s",
+    lineF("G01 X%s Y%s Z%s",
           p.X.inchesStr().c_str(),
           p.Y.inchesStr().c_str(),
           p.Z.inchesStr().c_str());
@@ -289,7 +288,7 @@ void GCodeWriter::updateCurrentPosition(Point p) {
 // A clockwise arc, 2d only (z is ignored).
 void GCodeWriter::emitClockwiseArc(Point dest, MCFixed radius) {
   assert(dest.Z == 0);
-  lineF("G02 G54 X%s Y%s Z0.0000 R%s",
+  lineF("G02 X%s Y%s Z0.0000 R%s",
         dest.X.inchesStr().c_str(),
         dest.Y.inchesStr().c_str(),
         radius.inchesStr().c_str());
@@ -358,9 +357,10 @@ void GCodeWriter::write(string directory) const {
   printf("%s\n", m_filename.c_str());
   std::ofstream o;
   o.open(directory + m_filename);
-  for (const auto& l : m_headerComments) o << l << std::endl;
-  o << std::endl;
-  for (const auto& l : m_lines) o << l << std::endl;
+  // Controllers like DOS line endings better.
+  for (const auto& l : m_headerComments) o << l << "\r\n";
+  o << "\r\n";
+  for (const auto& l : m_lines) o << l << "\r\n";
   o.close();
 }
 

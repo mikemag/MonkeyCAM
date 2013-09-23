@@ -78,6 +78,7 @@ class Machine {
   MPI(insertHoleDiameter, "insert hole diameter")
   MPT(topProfileTool, int, "top profile tool")
   MPT(topProfileTransitionSpeed, int, "top profile transition speed")
+  MPT(topProfileDeepSpeed, int, "top profile deep speed")
   MPT(topProfileOverlapPercentage, double, "top profile overlap percentage")
   MPI(topProfileLeadinLength, "top profile lead-in length")
   MPT(coreCutoutTool, int, "core cutout tool")

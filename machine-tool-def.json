@@ -19,7 +19,7 @@
     "guide hole diameter": 0.505,
 
     "alignment mark tool": 3,
-    "alignment mark offset": 0.5,
+    "alignment mark offset": 0.75,
     "alignment mark depth": -0.030,
     "alignment mark deep depth": -0.100,
 
@@ -33,6 +33,7 @@
 
     "top profile tool": 4,
     "top profile transition speed": 20,
+    "top profile deep speed": 50,
     "top profile overlap percentage": 0.50,
     "top profile lead-in length": 4.0,
 

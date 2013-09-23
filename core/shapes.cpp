@@ -198,10 +198,10 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(Machine& machine) {
                         markDepth));
   // Extra deep mark above the guide holes, to assist with
   // re-alignment of the machine in case of a crash.
-  auto leftDeepMark = m_leftGuideHole + Point(0, 1);
+  auto leftDeepMark = m_leftGuideHole + Point(0, MCFixed::fromInches(1));
   leftDeepMark.Z = deepMarkDepth;
   marks.push_back(leftDeepMark);
-  auto rightDeepMark = m_rightGuideHole + Point(0, 1);
+  auto rightDeepMark = m_rightGuideHole + Point(0, MCFixed::fromInches(1));
   rightDeepMark.Z = deepMarkDepth;
   marks.push_back(rightDeepMark);
   // Sort the marks to reduce cutter movement. Forming a graph and
@@ -218,6 +218,7 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(Machine& machine) {
     g.rapidToPoint(p);
     g.feedToPoint(p);
   }
+  g.rapidToPoint(marks.back());
   g.spindleOff();
   g.close();
   return g;
@@ -372,7 +373,8 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
   auto rapidHeight = machine.topRapidHeight();;
   GCodeWriter g(m_name + "-top-profile.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(), rapidHeight);
+                machine.rapidSpeed(), machine.topProfileDeepSpeed(),
+                rapidHeight);
   g.spindleOn();
   bool rapidMove = true;
   for (auto& pathSet : boost::adaptors::reverse(pathSets)) {

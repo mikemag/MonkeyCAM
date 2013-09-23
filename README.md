@@ -55,9 +55,11 @@ G-code programs:
 * Edge trenches to enable inlay of different edge wood and/or sidewall
 material along the effective edge of the core **(not yet complete)**
 
-The G-code programs emitted at this time have had only basic
-testing. I will cut real parts with them very soon and refine them a
-bit, and update this when they are verified.
+The G-code programs emitted at this time have been tested on my CNC
+machine with a very old DeskCNC controller and work correctly. Each
+program also loads in Mach 3 and simulates correctly. The programs not
+involving holes load in ShopBot's controller and simulate correctly,
+but the ones with holes do not work for ShopBot right now.
 
 There is no UI, and all configuration and results are in files.
 
