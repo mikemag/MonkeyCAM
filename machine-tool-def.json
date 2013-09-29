@@ -39,6 +39,10 @@
 
     "core cutout tool": 1,
 
+    "spacer end overhang": 1,
+    "spacer side overhang": 0.5,
+    "sidewall overhang": 0.0787,
+
     "tools":
     [
       {

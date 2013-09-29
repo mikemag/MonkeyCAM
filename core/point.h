@@ -18,6 +18,7 @@
 #define incl_Point_H_
 
 #include "mcfixed.h"
+#include "../util/basic-math.h"
 
 namespace MonkeyCAM {
 
@@ -42,13 +43,25 @@ class Point {
   Point operator+ (const Point& p) const {
     return Point(X + p.X, Y + p.Y, Z + p.Z);
   }
+  Point operator+ (const Vector2D& v) const {
+    return Point(X + v.X, Y + v.Y, Z);
+  }
   Point& operator+= (const Point& p) {
     *this = *this + p;
     return *this;
   }
+  Point operator- (const Point& p) const {
+    return Point(X - p.X, Y - p.Y, Z - p.Z);
+  }
+  Point operator- (const Vector2D& v) const {
+    return Point(X - v.X, Y - v.Y, Z);
+  }
 
   double distance(Point p) const;
   double distance2(Point p) const;
+  Vector2D toVector2D() const {
+    return Vector2D(X.dbl(), Y.dbl());
+  }
 
   static Point Intersect(Point p1, Point p2, Point p3, Point p4);
 

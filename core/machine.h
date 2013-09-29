@@ -82,6 +82,9 @@ class Machine {
   MPT(topProfileOverlapPercentage, double, "top profile overlap percentage")
   MPI(topProfileLeadinLength, "top profile lead-in length")
   MPT(coreCutoutTool, int, "core cutout tool")
+  MPI(spacerEndOverhang, "spacer end overhang")
+  MPI(spacerSideOverhang, "spacer side overhang")
+  MPI(sidewallOverhang, "sidewall overhang")
 #undef MPT
 #undef MPI
 

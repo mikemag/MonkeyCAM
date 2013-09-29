@@ -40,7 +40,8 @@ BoardShape::BoardShape(std::string name,
                        std::unique_ptr<ShapeEndPart>& tailPart,
                        MCFixed refStance, MCFixed setback,
                        std::unique_ptr<InsertPack>& nosePack,
-                       std::unique_ptr<InsertPack>& tailPack)
+                       std::unique_ptr<InsertPack>& tailPack,
+                       MCFixed spacerWidth)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -55,6 +56,7 @@ BoardShape::BoardShape(std::string name,
     , m_refStance(refStance)
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
+    , m_spacerWidth(spacerWidth)
     , m_maxCoreX(0)
 {
   // Node and tail width come from the sidecut depth...
@@ -99,6 +101,124 @@ const Path& BoardShape::buildOverallPath() {
   m_leftGuideHole = Point(MCFixed::fromInches(-0.5), 0);
   m_rightGuideHole = Point(m_maxCoreX + MCFixed::fromInches(0.5), 0);
   return m_overallPath;
+}
+
+template<class TIter>
+void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
+                     Point startPoint, MCFixed endX,
+                     MCFixed bpStartHandleYDelta,
+                     MCFixed bpEndHandleXDelta) {
+  auto start = std::find(beginIt, endIt, startPoint);
+  assert(start != endIt);
+  auto end = std::find_if(start, endIt,
+                          [&] (const Point& p) {
+                            if (startPoint.X > endX) {
+                              return p.X <= endX;
+                            } else {
+                              return p.X >= endX;
+                            }
+                          });
+  assert(end != endIt);
+  auto curveEndControl = *end +
+    ((*end - *(end - 1)).toVector2D().toUnitVector() * bpEndHandleXDelta.dbl());
+  BezierPath bp {
+    *start,
+    Point(start->X, start->Y + bpStartHandleYDelta),
+    curveEndControl,
+    *end
+  };
+  Path newPath;
+  newPath.insert(newPath.end(), beginIt, start);
+  newPath.insert(newPath.end(), bp.begin(), bp.end());
+  newPath.insert(newPath.end(), end, endIt);
+  path = newPath;
+}
+
+// Generate the shape of the core for a board with sidewalls, and
+// nose/tail inset to accomodate nose/tail spacers.
+//
+// The edge portion of the core extends out past the real edges by
+// ~2mm. This gives us a bit of extra play side-to-side which allows
+// the core and base to be slightly mis-aligned.
+//
+// The nose and tail portions are set inward by the width of the nose
+// and tail spacers.
+//
+// The end portions are joined to the edge portion with a gentle arc.
+const Path& BoardShape::buildCorePath(Machine& machine) {
+  // 1. Offset the overall path inward by the spacer size.
+  auto spacerClip = PathUtils::OffsetPath(m_overallPath, -m_spacerWidth);
+  assert(spacerClip.size() == 1);
+
+  // 2. Form squares for the nose and tail which cut the nose and tail
+  // off at the end of the effective edge. These will become the
+  // shapes of the nose and tail spacers.
+  Path noseSpacerSquare;
+  MCFixed noseSpacerX = -machine.spacerEndOverhang();
+  MCFixed noseSpacerY = m_noseWidth + machine.spacerSideOverhang();
+  noseSpacerSquare.push_back(Point(noseSpacerX, -noseSpacerY));
+  noseSpacerSquare.push_back(Point(m_noseLength, -noseSpacerY));
+  noseSpacerSquare.push_back(Point(m_noseLength, noseSpacerY));
+  noseSpacerSquare.push_back(Point(noseSpacerX, noseSpacerY));
+  noseSpacerSquare.push_back(Point(noseSpacerX, -noseSpacerY));
+  Path tailSpacerSquare;
+  MCFixed tailSpacerX1 = m_noseLength + m_effectiveEdge;
+  MCFixed tailSpacerX2 = tailSpacerX1 + m_tailLength +
+    machine.spacerEndOverhang();
+  MCFixed tailSpacerY = m_tailWidth + machine.spacerSideOverhang();
+  tailSpacerSquare.push_back(Point(tailSpacerX1, -tailSpacerY));
+  tailSpacerSquare.push_back(Point(tailSpacerX2, -tailSpacerY));
+  tailSpacerSquare.push_back(Point(tailSpacerX2, tailSpacerY));
+  tailSpacerSquare.push_back(Point(tailSpacerX1, tailSpacerY));
+  tailSpacerSquare.push_back(Point(tailSpacerX1, -tailSpacerY));
+
+  // 3. Clip the squares from #2, removing the area defined by #1.
+  auto spacers = PathUtils::ClipPathsDifference(
+    vector<Path> { noseSpacerSquare, tailSpacerSquare }, spacerClip);
+  assert(spacers.size() == 2);
+
+  // 4. Round the inner corners of the of results.
+  auto& noseSpacerPath = spacers[0];
+  auto& tailSpacerPath = spacers[1];
+  if (spacers[0][0].X > spacers[1][0].X) {
+    std::swap(noseSpacerPath, tailSpacerPath);
+  }
+  // @TODO: make these control points a bit more configurable.
+  roundSpacerEnds(noseSpacerPath,
+                  noseSpacerPath.begin(), noseSpacerPath.end(),
+                  Point(m_noseLength, -noseSpacerY), m_noseLength - 4,
+                  4, -4);
+  roundSpacerEnds(noseSpacerPath,
+                  noseSpacerPath.rbegin(), noseSpacerPath.rend(),
+                  Point(m_noseLength, noseSpacerY), m_noseLength - 4,
+                  -4, -4);
+  std::reverse(noseSpacerPath.begin(), noseSpacerPath.end());
+  roundSpacerEnds(tailSpacerPath,
+                  tailSpacerPath.rbegin(), tailSpacerPath.rend(),
+                  Point(tailSpacerX1, -tailSpacerY), tailSpacerX1 + 4,
+                  4, -4);
+  std::reverse(tailSpacerPath.begin(), tailSpacerPath.end());
+  roundSpacerEnds(tailSpacerPath,
+                  tailSpacerPath.begin(), tailSpacerPath.end(),
+                  Point(tailSpacerX1, tailSpacerY), tailSpacerX1 + 4,
+                  -4, -4);
+
+  // 4.5. The nose and tail spacer paths we have now are what we'll
+  // need when generating cut programs later, so hang onto them.
+  m_noseSpacerPath = noseSpacerPath;
+  m_tailSpacerPath = tailSpacerPath;
+
+  // 5. Offset the overall path outward by the sidewall overhang.
+  auto overhang = PathUtils::OffsetPath(m_overallPath,
+                                        machine.sidewallOverhang());
+  assert(overhang.size() == 1);
+
+  // 6. Clip the area from #5 with the results of #4, taking the inner
+  // volume as the final core path.
+  auto final = PathUtils::ClipPathsDifference(overhang, spacers);
+  assert(final.size() == 1);
+  m_corePath = final[0];
+  return m_corePath;
 }
 
 void BoardShape::setupInserts() {
@@ -434,15 +554,48 @@ const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
 
 //------------------------------------------------------------------------------
 // Core top cutout
+//
+// The core cutout leaves "tabs" on the last pass to hold the core
+// within the core blank for removal later. This makes it a lot easier
+// to hold the core down if you don't have vacuum hold down.
 
-// @TODO: needs the core path
 const GCodeWriter BoardShape::generateTopCutout(Machine& machine) {
+  // Offset the core path as usual
   auto tool = machine.tool(machine.coreCutoutTool());
+  auto paths = PathUtils::OffsetPath(buildCorePath(machine), tool.diameter / 2);
+  assert(paths.size() == 1);
+  auto op = paths[0];
+  // Form a tab profile path
+  Path tabProfile;
+  auto quarterEELength = m_effectiveEdge / 4;
+  auto boardLength = m_noseLength + m_effectiveEdge + m_tailLength;
+  auto boardCenterX = boardLength / 2;
+  auto leftTabX = boardCenterX - quarterEELength;
+  auto rightTabX = boardCenterX + quarterEELength;
+  MCFixed cutThroughDepth = MCFixed::fromInches(-0.010);
+  MCFixed tabHeight = MCFixed::fromInches(0.080);
+  tabProfile.push_back(Point(-1, cutThroughDepth));
+  tabProfile.push_back(Point(leftTabX - 3, cutThroughDepth));
+  tabProfile.push_back(Point(leftTabX - 1, tabHeight));
+  tabProfile.push_back(Point(leftTabX + 1, tabHeight));
+  tabProfile.push_back(Point(leftTabX + 3, cutThroughDepth));
+  tabProfile.push_back(Point(rightTabX - 3, cutThroughDepth));
+  tabProfile.push_back(Point(rightTabX - 1, tabHeight));
+  tabProfile.push_back(Point(rightTabX + 1, tabHeight));
+  tabProfile.push_back(Point(rightTabX + 3, cutThroughDepth));
+  tabProfile.push_back(Point(boardLength + 1, cutThroughDepth));
+  // Now deform the cutout path with the tab profile.
+  auto profPath = ProfiledPath(op, tabProfile);
   GCodeWriter g(m_name + "-top-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.rapidSpeed(), machine.normalSpeed(),
                 machine.topRapidHeight());
-  assert(!"NYI");
+  g.rapidToPoint(profPath[0]);
+  g.spindleOn();
+  g.emitSpiralPath(profPath, machine.coreBlankThickness(), 3);
+  g.rapidToPoint(profPath[0]);
+  g.spindleOff();
+  g.close();
   return g;
 }
 

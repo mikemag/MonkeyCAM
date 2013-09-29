@@ -50,16 +50,23 @@ void SVGWriter::addPath(const Path& path, std::string color) {
   assert(m_outputStream.is_open());
   m_outputStream << "<polyline points=\"";
   for (auto const& p : path) {
-    double x = (p.X.dbl() + 1) * m_scale;
+    double x = (p.X.dbl() + 3) * m_scale;
     double y = (m_yShift - p.Y.dbl()) * m_scale;
     m_outputStream << x << "," << y << " ";
   }
   m_outputStream << "\" style=\"fill-opacity:0.5;fill:rgb(0,0,0);"
     "stroke:" << color << ";stroke-width:1;fill:none\"/>" << std::endl;
   auto fp = path[0];
-  m_outputStream << "<circle cx=\"" << (fp.X.dbl() + 1) * m_scale <<
+  m_outputStream << "<circle cx=\"" << (fp.X.dbl() + 3) * m_scale <<
     "\" cy=\"" << (m_yShift - fp.Y.dbl()) * m_scale <<
     "\" r=\"2\" style=\"stroke-width:1;stroke:red;fill:none\"/>" << std::endl;
+}
+
+void SVGWriter::addPointMark(const Point& p, std::string color) {
+  m_outputStream << "<circle cx=\"" << (p.X.dbl() + 3) * m_scale <<
+    "\" cy=\"" << (m_yShift - p.Y.dbl()) * m_scale <<
+    "\" r=\"2\" style=\"stroke-width:1;stroke:" << color <<
+    ";fill:none\"/>" << std::endl;
 }
 
 } // namespace MonkeyCAM

@@ -59,6 +59,10 @@ struct MCFixed {
   MCFixed operator- (const MCFixed& mcf) const {
     return MCFixed(m_data - mcf.m_data);
   }
+  MCFixed& operator-= (const MCFixed& mcf) {
+    m_data -= mcf.m_data;
+    return *this;
+  }
   MCFixed operator- () const {
     return MCFixed(-m_data);
   }

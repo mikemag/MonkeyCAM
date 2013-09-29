@@ -83,9 +83,11 @@ BoardShape loadBoard(boost::property_tree::ptree& config) {
   auto nosePack = loadInserts(config.get_child("board.nose insert pack"));
   auto tailPack = loadInserts(config.get_child("board.tail insert pack"));
 
+  auto spacerWidth = config.get<double>("board.nose and tail spacer width");
+
   BoardShape board { name, noseLength, eeLength, tailLength, sidecutRadius,
       waistWidth, taper, nose, edge, tail, refStance, setback,
-      nosePack, tailPack };
+      nosePack, tailPack, spacerWidth };
   return board;
 }
 
@@ -188,12 +190,14 @@ int main(int argc, char *argv[]) {
   shape.generateCoreEdgeGroove(machine).write(outdir);
   shape.generateInsertHoles(machine).write(outdir);
   shape.generateTopProfile(machine, profile).write(outdir);
+  shape.generateTopCutout(machine).write(outdir);
 
   string overviewSvgName = shape.name() + "-overview.svg";
   printf("%s\n", overviewSvgName.c_str());
   MonkeyCAM::SVGWriter overallSvg(outdir + overviewSvgName, 16, 7);
   overallSvg.addPath(shape.buildOverallPath());
   overallSvg.addPath(profile.path());
+  overallSvg.addPath(shape.buildCorePath(machine));
 
   printf("Done.\n");
   return 0;

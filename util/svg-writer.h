@@ -20,12 +20,14 @@
 namespace MonkeyCAM {
 
 class Path;
+class Point;
 
 class SVGWriter {
  public:
   SVGWriter(std::string filename, int yShift = 5, double scale = 100.0);
   ~SVGWriter();
-  void addPath(Path const& path, std::string color = "rgb(0,0,0)");
+  void addPath(const Path& path, std::string color = "rgb(0,0,0)");
+  void addPointMark(const Point& p, std::string color = "rgb(0,0,255)");
 
  private:
   std::ofstream m_outputStream;

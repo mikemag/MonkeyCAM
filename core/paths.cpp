@@ -249,6 +249,26 @@ std::vector<Path> OffsetPath(const Path& path, MCFixed offset) {
   return resultPaths;
 }
 
+// Use Clipper to subtract one set of paths from another.
+std::vector<Path> ClipPathsDifference(const std::vector<Path>& subjects,
+                                      const std::vector<Path>& clips) {
+  std::vector<Path> resultPaths;
+  ClipperLib::Clipper c;
+  ClipperLib::Polygons clip;
+  ClipperLib::Polygons subject;
+  ClipperLib::Polygons solution;
+  for (auto& p : subjects) subject.emplace_back(pathToPolygon(p));
+  for (auto& p : clips) clip.emplace_back(pathToPolygon(p));
+  c.AddPolygons(subject, ClipperLib::ptSubject);
+  c.AddPolygons(clip, ClipperLib::ptClip);
+  c.Execute(ClipperLib::ctDifference, solution,
+            ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+  for (const auto& poly : solution) {
+    resultPaths.emplace_back(polygonToPath(poly));
+  }
+  return resultPaths;
+}
+
 // Assumes path is counterclockwise and closed.
 double Area(const Path& path) {
   ClipperLib::Polygon poly = pathToPolygon(path);

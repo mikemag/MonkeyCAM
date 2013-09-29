@@ -17,6 +17,8 @@
 #ifndef incl_basic_math_H_
 #define incl_basic_math_H_
 
+#include <cmath>
+
 namespace MonkeyCAM {
 
 static const double PI = 3.141592653589793;
@@ -47,6 +49,41 @@ struct Circle {
   Circle(double p1X, double p1Y,
          double p2X, double p2Y,
          double p3X, double p3Y);
+};
+
+struct Vector2D {
+  Vector2D(double x, double y) {
+    X = x;
+    Y = y;
+    Normal = sqrt((X * X) + (Y * Y));
+  }
+
+  Vector2D(double p1X, double p1Y, double p2X, double p2Y) {
+    X = p2X - p1X;
+    Y = p2Y - p1Y;
+    Normal = sqrt((X * X) + (Y * Y));
+  }
+
+  Vector2D toUnitVector() {
+    return Vector2D(X / Normal, Y / Normal);
+  }
+
+  Vector2D toPerpVector() {
+    return Vector2D(-Y, X);
+  }
+
+  Vector2D operator* (double d) {
+    return Vector2D(X * d, Y * d);
+  }
+  Vector2D& operator*= (double d) {
+    X *= d;
+    Y *= d;
+    return *this;
+  }
+
+  double X;
+  double Y;
+  double Normal;
 };
 
 } // namespace MonkeyCAM

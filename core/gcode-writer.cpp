@@ -252,11 +252,13 @@ void GCodeWriter::feedToPoint(Point p, int feedRate) {
   m_firstMovement = false;
 }
 
+// Emit a 3D path.
 void GCodeWriter::emitPath(Path& path) {
   PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
   for (const auto& p : path) feedToPoint(p);
 }
 
+// Emit a 2D path at a given depth.
 void GCodeWriter::emitPath(Path& path, MCFixed depth) {
   PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
   for (const auto& p : path) {
@@ -266,9 +268,26 @@ void GCodeWriter::emitPath(Path& path, MCFixed depth) {
   }
 }
 
-void GCodeWriter::emitSpiralPath(const Path& path, MCFixed startDepth,
-                                 MCFixed endDepth, int numberOfLevels) {
-  comment("emitSpiralPath NYI!");
+// Emit a 3D path, working down to it over the given number of passes.
+void GCodeWriter::emitSpiralPath(Path& path, MCFixed startDepth,
+                                 int numberOfLevels) {
+  PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
+  auto minZ = std::min_element(path.begin(), path.end(),
+                               [](const Point& a, const Point& b) {
+                                 return a.Z < b.Z;
+                               });
+  auto depthDelta = (startDepth - minZ->Z) / numberOfLevels;
+  auto currentDepth = startDepth;
+  for (int i = 0; i < numberOfLevels; i++) {
+    currentDepth -= depthDelta;
+    for (const auto& p : path) {
+      auto currentPoint = p;
+      if (i < numberOfLevels - 1) {
+        if (currentPoint.Z < currentDepth) currentPoint.Z = currentDepth;
+      }
+      feedToPoint(currentPoint);
+    }
+  }
 }
 
 void GCodeWriter::updateCurrentPosition(Point p) {

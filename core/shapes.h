@@ -41,8 +41,10 @@ class BoardShape {
              std::unique_ptr<ShapeEndPart>& tailPart,
              MCFixed refStance, MCFixed setback,
              std::unique_ptr<InsertPack>& nosePack,
-             std::unique_ptr<InsertPack>& tailPack);
+             std::unique_ptr<InsertPack>& tailPack,
+             MCFixed spacerWidth);
   const Path& buildOverallPath();
+  const Path& buildCorePath(Machine& machine);
 
   const GCodeWriter generateBaseCutout(Machine& machine);
   const GCodeWriter generateNoseTailSpaceCutout(Machine& machine);
@@ -88,7 +90,12 @@ class BoardShape {
   std::unique_ptr<InsertPack> m_tailInserts;
   Path m_insertsPath;
 
+  MCFixed m_spacerWidth;
+
   Path m_overallPath;
+  Path m_corePath;
+  Path m_noseSpacerPath;
+  Path m_tailSpacerPath;
 
   MCFixed m_maxCoreX;
 
