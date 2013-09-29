@@ -155,7 +155,7 @@ const Path& BoardShape::buildCorePath(Machine& machine) {
   // shapes of the nose and tail spacers.
   Path noseSpacerSquare;
   MCFixed noseSpacerX = -machine.spacerEndOverhang();
-  MCFixed noseSpacerY = m_noseWidth + machine.spacerSideOverhang();
+  MCFixed noseSpacerY = (m_noseWidth / 2) + machine.spacerSideOverhang();
   noseSpacerSquare.push_back(Point(noseSpacerX, -noseSpacerY));
   noseSpacerSquare.push_back(Point(m_noseLength, -noseSpacerY));
   noseSpacerSquare.push_back(Point(m_noseLength, noseSpacerY));
@@ -165,7 +165,7 @@ const Path& BoardShape::buildCorePath(Machine& machine) {
   MCFixed tailSpacerX1 = m_noseLength + m_effectiveEdge;
   MCFixed tailSpacerX2 = tailSpacerX1 + m_tailLength +
     machine.spacerEndOverhang();
-  MCFixed tailSpacerY = m_tailWidth + machine.spacerSideOverhang();
+  MCFixed tailSpacerY = (m_tailWidth / 2) + machine.spacerSideOverhang();
   tailSpacerSquare.push_back(Point(tailSpacerX1, -tailSpacerY));
   tailSpacerSquare.push_back(Point(tailSpacerX2, -tailSpacerY));
   tailSpacerSquare.push_back(Point(tailSpacerX2, tailSpacerY));
@@ -527,13 +527,70 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
 // @TODO: need nose path and tail path separate
 // - old algorithm pulls those off of the core cutout, so they are already
 //   inset and have the curve to the sidewall added.
-const GCodeWriter BoardShape::generateNoseTailSpaceCutout(Machine& machine) {
+const GCodeWriter BoardShape::generateNoseTailSpacerCutout(Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
+  auto nosePath = m_noseSpacerPath;
+  auto tailPath = m_tailSpacerPath;
+
+  // Shift the nose right so it starts at X=0.
+  auto nShift = -nosePath[0].X;
+  assert(nShift >= 0);
+  std::transform(nosePath.begin(), nosePath.end(), nosePath.begin(),
+                 [&](const Point& p) { return p + Point(nShift, 0); });
+
+  // Shift the tail left so it comes within 2cm of the nose path.
+  auto nmax = std::max_element(nosePath.begin(), nosePath.end(),
+                               [](const Point& a, const Point& b) {
+                                 return a.X < b.X;
+                               });
+  auto tShift = nmax->X + 2 - tailPath[0].X;
+  assert(tShift <= 0);
+  std::transform(tailPath.begin(), tailPath.end(), tailPath.begin(),
+                 [&](const Point& p) { return p + Point(tShift, 0); });
+
+  // Offset each
+  auto ops = PathUtils::OffsetPath(nosePath, tool.diameter / 2);
+  assert(ops.size() == 1);
+  auto onp = ops[0];
+  ops = PathUtils::OffsetPath(tailPath, tool.diameter / 2);
+  assert(ops.size() == 1);
+  auto otp = ops[0];
+
+  // Trim out just the path that cuts the interface with the core
+  auto lb = nosePath[0];
+  auto ub = Point(lb.X + m_noseLength + machine.spacerEndOverhang() + 1, -lb.Y);
+  auto trimmer = [&](const Point& p) {
+    return (p.X < lb.X) || (p.X > ub.X) ||
+    (p.Y < lb.Y) || (p.Y > ub.Y);
+  };
+  auto e = std::remove_if(onp.begin(), onp.end(), trimmer);
+  onp.resize(std::distance(onp.begin(), e));
+
+  lb = tailPath[0] - Point(1, 0);
+  ub = Point(lb.X + m_tailLength + machine.spacerEndOverhang(), -lb.Y);
+  e = std::remove_if(otp.begin(), otp.end(), trimmer);
+  otp.resize(std::distance(otp.begin(), e));
+  otp.erase(otp.begin()); // First element of the tail is redundant with the end
+
   GCodeWriter g(m_name + "-nose-tail-spacers.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.rapidSpeed(), machine.normalSpeed(),
                 machine.baseRapidHeight());
-  assert(!"NYI");
+  auto materialLength = m_noseLength + m_tailLength + 2 +
+    machine.spacerEndOverhang() * 2;
+  g.headerComment();
+  g.headerCommentF("Spacer material length: %s\" [%scm]",
+                   materialLength.inchesStr().c_str(),
+                   materialLength.str().c_str());
+  g.headerComment();
+  g.rapidToPoint(onp[0]);
+  g.spindleOn();
+  g.emitPath(onp, machine.baseCutThruHeight());
+  g.rapidToPoint(otp[0]);
+  g.emitPath(otp, machine.baseCutThruHeight());
+  g.rapidToPoint(onp[0]);
+  g.spindleOff();
+  g.close();
   return g;
 }
 

@@ -50,8 +50,7 @@ G-code programs:
   * Insert holes for standard snowboard inserts (T-nuts) in a variety of patterns
   * Top profile to impart the taper to the core
   * Cutout, allowing for sidewall overhang and nose/tail spacers
-**(not yet complete)**
-* Nose and tail spacers which match the core **(not yet complete)**
+* Nose and tail spacers which match the core
 * Edge trenches to enable inlay of different edge wood and/or sidewall
 material along the effective edge of the core **(not yet complete)**
 

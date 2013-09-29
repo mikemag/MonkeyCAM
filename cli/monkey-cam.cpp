@@ -191,6 +191,7 @@ int main(int argc, char *argv[]) {
   shape.generateInsertHoles(machine).write(outdir);
   shape.generateTopProfile(machine, profile).write(outdir);
   shape.generateTopCutout(machine).write(outdir);
+  shape.generateNoseTailSpacerCutout(machine).write(outdir);
 
   string overviewSvgName = shape.name() + "-overview.svg";
   printf("%s\n", overviewSvgName.c_str());

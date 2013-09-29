@@ -47,7 +47,7 @@ class BoardShape {
   const Path& buildCorePath(Machine& machine);
 
   const GCodeWriter generateBaseCutout(Machine& machine);
-  const GCodeWriter generateNoseTailSpaceCutout(Machine& machine);
+  const GCodeWriter generateNoseTailSpacerCutout(Machine& machine);
   const GCodeWriter generateCoreAlignmentMarks(Machine& machine);
   const GCodeWriter generateGuideHoles(Machine& machine);
   const GCodeWriter generateCoreEdgeGroove(Machine& machine);
