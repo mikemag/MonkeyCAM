@@ -116,6 +116,22 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
 } // namespace MonkeyCAM
 
 
+// @TODO: temp ghetto output to view a path with three.js.
+void emitPathJS(std::ofstream& os, std::string name,
+                const MonkeyCAM::Path& path) {
+  os << "function getPath" << name << "() {" << std::endl;
+  os << "  var path = new THREE.Geometry();" << std::endl;
+  for (const auto& p : path) {
+    os << "  path.vertices.push(new THREE.Vector3(";
+    os << p.X.dbl() - (168 / 2) << ", "
+       << p.Y.dbl() << ", "
+       << p.Z.dbl() << "));"
+       << std::endl;
+  }
+  os << "  return path;" << std::endl;
+  os << "}" << std::endl;
+}
+
 void usage(const char* program) {
   printf("\nUsage: %s --board brd.json --machine mach.json --outdir <dir>\n\n",
          program);
@@ -199,6 +215,13 @@ int main(int argc, char *argv[]) {
   overallSvg.addPath(shape.buildOverallPath());
   overallSvg.addPath(profile.path());
   overallSvg.addPath(shape.buildCorePath(machine));
+
+  // @TODO: temp ghetto output.
+  std::ofstream os("paths.js");
+  emitPathJS(os, "Core", shape.buildCorePath(machine));
+  emitPathJS(os, "Overall", shape.buildOverallPath());
+  emitPathJS(os, "Profile", profile.path());
+  os.close();
 
   printf("Done.\n");
   return 0;
