@@ -54,7 +54,7 @@ class BoardShape {
   const GCodeWriter generateEdgeTrench(Machine& machine);
   const GCodeWriter generateInsertHoles(Machine& machine);
   const GCodeWriter generateTopProfile(Machine& machine,
-                                              BoardProfile profile);
+                                       BoardProfile profile);
   const GCodeWriter generateTopCutout(Machine& machine);
 
   const Path& insertsPath() const { return m_insertsPath; }

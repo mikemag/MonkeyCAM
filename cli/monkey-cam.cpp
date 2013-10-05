@@ -116,22 +116,6 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
 } // namespace MonkeyCAM
 
 
-// @TODO: temp ghetto output to view a path with three.js.
-void emitPathJS(std::ofstream& os, std::string name,
-                const MonkeyCAM::Path& path) {
-  os << "function getPath" << name << "() {" << std::endl;
-  os << "  var path = new THREE.Geometry();" << std::endl;
-  for (const auto& p : path) {
-    os << "  path.vertices.push(new THREE.Vector3(";
-    os << p.X.dbl() - (168 / 2) << ", "
-       << p.Y.dbl() << ", "
-       << p.Z.dbl() << "));"
-       << std::endl;
-  }
-  os << "  return path;" << std::endl;
-  os << "}" << std::endl;
-}
-
 void usage(const char* program) {
   printf("\nUsage: %s --board brd.json --machine mach.json --outdir <dir>\n\n",
          program);
@@ -200,14 +184,28 @@ int main(int argc, char *argv[]) {
   auto profile = MonkeyCAM::loadProfile(boardConfig, shape);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
-  shape.generateBaseCutout(machine).write(outdir);
-  shape.generateCoreAlignmentMarks(machine).write(outdir);
-  shape.generateGuideHoles(machine).write(outdir);
-  shape.generateCoreEdgeGroove(machine).write(outdir);
-  shape.generateInsertHoles(machine).write(outdir);
-  shape.generateTopProfile(machine, profile).write(outdir);
-  shape.generateTopCutout(machine).write(outdir);
-  shape.generateNoseTailSpacerCutout(machine).write(outdir);
+  // @TODO: temp ghetto JS output.
+  std::ofstream os2("paths.js");
+  os2 << "var gcodeFiles=[];";
+
+#define JS(__s) \
+  auto __s = shape.generate##__s(machine); \
+  __s.write(outdir); \
+  __s.writeJS(#__s, os2);
+
+  JS(BaseCutout);
+  JS(GuideHoles);
+  JS(CoreAlignmentMarks);
+  JS(CoreEdgeGroove);
+  JS(InsertHoles);
+  JS(TopCutout);
+  JS(NoseTailSpacerCutout);
+
+  auto topProfile = shape.generateTopProfile(machine, profile);
+  topProfile.write(outdir);
+  topProfile.writeJS("gcodeTopProfile", os2);
+
+  os2.close();
 
   string overviewSvgName = shape.name() + "-overview.svg";
   printf("%s\n", overviewSvgName.c_str());
@@ -215,13 +213,6 @@ int main(int argc, char *argv[]) {
   overallSvg.addPath(shape.buildOverallPath());
   overallSvg.addPath(profile.path());
   overallSvg.addPath(shape.buildCorePath(machine));
-
-  // @TODO: temp ghetto output.
-  std::ofstream os("paths.js");
-  emitPathJS(os, "Core", shape.buildCorePath(machine));
-  emitPathJS(os, "Overall", shape.buildOverallPath());
-  emitPathJS(os, "Profile", profile.path());
-  os.close();
 
   printf("Done.\n");
   return 0;

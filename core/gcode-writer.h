@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "machine.h"
 #include "paths.h"
@@ -73,6 +74,7 @@ class GCodeWriter {
 
   void close();
   void write(std::string directory) const;
+  void writeJS(std::string name, std::ofstream& stream) const;
 
   const Tool& tool() const { return m_tool; }
   const Point& currentPosition() const { return m_currentPosition; }
