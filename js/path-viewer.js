@@ -28,9 +28,55 @@ HEIGHT = window.innerHeight;
 var GCodeRegexG = /[gG]([0-9]+)/g;
 var GCodeRegexCoord = /([xXyYzZ])(-?[0-9]+\.[0-9]+)/g;
 var GCodeRegexFeed = /[fF]([0-9]+)/g;
+var GCodeRegexR = /[rR](-?[0-9]+\.[0-9]+)/g;
 
 init();
 animate();
+
+function circle(geometry, color, x1, y1, z1, x2, y2, z2, r, g) {
+    var xd = x2 - x1;
+    var yd = y2 - y1;
+    var coordlen = Math.sqrt(xd * xd + yd * yd);
+    var midx = (x1 + x2) / 2;
+    var midy = (y1 + y2) / 2;
+    var unx = -yd / coordlen;
+    var uny = xd / coordlen;
+    var d = Math.sqrt(r * r - (coordlen/2) * (coordlen/2));
+    var cx = midx - d * unx;
+    var cy = midy - d * uny;
+    // Floats suck, of course, so take steps to ensure atan2() can be reasonable.
+    var cdx1 = x1 - cx;
+    var cdy1 = y1 - cy;
+    var cdx2 = x2 - cx;
+    var cdy2 = y2 - cy;
+    if (Math.abs(cdx1) < 0.001) cdx1 = 0.0;
+    if (Math.abs(cdy1) < 0.001) cdy1 = 0.0;
+    if (Math.abs(cdx2) < 0.001) cdx2 = 0.0;
+    if (Math.abs(cdy2) < 0.001) cdy2 = 0.0;
+    var startAngle = Math.atan2(cdy1, cdx1);
+    var endAngle = Math.atan2(cdy2, cdx2);
+    // Convert the interval to [0, 2PI)
+    if (startAngle < 0) startAngle += 2 * Math.PI;
+    if (endAngle < 0) {
+        endAngle += 2 * Math.PI;
+        if (startAngle == 0 && g == 2) startAngle = 2 * Math.PI;
+    }
+    var pointCount = 10;
+    var angleDelta = (endAngle - startAngle) / pointCount;
+    if (startAngle > endAngle) angleDelta *= -1;
+    if (g == 2) angleDelta *= -1;
+    for (var i = 0; i < pointCount; i++) {
+        var angle = startAngle + (angleDelta * i);
+        geometry.vertices.push(
+            new THREE.Vector3(
+                cx + r * Math.cos(angle),
+                cy + r * Math.sin(angle),
+                z1));
+        geometry.colors.push(new THREE.Color(color));
+    }
+    geometry.vertices.push(new THREE.Vector3(x2, y2, z2));
+    geometry.colors.push(new THREE.Color(color));
+}
 
 function gcodeParseFeedRate(gcodeLine) {
     GCodeRegexFeed.lastIndex = 0;
@@ -50,22 +96,28 @@ function gcodeToGeometry(gcode) {
     var incremental = false;
     var wco = 54;
     var feedRate = -1;
+    var g = 0;
 
-    var colors = [];
+    geometryPath.colors = [];
     for (var i = 0; i < gcode.length; i++) {
         GCodeRegexG.lastindex = 0;
         GCodeRegexCoord.lastIndex = 0;
         var gMatch;
         var feeding = false;
+        var r;
         while ((gMatch = GCodeRegexG.exec(gcode[i])) != null) {
-            var g = parseInt(gMatch[1]);
+            g = parseInt(gMatch[1]);
             switch (g) {
             case 0:
                 feeding = false;
                 break;
             case 1:
-            case 2: // @todo: need real circle represenation
+                feeding = true;
+                break;
+            case 2:
             case 3:
+                var rMatch = GCodeRegexR.exec(gcode[i]);
+                if (rMatch != null) r = parseFloat(rMatch[1]) * 2.54;
                 feeding = true;
                 break;
             case 54:
@@ -88,6 +140,7 @@ function gcodeToGeometry(gcode) {
             if (f != -1) feedRate = f;
         }
         var coordMatch;
+        var oldx = x; var oldy = y; var oldz = z;
         if (gcode[i][0] != '(') { // @TODO: real comment treatment
             while ((coordMatch = GCodeRegexCoord.exec(gcode[i])) != null) {
                 var c = parseFloat(coordMatch[2]) * 2.54;
@@ -107,14 +160,19 @@ function gcodeToGeometry(gcode) {
                 }
             }
         }
-        geometryPath.vertices.push(new THREE.Vector3(x, y, z));
+        var color;
         if ((feedRate == -1) || !feeding) {
-            colors[i] = new THREE.Color(0xff7700);
+            color = 0xff7700;
         } else {
-            colors[i] = new THREE.Color(0x0077ff);
+            color = 0x0077ff;
+        }
+        if (g == 0 || g == 1) {
+            geometryPath.vertices.push(new THREE.Vector3(x, y, z));
+            geometryPath.colors.push(new THREE.Color(color));
+        } else if (g == 2 || g == 3) {
+            circle(geometryPath, color, oldx, oldy, oldz, x, y, z, r, g);
         }
     }
-    geometryPath.colors = colors;
     return geometryPath;
 }
 
