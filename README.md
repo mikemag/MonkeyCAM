@@ -62,9 +62,11 @@ but the ones with holes do not work for ShopBot right now.
 
 There is no UI, and all configuration and results are in files.
 
+You can see a sample set of programs here: [MonkeyCAM Visualization Example](http://www.happymonkeysnowboards.com/MonkeyCAM/path-viewer.html)
+
 ## Future Work
 
-MonkeyCAM v4.0 is a work in-progress. It is an incomplete (~30% so
+MonkeyCAM v4.0 is a work in-progress. It is an incomplete (~50% so
 far) port of MonkeyCAM, developed by [Mike
 Magruder](https://github.com/mikemag) for [Happy Monkey Snowboards,
 Inc.](http://www.happymonkeysnowboards.com/) from 2003 to 2012. The
