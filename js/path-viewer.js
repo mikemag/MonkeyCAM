@@ -20,7 +20,7 @@
 
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-var renderer, scene, camera;
+var renderer, scene, camera, controls;
 var objects = [];
 var WIDTH = window.innerWidth,
 HEIGHT = window.innerHeight;
@@ -122,6 +122,18 @@ function init() {
     camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 1, 300);
     camera.position.z = 150;
 
+    controls = new THREE.TrackballControls(camera);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.noZoom = false;
+    controls.noPan = false;
+    controls.staticMoving = false;
+    controls.dynamicDampingFactor = 0.2;
+    controls.maxDistance = 250;
+    controls.minDistance = 10;
+    controls.keys = [ 16 /*shift*/, 17 /*ctrl*/, 18 /*alt*/ ];
+
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x111111, 150, 275);
 
@@ -175,9 +187,10 @@ function render() {
     var time = Date.now();
     for (var i = 0; i < objects.length; i++) {
         var object = objects[i];
-        object.rotation.x = 0.25 * time * 0.001;
+        //object.rotation.x = 0.25 * time * 0.001;
         //object.rotation.y = 0.25 * time * 0.001;
         //object.rotation.z = 0.25 * time * 0.001;
     }
+    controls.update();
     renderer.render(scene, camera);
 }
