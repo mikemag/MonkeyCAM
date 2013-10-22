@@ -52,7 +52,7 @@ G-code programs:
   * Cutout, allowing for sidewall overhang and nose/tail spacers
 * Nose and tail spacers which match the core
 * Edge trenches to enable inlay of different edge wood and/or sidewall
-material along the effective edge of the core **(not yet complete)**
+material along the effective edge of the core
 
 The G-code programs emitted at this time have been tested on my CNC
 machine with a very old DeskCNC controller and work correctly. Each
@@ -75,8 +75,6 @@ generation) will be ported to this version over the next many
 months. The old UI will be discarded. The plan includes, roughly in
 order:
 
-* Complete the generation of the G-code programs marked **(not yet complete)**
-above.
 * Target more G-code controllers with different formats and requirements.
 * Provide distribution of binaries for Mac OSX and Windows 8.
 * More options for effective edge, nose, and tail. (MonkeyCAM v3, for instance, had 6 tail options.)

@@ -22,7 +22,7 @@
 
 #include "shapes.h"
 #include "shape-parts.h"
-#include "svg-writer.h"
+#include "svg-writer.h" // @TODO: remove when done with random svg's...
 
 namespace MonkeyCAM {
 
@@ -467,8 +467,8 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
                                               BoardProfile profile) {
   auto tool = machine.tool(machine.topProfileTool());
   // Fatten up the overall path by 1/4" to allow room for a 1/4"
-  // cutter to remove the without having to chew thru a shit-ton of
-  // material.
+  // cutter to remove the core without having to chew thru a shit-ton
+  // of material.
   auto offsetPaths = PathUtils::OffsetPath(
     buildOverallPath(),
     machine.tool(machine.coreCutoutTool()).diameter);
@@ -501,8 +501,9 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
     for (auto& path : pathSet) {
       if (rapidMove) {
         rapidMove = false;
-        auto leadIn = PathUtils::SimpleLeadIn(path, rapidHeight,
-                                              machine.topProfileLeadinLength());
+        auto leadIn =
+          PathUtils::SimpleLeadIn(path, rapidHeight,
+                                  machine.topProfileLeadinLength());
         if (leadIn.size() > 0) {
           g.rapidToPoint(leadIn.front());
           g.emitPath(leadIn);
@@ -524,9 +525,6 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
 //------------------------------------------------------------------------------
 // Nose and tail spacer cutouts
 
-// @TODO: need nose path and tail path separate
-// - old algorithm pulls those off of the core cutout, so they are already
-//   inset and have the curve to the sidewall added.
 const GCodeWriter BoardShape::generateNoseTailSpacerCutout(Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
   auto nosePath = m_noseSpacerPath;
@@ -597,15 +595,109 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(Machine& machine) {
 //------------------------------------------------------------------------------
 // Core edge trench
 
-// @TODO: needs the core ee path separate, plus support for interseciton,
-// cutting, extension, etc.
+// Counter-clockwise from lower left.
+Path formRectanglePath(Point ll, Point ur) {
+  Path p;
+  p.push_back(ll);
+  p.push_back(Point(ur.X, ll.Y));
+  p.push_back(ur);
+  p.push_back(Point(ll.X, ur.Y));
+  p.push_back(ll);
+  return p;
+}
+
+// Extend a path which is open, i.e., a line, on both ends the given
+// length.
+void extendLine(Path& p, MCFixed length) {
+  assert(p.size() > 1);
+  auto newStart = p[0] + ((p[0] - p[1]).toVector2D().toUnitVector() *
+                          length.dbl());
+  auto e = p.size() - 1;
+  auto newEnd = p[e] + ((p[e] - p[e - 1]).toVector2D().toUnitVector() *
+                        length.dbl());
+  p[0] = newStart;
+  p[e] = newEnd;
+}
+
 const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
+  // The outter edge of the edge trench is at the sidewall overhang.
+  // We need to move the edge of the overall shape to the center of
+  // the edge trench so we can offset it evenly on each side.
+  auto& overallPath = buildOverallPath();
+  auto etCenterAdjust = machine.sidewallOverhang() -
+    (machine.edgeTrenchWidth() / 2);
+  auto etCenterOverallPaths = PathUtils::OffsetPath(overallPath,
+                                                    etCenterAdjust);
+  assert(etCenterOverallPaths.size() == 1);
+  auto etCenterOverallPath = etCenterOverallPaths[0];
+
+  // Use two rectangles which will contain the nose and tail to trim
+  // out the edge paths. These extend an extra 1 unit past the ends
+  // and sides to ensure containtment of the shape.
+  auto noseTrimPath = formRectanglePath(
+    Point(-1, -(m_noseWidth / 2) - 1),
+    Point(m_noseLength, (m_noseWidth / 2) + 1));
+  auto tailTrimPath = formRectanglePath(
+    Point(m_noseLength + m_effectiveEdge, -(m_tailWidth / 2) - 1),
+    Point(m_noseLength + m_effectiveEdge + m_tailLength + 1,
+          (m_tailWidth / 2) + 1));
+  auto etCenterPaths = PathUtils::ClipPathsDifference(
+    vector<Path> { etCenterOverallPath },
+    vector<Path> { noseTrimPath, tailTrimPath });
+  assert(etCenterPaths.size() == 1);
+  auto etCenterPath = etCenterPaths[0];
+
+  // Now pull out the individual center lines for the trenches from
+  // the trimmed path. These are not real Paths since they are open.
+  Path etLowerCenter;
+  etLowerCenter.resize(etCenterPath.size());
+  auto end = std::copy_if(
+    etCenterPath.begin(), etCenterPath.end() - 1,
+    etLowerCenter.begin(),
+    [](const Point& p) { return p.Y < 0; });
+  etLowerCenter.resize(std::distance(etLowerCenter.begin(), end));
+  end = std::remove_if(
+    etCenterPath.begin(), etCenterPath.end() - 1,
+    [](const Point& p) { return p.Y < 0; });
+  etCenterPath.resize(std::distance(etCenterPath.begin(), end));
+  auto etUpperCenter = etCenterPath;
+
+  // Extend each center line to clear the core. NB: add twice the
+  // cutter diameter to leave room for the rounded corners on both
+  // ends.
   auto tool = machine.tool(machine.coreCutoutTool());
+  extendLine(etUpperCenter, machine.edgeTrenchExtension() +
+             tool.diameter * 2);
+  extendLine(etLowerCenter, machine.edgeTrenchExtension() +
+             tool.diameter * 2);
+
+  // Form the trench paths by offseting the two centerlines.
+  auto trenches =
+    PathUtils::OffsetLines(vector<Path> { etLowerCenter, etUpperCenter},
+                           machine.edgeTrenchWidth() / 2);
+  assert(trenches.size() == 2);
+
+  // Offset the trenches inwards for machining.
+  auto ps = PathUtils::OffsetPath(trenches[0], -tool.diameter / 2);
+  assert(ps.size() == 1);
+  auto t1 = ps[0];
+  ps = PathUtils::OffsetPath(trenches[1], -tool.diameter / 2);
+  assert(ps.size() == 1);
+  auto t2 = ps[0];
+
   GCodeWriter g(m_name + "-edge-trench.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.rapidSpeed(), machine.normalSpeed(),
                 machine.topRapidHeight());
-  assert(!"NYI");
+  g.rapidToPoint(t1[0]);
+  g.spindleOn();
+  g.emitSpiralPath(t1, machine.coreBlankThickness(), 3);
+  g.rapidToPoint(t1[0]);
+  g.rapidToPoint(t2[0]);
+  g.emitSpiralPath(t2, machine.coreBlankThickness(), 3);
+  g.rapidToPoint(t2[0]);
+  g.spindleOff();
+  g.close();
   return g;
 }
 
@@ -619,7 +711,8 @@ const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
 const GCodeWriter BoardShape::generateTopCutout(Machine& machine) {
   // Offset the core path as usual
   auto tool = machine.tool(machine.coreCutoutTool());
-  auto paths = PathUtils::OffsetPath(buildCorePath(machine), tool.diameter / 2);
+  auto paths = PathUtils::OffsetPath(buildCorePath(machine),
+                                     tool.diameter / 2);
   assert(paths.size() == 1);
   auto op = paths[0];
   // Form a tab profile path

@@ -21,7 +21,6 @@
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 var renderer, scene, camera, controls;
-var objects = [];
 var WIDTH = window.innerWidth,
 HEIGHT = window.innerHeight;
 
@@ -176,6 +175,16 @@ function gcodeToGeometry(gcode) {
     return geometryPath;
 }
 
+function addGcode(scene, material, name, yoffset, zoffset) {
+    var geometryPath = gcodeToGeometry(gcodeFiles[name]);
+    geometryPath.computeLineDistances();
+    var object = new THREE.Line(geometryPath, material, THREE.LineStrip);
+    object.position.x = -168 / 2;
+    object.position.y = yoffset;
+    object.position.z = zoffset;
+    scene.add(object);
+}
+
 function init() {
     camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 1, 300);
     camera.position.z = 150;
@@ -204,21 +213,19 @@ function init() {
     var material = new THREE.LineBasicMaterial({
         color: 0xffffff,
         opacity: 1,
-        linewidth: 3,
+        linewidth: 1,
         vertexColors: THREE.VertexColors
     });
 
-    var yoffset = 60;
-    for (gcodeFileName in gcodeFiles) {
-        var geometryPath = gcodeToGeometry(gcodeFiles[gcodeFileName]);
-        geometryPath.computeLineDistances();
-        var object = new THREE.Line(geometryPath, material, THREE.LineStrip);
-        object.position.x = -168 / 2;
-        object.position.y = yoffset;
-        objects.push(object);
-        scene.add(object);
-        yoffset -= 18;
-    }
+    addGcode(scene, material, "BaseCutout", 40, 0);
+    addGcode(scene, material, "NoseTailSpacerCutout", 40, -10);
+    addGcode(scene, material, "TopProfile", 0, 0);
+    addGcode(scene, material, "TopCutout", 0, -10);
+    addGcode(scene, material, "EdgeTrench", -40, 0);
+    addGcode(scene, material, "GuideHoles", -40, -10);
+    addGcode(scene, material, "CoreAlignmentMarks", -40, -20);
+    addGcode(scene, material, "CoreEdgeGroove", -40, -30);
+    addGcode(scene, material, "InsertHoles", -40, -40);
 
     renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } );
     renderer.setClearColor(0x111111, 1);
@@ -242,13 +249,6 @@ function animate() {
 }
 
 function render() {
-    var time = Date.now();
-    for (var i = 0; i < objects.length; i++) {
-        var object = objects[i];
-        //object.rotation.x = 0.25 * time * 0.001;
-        //object.rotation.y = 0.25 * time * 0.001;
-        //object.rotation.z = 0.25 * time * 0.001;
-    }
     controls.update();
     renderer.render(scene, camera);
 }

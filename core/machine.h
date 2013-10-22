@@ -34,9 +34,10 @@ struct Tool {
   Tool() : name(""), diameter(0), gcodeToolNumber(0) {}
   Tool(std::string name, MCFixed diameter, int toolNumber)
       : name(name), diameter(diameter), gcodeToolNumber(toolNumber) {}
+
   std::string name;
   MCFixed diameter;
-    int gcodeToolNumber;
+  int gcodeToolNumber;
 };
 
 //------------------------------------------------------------------------------
@@ -85,6 +86,8 @@ class Machine {
   MPI(spacerEndOverhang, "spacer end overhang")
   MPI(spacerSideOverhang, "spacer side overhang")
   MPI(sidewallOverhang, "sidewall overhang")
+  MPI(edgeTrenchWidth, "edge trench width")
+  MPI(edgeTrenchExtension, "edge trench extension")
 #undef MPT
 #undef MPI
 

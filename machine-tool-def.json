@@ -41,7 +41,11 @@
 
     "spacer end overhang": 1,
     "spacer side overhang": 0.5,
+
     "sidewall overhang": 0.0787,
+
+    "edge trench width": 1.287, // mmmfixme: not correct
+    "edge trench extension": 3, // mmmfixme: not correct
 
     "tools":
     [

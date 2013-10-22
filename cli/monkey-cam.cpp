@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
   // @TODO: temp ghetto JS output.
-  std::ofstream os2("paths.js");
+  std::ofstream os2("js/paths.js");
   os2 << "var gcodeFiles=[];";
 
 #define JS(__s) \
@@ -200,10 +200,11 @@ int main(int argc, char *argv[]) {
   JS(InsertHoles);
   JS(TopCutout);
   JS(NoseTailSpacerCutout);
+  JS(EdgeTrench);
 
   auto topProfile = shape.generateTopProfile(machine, profile);
   topProfile.write(outdir);
-  topProfile.writeJS("gcodeTopProfile", os2);
+  topProfile.writeJS("TopProfile", os2);
 
   os2.close();
 

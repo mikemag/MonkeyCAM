@@ -198,15 +198,21 @@ ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
 
 namespace PathUtils {
 
-ClipperLib::Polygon pathToPolygon(const Path& path) {
+enum PathClosure {
+  Open,
+  Closed
+};
+
+ClipperLib::Polygon pathToPolygon(const Path& path, PathClosure c = Closed) {
   // Our paths are closed, and may have duplicated points in
   // them. Clean them up as we form the polygon.
   ClipperLib::Polygon poly;
   auto pathStart = path.cbegin();
   auto pathEnd = path.cend();
   Point lastPoint;
-  assert(*(pathEnd - 1) == *pathStart);
-  for (auto p = pathStart; p != pathEnd - 1; ++p) {
+  assert((c == Open) || *(pathEnd - 1) == *pathStart);
+  if (c == Closed) --pathEnd;
+  for (auto p = pathStart; p != pathEnd; ++p) {
     if ((p == pathStart) || (lastPoint != *p)) {
       poly.push_back(ClipperLib::IntPoint(p->X.scaledInt(),
                                           p->Y.scaledInt()));
@@ -248,6 +254,28 @@ std::vector<Path> OffsetPath(const Path& path, MCFixed offset) {
   }
   return resultPaths;
 }
+
+// Use Clipper to offset a set of open paths, i.e., lines. There is no
+// assumption about the direction of the lines. The input lines may
+// have duplicate points.
+//
+// The output is a set of paths. They are counterclockwise, closed,
+// and the start point is the minimum point (far left, lowest).
+std::vector<Path> OffsetLines(const std::vector<Path>& paths, MCFixed offset) {
+  std::vector<Path> resultPaths;
+  ClipperLib::Polygons origPolys;
+  for (const auto& path : paths) {
+    origPolys.emplace_back(pathToPolygon(path, Open));
+  }
+  ClipperLib::Polygons resultPolys;
+  ClipperLib::OffsetPolyLines(origPolys, resultPolys, offset.scaledInt(),
+                              ClipperLib::jtRound, ClipperLib::etButt, 0);
+  for (const auto& poly : resultPolys) {
+    resultPaths.emplace_back(polygonToPath(poly));
+  }
+  return resultPaths;
+}
+
 
 // Use Clipper to subtract one set of paths from another.
 std::vector<Path> ClipPathsDifference(const std::vector<Path>& subjects,
