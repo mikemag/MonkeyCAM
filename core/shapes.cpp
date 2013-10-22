@@ -665,6 +665,11 @@ const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
   // Extend each center line to clear the core. NB: add twice the
   // cutter diameter to leave room for the rounded corners on both
   // ends.
+  //
+  // @TODO: older versions of MonkeyCAM used to compute the
+  // intersection with the core path, then extend from there, so older
+  // extension values were quite a bit shorter. This is preferable,
+  // and I should adjust this to do the same one day.
   auto tool = machine.tool(machine.coreCutoutTool());
   extendLine(etUpperCenter, machine.edgeTrenchExtension() +
              tool.diameter * 2);
