@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv='Content-type' content='text/html; charset=utf-8'>
+    <title>MonkeyCAM</title>
+
+    <style>
+      body {
+        color: #ffffff;
+        font-family: Arial;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+
+        background-color: #330000;
+        margin: 0px;
+        #outline: #555555 solid thin;
+        #overflow: hidden;
+      }
+
+      #three_d_container {
+        color: #eeeeee;
+        position: absolute;
+        top: 0px;
+        #float: left;
+        width: 100%;
+        padding: 0px;
+        z-index: -100;
+        #outline: #555555 solid thin;
+      }
+
+      #designerCanvas {
+        color: #eeeeee;
+        background-color: #000000;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        padding: 0px;
+        z-index: -100;
+      }
+
+      #boardParamContainer {
+        position: absolute;
+        top: 10px;
+        #float: left;
+        width: auto;
+        padding: 2px;
+        outline: #555555 solid thin;
+
+        color: #bbbbbb;
+        font-family: Arial;
+        font-size: 16px;
+        text-align: left;
+        font-weight: normal;
+      }
+
+      #designerPanel {
+        position: relative;
+        #top: 30px;
+        margin: 0px;
+        padding: 0px;
+      }
+
+      #header {
+        text-align: right;
+        background-color: #000066;
+        padding: 5px;
+      }
+    </style>
+
+  </head>
+  <body>
+    <div id="header">
+      MonkeyCAM
+    </div>
+    <div id="designerPanel">
+      <div id="boardParamContainer">
+        <p>
+          MonkeyCAM isn't working right. Make sure you have JavaScript
+          enabled in your browser.
+        </p>
+      </div>
+
+      <!--<div id="three_d_container"></div>-->
+      <canvas id="designerCanvas"></canvas>
+      <div id="stanceParamContainer"></div>
+
+    </div>
+
+    <!--
+        <script src="js/three.js-r61-0-g5834622/Detector.js"></script>
+        <script src="js/three.js-r61-0-g5834622/three.js"></script>
+        <script src="js/three.js-r61-0-g5834622/TrackballControls.js"></script>
+        -->
+
+    <script src="../react-0.5.1/build/react.js"></script>
+    <script src="../react-0.5.1/build/JSXTransformer.js"></script>
+
+    <script type="text/jsx" src="js/designer-viewer.js"></script>
+    <script type="text/jsx" src="js/basic-math.js"></script>
+    <script type="text/jsx" src="js/shape-parts.js"></script>
+
+    <script type="text/jsx">
+      /**
+       * @jsx React.DOM
+       */
+
+      var Dimension = React.createClass({
+        render: function() {
+          var name = this.props.name;
+          var value = this.props.children;
+          value = Math.round(value * 1000) / 1000;
+          var unit = (this.props.unit !== undefined) ? this.props.unit : "cm";
+          return <div id="dimension">{name}: {value}{unit}</div>;
+        }
+      });
+
+      var BoardName = React.createClass({
+        getInitialState: function() {
+          return {value: ""};//this.props.children};
+        },
+        onChange: function(e) {
+          this.setState({value: e.target.value});
+          this.props.boardBasics.setState({boardName: e.target.value,
+            //noseLength:(this.props.boardBasics.state.noseLength+1),
+            taper:(this.props.boardBasics.state.taper+1)});
+        },
+        render: function() {
+          return (
+            <input type="text" placeholder="Name of your board" onChange={this.onChange} value={this.state.value} />
+          );
+        }
+      });
+
+      var DimensionGroup = React.createClass({
+        render: function() {
+          var dimensions = this.props.data.map(function (dimension) {
+            return <Dimension name={dimension.label}>
+              {dimension.defaultValue}
+            </Dimension>;
+          });
+          return (
+            <div className="dimensionBox">
+              {dimensions}
+            </div>
+          );
+        }
+      });
+
+      var BoardBasicsGroup = React.createClass({
+        getInitialState: function() {
+          return {
+                   boardName: "Sample Snowboard",
+                   noseLength: 18,
+                   eeLength: 136,
+                   tailLength: 14,
+                   waistWidth: 24.6,
+                   sidecutRadius: 1100,
+                   taper: 4,
+                   selectedNosePart: 0,
+                   selectedEdgePart: 0,
+                   selectedTailPart: 0,
+                 };
+        },
+
+        render: function() {
+          var b = new boardDesign(this.state.noseLength,
+            this.state.eeLength,
+            this.state.tailLength,
+            this.state.waistWidth,
+            this.state.sidecutRadius,
+            this.state.taper);
+
+          var noseShape1 =
+            <NoseShapeSimpleBezier board={b}></NoseShapeSimpleBezier>;
+          var noseShape2 =
+            <NoseShapeFatBezier board={b}></NoseShapeFatBezier>;
+          var edgeShape1 =
+            <EdgeShapeSimpleArc board={b}></EdgeShapeSimpleArc>;
+          var tailShape1 =
+            <TailShapeSimpleBezier board={b}></TailShapeSimpleBezier>;
+
+          var noseShapes = [noseShape1, noseShape2];
+          var edgeShapes = [edgeShape1];
+          var tailShapes = [tailShape1];
+
+          clearDesignDrawing();
+
+          return (
+            <div>
+              <div className="boardBasicsGroup">
+                <BoardName boardBasics={this}>{this.state.boardName}</BoardName>
+                <Dimension name="Overall length">{b.overallLength}</Dimension>
+              </div>
+              <ShapeSelector boardBasics={this} shapes={noseShapes} selected={this.state.selectedNosePart} stateName="selectedNosePart">Nose</ShapeSelector>
+              <ShapeSelector boardBasics={this} shapes={edgeShapes} selected={this.state.selectedEdgePart} stateName="selectedEdgePart">Edge</ShapeSelector>
+              <ShapeSelector boardBasics={this} shapes={tailShapes} selected={this.state.selectedTailPart} stateName="selectedTailPart">Tail</ShapeSelector>
+            </div>
+          );
+        }
+      });
+
+      React.renderComponent(
+        <BoardBasicsGroup />,
+        document.getElementById('boardParamContainer')
+      );
+      //React.renderComponent(
+      //  <Dimension name="Stance width">58</Dimension>,
+      //  document.getElementById('stanceParamContainer')
+      //);
+
+    </script>
+  </body>
+</html>

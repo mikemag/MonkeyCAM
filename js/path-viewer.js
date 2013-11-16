@@ -189,18 +189,6 @@ function init() {
     camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 1, 300);
     camera.position.z = 150;
 
-    controls = new THREE.TrackballControls(camera);
-    controls.rotateSpeed = 1.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
-    controls.noZoom = false;
-    controls.noPan = false;
-    controls.staticMoving = false;
-    controls.dynamicDampingFactor = 0.2;
-    controls.maxDistance = 250;
-    controls.minDistance = 10;
-    controls.keys = [ 16 /*shift*/, 17 /*ctrl*/, 18 /*alt*/ ];
-
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x111111, 150, 275);
 
@@ -233,6 +221,18 @@ function init() {
 
     var container = document.getElementById('three_d_container');
     container.appendChild(renderer.domElement);
+
+    controls = new THREE.TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.noZoom = false;
+    controls.noPan = false;
+    controls.staticMoving = false;
+    controls.dynamicDampingFactor = 0.2;
+    controls.maxDistance = 250;
+    controls.minDistance = 10;
+    controls.keys = [ 16 /*shift*/, 17 /*ctrl*/, 18 /*alt*/ ];
 
     window.addEventListener('resize', onWindowResize, false);
 }

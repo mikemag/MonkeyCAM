@@ -59,7 +59,7 @@ BoardShape::BoardShape(std::string name,
     , m_spacerWidth(spacerWidth)
     , m_maxCoreX(0)
 {
-  // Node and tail width come from the sidecut depth...
+  // Nose and tail width come from the sidecut depth...
   m_sidecutDepth = m_sidecutRadius -
     sqrt(((m_sidecutRadius * m_sidecutRadius) -
          (m_effectiveEdge * m_effectiveEdge / 4)).dbl());
