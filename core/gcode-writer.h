@@ -44,7 +44,7 @@ class GCodeWriter {
 
   // Feed speeds are in IPM, suitable for a Fxx.
   GCodeWriter(std::string filename, Tool const& tool, ZeroZ zeroHeight,
-              XYOrigin origin, int rapidSpeed, int normalSpeed,
+              XYOrigin origin, int normalSpeed,
               MCFixed rapidHeight);
 
   void spindleOn();
@@ -94,7 +94,6 @@ class GCodeWriter {
   std::string m_filename;
   Tool m_tool;
 
-  int m_rapidSpeed;
   int m_defaultSpeed;
 
   MCFixed m_rapidHeight;

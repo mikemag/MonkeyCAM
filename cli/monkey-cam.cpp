@@ -66,7 +66,7 @@ std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
         hSpacing, vSpacing } };
 }
 
-BoardShape loadBoard(boost::property_tree::ptree& config) {
+std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto name = config.get<std::string>("board.name");
   auto noseLength = config.get<double>("board.nose length");
   auto eeLength = config.get<double>("board.effective edge length");
@@ -85,10 +85,10 @@ BoardShape loadBoard(boost::property_tree::ptree& config) {
 
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
 
-  BoardShape board { name, noseLength, eeLength, tailLength, sidecutRadius,
-      waistWidth, taper, nose, edge, tail, refStance, setback,
-      nosePack, tailPack, spacerWidth };
-  return board;
+  return std::unique_ptr<BoardShape> {
+    new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
+        waistWidth, taper, nose, edge, tail, refStance, setback,
+        nosePack, tailPack, spacerWidth } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
   printf("Building board shapes...\n");
   MonkeyCAM::Machine machine { machineConfig };
   auto shape = MonkeyCAM::loadBoard(boardConfig);
-  auto profile = MonkeyCAM::loadProfile(boardConfig, shape);
+  auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
   // @TODO: temp ghetto JS output.
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
   os2 << "var gcodeFiles=[];";
 
 #define JS(__s) \
-  auto __s = shape.generate##__s(machine); \
+  auto __s = shape->generate##__s(machine); \
   __s.write(outdir); \
   __s.writeJS(#__s, os2);
 
@@ -202,18 +202,18 @@ int main(int argc, char *argv[]) {
   JS(NoseTailSpacerCutout);
   JS(EdgeTrench);
 
-  auto topProfile = shape.generateTopProfile(machine, profile);
+  auto topProfile = shape->generateTopProfile(machine, profile);
   topProfile.write(outdir);
   topProfile.writeJS("TopProfile", os2);
 
   os2.close();
 
-  string overviewSvgName = shape.name() + "-overview.svg";
+  string overviewSvgName = shape->name() + "-overview.svg";
   printf("%s\n", overviewSvgName.c_str());
   MonkeyCAM::SVGWriter overallSvg(outdir + overviewSvgName, 16, 7);
-  overallSvg.addPath(shape.buildOverallPath());
+  overallSvg.addPath(shape->buildOverallPath());
   overallSvg.addPath(profile.path());
-  overallSvg.addPath(shape.buildCorePath(machine));
+  overallSvg.addPath(shape->buildCorePath(machine));
 
   printf("Done.\n");
   return 0;

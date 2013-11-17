@@ -113,7 +113,8 @@ that code again. :)
 
 MonkeyCAM currently depends on the following packages:
 
-* GCC 4.8.1. See http://gcc.gnu.org/ or install via something like Ports.
+* Up thru 953fe71b, GCC 4.8.1. See http://gcc.gnu.org/ or install via something like Ports. I'll ressurect the GCC build once I start deploying on AWS.
+* Currently, builds on MacOS X Mavericks with the system compiler.
 * CMake 2.8. See http://www.cmake.org/ or install via something like Ports.
 * Boost 1.54.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See

@@ -252,8 +252,7 @@ const GCodeWriter BoardShape::generateBaseCutout(Machine& machine) {
   auto op = offsetPaths[0];
   GCodeWriter g(m_name + "-base-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.baseRapidHeight());
+                machine.normalSpeed(), machine.baseRapidHeight());
   g.rapidToPoint(op[0]);
   g.spindleOn();
   g.emitPath(op, machine.baseCutThruHeight());
@@ -277,7 +276,7 @@ const GCodeWriter BoardShape::generateGuideHoles(Machine& machine) {
   auto tool = machine.tool(machine.guideHoleTool());
   GCodeWriter g(m_name + "-guide-holes.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(), rapidHeight);
+                machine.normalSpeed(), rapidHeight);
   g.comment("Guide holes should be milled first so we can re-align the core if "
             "something goes wrong.");
   g.line();
@@ -331,8 +330,7 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(Machine& machine) {
   auto tool = machine.tool(machine.alignmentMarkTool());
   GCodeWriter g(m_name + "-core-alignment-marks.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.bottomRapidHeight());
+                machine.normalSpeed(), machine.bottomRapidHeight());
   g.spindleOn();
   for (auto& p : marks) {
     g.rapidToPoint(p);
@@ -368,8 +366,7 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(Machine& machine) {
   auto grooveOutter = offsetPaths[0];
   GCodeWriter g(m_name + "-core-edge-groove.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.bottomRapidHeight());
+                machine.normalSpeed(), machine.bottomRapidHeight());
   g.rapidToPoint(grooveOutter[0]);
   g.spindleOn();
   g.emitPath(grooveOutter, machine.edgeGrooveDepth());
@@ -443,7 +440,7 @@ const GCodeWriter BoardShape::generateInsertHoles(Machine& machine) {
   auto rapidHeight = machine.bottomRapidHeight();
   GCodeWriter g(m_name + "-core-insert-holes.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(), rapidHeight);
+                machine.normalSpeed(), rapidHeight);
   g.spindleOn();
   for (auto& p : m_insertsPath) {
     g.rapidToPoint(p);
@@ -493,8 +490,7 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
   auto rapidHeight = machine.topRapidHeight();;
   GCodeWriter g(m_name + "-top-profile.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.topProfileDeepSpeed(),
-                rapidHeight);
+                machine.topProfileDeepSpeed(), rapidHeight);
   g.spindleOn();
   bool rapidMove = true;
   for (auto& pathSet : boost::adaptors::reverse(pathSets)) {
@@ -572,8 +568,7 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(Machine& machine) {
 
   GCodeWriter g(m_name + "-nose-tail-spacers.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.baseRapidHeight());
+                machine.normalSpeed(), machine.baseRapidHeight());
   auto materialLength = m_noseLength + m_tailLength + 2 +
     machine.spacerEndOverhang() * 2;
   g.headerComment();
@@ -692,8 +687,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
 
   GCodeWriter g(m_name + "-edge-trench.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.topRapidHeight());
+                machine.normalSpeed(), machine.topRapidHeight());
   g.rapidToPoint(t1[0]);
   g.spindleOn();
   g.emitSpiralPath(t1, machine.coreBlankThickness(), 3);
@@ -743,8 +737,7 @@ const GCodeWriter BoardShape::generateTopCutout(Machine& machine) {
   auto profPath = ProfiledPath(op, tabProfile);
   GCodeWriter g(m_name + "-top-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.rapidSpeed(), machine.normalSpeed(),
-                machine.topRapidHeight());
+                machine.normalSpeed(), machine.topRapidHeight());
   g.rapidToPoint(profPath[0]);
   g.spindleOn();
   g.emitSpiralPath(profPath, machine.coreBlankThickness(), 3);

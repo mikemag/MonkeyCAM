@@ -1,6 +1,7 @@
 # cli
 include_directories(${MonkeyCAM_SOURCE_DIR}/util)
 include_directories(${MonkeyCAM_SOURCE_DIR}/core)
+include_directories(/opt/local/include) # For boost
 
 link_directories(${MonkeyCAM_BINARY_DIR}/util)
 link_directories(${MonkeyCAM_BINARY_DIR}/core)
@@ -15,6 +16,4 @@ add_executable(MonkeyCAM
 
 target_link_libraries(MonkeyCAM util core clipper ${Boost_LIBRARIES})
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
-endif()
+set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")

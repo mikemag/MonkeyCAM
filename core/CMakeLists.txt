@@ -1,11 +1,10 @@
 # core
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
-endif()
+set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
 
 include_directories(${MonkeyCAM_SOURCE_DIR}/util)
 include_directories(${MonkeyCAM_SOURCE_DIR}/clipper)
+include_directories(/opt/local/include) # For boost
 
 set(MONKEYCAM_CORE_SRCS
     arc-path.cpp

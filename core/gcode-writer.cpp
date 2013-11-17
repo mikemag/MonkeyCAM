@@ -29,11 +29,10 @@ using std::string;
 using std::vector;
 
 GCodeWriter::GCodeWriter(string filename, Tool const& tool,
-                         ZeroZ zeroHeight, XYOrigin origin, int rapidSpeed,
+                         ZeroZ zeroHeight, XYOrigin origin,
                          int normalSpeed, MCFixed rapidHeight)
     : m_filename(filename)
     , m_tool(tool)
-    , m_rapidSpeed(rapidSpeed)
     , m_defaultSpeed(normalSpeed)
     , m_rapidHeight(rapidHeight)
     , m_zeroHeight(zeroHeight)
