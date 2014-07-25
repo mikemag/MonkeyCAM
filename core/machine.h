@@ -48,12 +48,14 @@ struct Tool {
 
 class Machine {
  public:
-  Machine(boost::property_tree::ptree& config);
+  Machine(const boost::property_tree::ptree& config);
 
-  const Tool& tool(int id) { return m_tools[id]; }
+  const Tool& tool(int id) const { return m_tools.at(id); }
 
-#define MPT(_f, _t, _n) _t _f() { return m_config.get<_t>("machine." _n); }
-#define MPI(_f, _n) MCFixed _f() {                                 \
+#define MPT(_f, _t, _n) const _t _f() const { \
+  return m_config.get<_t>("machine." _n);     \
+}
+#define MPI(_f, _n) const MCFixed _f() const {                     \
   return MCFixed::fromInches(m_config.get<double>("machine." _n)); \
 }
   MPT(rapidSpeed, int, "rapid speed")
@@ -67,12 +69,15 @@ class Machine {
   MPT(guideHoleTool, int, "guide hole tool")
   MPI(guideHoleDepth, "guide hole depth")
   MPI(guideHoleDiameter, "guide hole diameter")
+  MPI(guideHoleOffset, "guide hole offset")
   MPT(alignmentMarkTool, int, "alignment mark tool")
   MPI(alignmentMarkOffset, "alignment mark offset")
   MPI(alignmentMarkDepth, "alignment mark depth")
   MPI(alignmentMarkDeepDepth, "alignment mark deep depth")
   MPT(edgeGrooveTool, int, "edge groove tool")
   MPI(edgeGrooveDepth, "edge groove depth")
+  MPI(edgeGrooveEdgeWidth, "edge groove edge width")
+  MPT(edgeGrooveOverlapPercentage, double, "edge groove overlap percentage")
   MPT(insertHolesTool, int, "insert tool")
   MPI(insertRimDepth, "insert rim depth")
   MPI(insertRimDiameter, "insert rim diameter")
@@ -92,8 +97,8 @@ class Machine {
 #undef MPI
 
  private:
-  boost::property_tree::ptree m_config;
-  std::map<int, Tool> m_tools;
+  const boost::property_tree::ptree m_config;
+  /*const*/ std::map<int, const Tool> m_tools;
 };
 
 } // namespace MonkeyCAM

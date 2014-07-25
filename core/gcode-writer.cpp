@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -264,6 +265,36 @@ void GCodeWriter::emitPath(Path& path, MCFixed depth) {
     Point a = p;
     a.Z = depth;
     feedToPoint(a);
+  }
+}
+
+// Emit sets of paths. The transition from a set of size one to the
+// next step is a smooth, feed transition. Sets with multiple paths
+// rapid and lead in to each path, and to the first path of the next
+// set.
+//
+// rapidMove indicates if we should rapid to the first path in the
+// first set. If the leadInLength is zero then there is no lead in.
+void GCodeWriter::emitPathSets(vector<vector<Path>>& pathSets, bool rapidMove,
+                               MCFixed rapidHeight, MCFixed leadInLength,
+                               int transitionSpeed) {
+  for (auto& pathSet : boost::adaptors::reverse(pathSets)) {
+    for (auto& path : pathSet) {
+      if (rapidMove) {
+        rapidMove = false;
+        auto leadIn = PathUtils::SimpleLeadIn(path, rapidHeight, leadInLength);
+        if (leadIn.size() > 0) {
+          rapidToPoint(leadIn.front());
+          emitPath(leadIn);
+        } else {
+          rapidToPoint(path.front());
+        }
+      }
+      feedToPoint(path.front(), transitionSpeed);
+      emitPath(path);
+      // Rapid between disconnected paths.
+      if (pathSet.size() > 1) rapidMove = true;
+    }
   }
 }
 

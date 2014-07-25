@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
   read_json(boardDef, boardConfig);
 
   printf("Building board shapes...\n");
-  MonkeyCAM::Machine machine { machineConfig };
+  const MonkeyCAM::Machine machine { machineConfig };
   auto shape = MonkeyCAM::loadBoard(boardConfig);
   auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
 
@@ -214,6 +214,12 @@ int main(int argc, char *argv[]) {
   overallSvg.addPath(shape->buildOverallPath());
   overallSvg.addPath(profile.path());
   overallSvg.addPath(shape->buildCorePath(machine));
+  overallSvg.addPath(shape->alignmentMarksPath(machine));
+#if 0
+  for (auto& path : shape->debugPaths()) {
+    overallSvg.addPath(path, path.color(), path.name());
+  }
+#endif
 
   printf("Done.\n");
   return 0;

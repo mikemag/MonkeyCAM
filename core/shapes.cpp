@@ -31,7 +31,7 @@ using std::vector;
 
 // Origin is at the center of the nose. Board extends right (regular
 // foot, of course!)
-BoardShape::BoardShape(std::string name,
+BoardShape::BoardShape(string name,
                        MCFixed noseLength, MCFixed effectiveEdge,
                        MCFixed tailLength, MCFixed sidecutRadius,
                        MCFixed waistWidth, MCFixed taper,
@@ -65,7 +65,22 @@ BoardShape::BoardShape(std::string name,
          (m_effectiveEdge * m_effectiveEdge / 4)).dbl());
   m_noseWidth = m_waistWidth + (m_sidecutDepth * 2) + (m_taper / 2);
   m_tailWidth = m_waistWidth + (m_sidecutDepth * 2) - (m_taper / 2);
+  m_maxCoreX = m_noseLength + m_effectiveEdge + m_tailLength;
+
   setupInserts();
+}
+
+const Point BoardShape::leftGuideHole(const Machine& machine) const {
+  return Point(-machine.guideHoleOffset(), 0);
+}
+
+const Point BoardShape::rightGuideHole(const Machine& machine) const {
+  return Point(m_maxCoreX + machine.guideHoleOffset(), 0);
+}
+
+const void BoardShape::addDebugPath(std::function<DebugPath()> pathFunc) {
+  // @todo: only if we're debugging...
+  m_debugPaths.push_back(pathFunc());
 }
 
 // Build an overall board shape, which is the true finished shape of
@@ -96,10 +111,6 @@ const Path& BoardShape::buildOverallPath() {
   m_overallPath.push_back_path(MirroredPath(ep));
   m_overallPath.push_back_path(MirroredPath(np));
   assert(m_overallPath.size() > 0);
-  // Compute basic info about the overall shape for later.
-  m_maxCoreX = m_noseLength + m_effectiveEdge + m_tailLength;
-  m_leftGuideHole = Point(MCFixed::fromInches(-0.5), 0);
-  m_rightGuideHole = Point(m_maxCoreX + MCFixed::fromInches(0.5), 0);
   return m_overallPath;
 }
 
@@ -145,7 +156,8 @@ void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
 // and tail spacers.
 //
 // The end portions are joined to the edge portion with a gentle arc.
-const Path& BoardShape::buildCorePath(Machine& machine) {
+const Path& BoardShape::buildCorePath(const Machine& machine) {
+  if (m_corePath.size() != 0) return m_corePath;
   // 1. Offset the overall path inward by the spacer size.
   auto spacerClip = PathUtils::OffsetPath(m_overallPath, -m_spacerWidth);
   assert(spacerClip.size() == 1);
@@ -243,7 +255,7 @@ void BoardShape::setupInserts() {
 //------------------------------------------------------------------------------
 // Base Cutout
 
-const GCodeWriter BoardShape::generateBaseCutout(Machine& machine) {
+const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
   auto paths = PathUtils::OffsetPath(buildOverallPath(), -0.2);
   assert(paths.size() == 1);
@@ -265,7 +277,7 @@ const GCodeWriter BoardShape::generateBaseCutout(Machine& machine) {
 //------------------------------------------------------------------------------
 // Core guide holes
 
-const GCodeWriter BoardShape::generateGuideHoles(Machine& machine) {
+const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
   // Guide holes: left hole is in negative X near the nose of the
   // board, right hole is beyond the end of the tail. Each hole is
   // 1/2" diameter, and placed 1/4" away from the overall board shape
@@ -281,9 +293,9 @@ const GCodeWriter BoardShape::generateGuideHoles(Machine& machine) {
             "something goes wrong.");
   g.line();
   g.spindleOn();
-  g.rapidToPoint(m_leftGuideHole);
+  g.rapidToPoint(leftGuideHole(machine));
   g.emitIncrementalHole(holeDia, holeDepth, rapidHeight, 3);
-  g.rapidToPoint(m_rightGuideHole);
+  g.rapidToPoint(rightGuideHole(machine));
   g.emitIncrementalHole(holeDia, holeDepth, rapidHeight, 3);
   g.spindleOff();
   g.close();
@@ -293,40 +305,58 @@ const GCodeWriter BoardShape::generateGuideHoles(Machine& machine) {
 //------------------------------------------------------------------------------
 // Core alignment marks
 
-const GCodeWriter BoardShape::generateCoreAlignmentMarks(Machine& machine) {
+const Path BoardShape::alignmentMarksPath(const Machine& machine) {
   // Alignment marks, based off of the core nose/waist/tail control
   // points, set in a smidge.
   auto eeCenterX = (m_effectiveEdge / 2) + m_noseLength;
   auto boardLength = m_noseLength + m_effectiveEdge + m_tailLength;
   auto boardCenterX = boardLength / 2;
-  auto markOffset = machine.alignmentMarkOffset();
+  auto markXOffset = machine.alignmentMarkOffset();
+  auto markYOffset = machine.alignmentMarkOffset() +
+    machine.edgeGrooveEdgeWidth();
   auto markDepth = machine.alignmentMarkDepth();
   auto deepMarkDepth = machine.alignmentMarkDeepDepth();
   Path marks;
-  marks.push_back(Point(markOffset, 0, markDepth));
-  marks.push_back(Point(boardLength - markOffset, 0, markDepth));
-  marks.push_back(Point(boardCenterX, (m_waistWidth / 2) - markOffset,
+  // Nose, two spaced a 10cm apart to make it easy to strike a good pencil line.
+  marks.push_back(Point(m_spacerWidth + markXOffset, 0, markDepth));
+  marks.push_back(Point(m_spacerWidth + markXOffset + 10, 0, markDepth));
+  // Tail
+  marks.push_back(Point(boardLength - m_spacerWidth - markXOffset, 0,
+                        markDepth));
+  marks.push_back(Point(boardLength - m_spacerWidth - markXOffset - 10, 0,
+                        markDepth));
+  // Overall center
+  marks.push_back(Point(boardCenterX, (m_waistWidth / 2) - markYOffset,
                         markDepth));
   marks.push_back(Point(boardCenterX, 0, markDepth));
-  marks.push_back(Point(boardCenterX, (-m_waistWidth / 2) + markOffset,
+  marks.push_back(Point(boardCenterX, (-m_waistWidth / 2) + markYOffset,
                         markDepth));
-  marks.push_back(Point(eeCenterX, (m_waistWidth / 2) - markOffset,
+  // EE center
+  marks.push_back(Point(eeCenterX, (m_waistWidth / 2) - markYOffset,
                         markDepth));
   marks.push_back(Point(eeCenterX, 0, markDepth));
-  marks.push_back(Point(eeCenterX, (-m_waistWidth / 2) + markOffset,
+  marks.push_back(Point(eeCenterX, (-m_waistWidth / 2) + markYOffset,
                         markDepth));
   // Extra deep mark above the guide holes, to assist with
   // re-alignment of the machine in case of a crash.
-  auto leftDeepMark = m_leftGuideHole + Point(0, MCFixed::fromInches(1));
+  auto leftDeepMark = leftGuideHole(machine) + Point(0, MCFixed::fromInches(1));
   leftDeepMark.Z = deepMarkDepth;
   marks.push_back(leftDeepMark);
-  auto rightDeepMark = m_rightGuideHole + Point(0, MCFixed::fromInches(1));
+  auto rightDeepMark = rightGuideHole(machine) + Point(0,
+                                                       MCFixed::fromInches(1));
   rightDeepMark.Z = deepMarkDepth;
   marks.push_back(rightDeepMark);
   // Sort the marks to reduce cutter movement. Forming a graph and
   // finding the shortest path would be ideal, but more trouble than
   // it's worth for this.
   std::sort(marks.begin(), marks.end());
+  return marks;
+}
+
+const GCodeWriter BoardShape::generateCoreAlignmentMarks(
+  const Machine& machine)
+{
+  auto marks = alignmentMarksPath(machine);
   auto tool = machine.tool(machine.alignmentMarkTool());
   GCodeWriter g(m_name + "-core-alignment-marks.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
@@ -345,33 +375,46 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(Machine& machine) {
 //------------------------------------------------------------------------------
 // Core edge groove
 
-const GCodeWriter BoardShape::generateCoreEdgeGroove(Machine& machine) {
-  auto paths = PathUtils::OffsetPath(buildOverallPath(), -0.2);
-  assert(paths.size() == 1);
-  auto sourcePath = paths[0];
+const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
+  auto overallPath = buildOverallPath();
   auto tool = machine.tool(machine.edgeGrooveTool());
-  // Bottom groove (offset 6mm inward, less the offset for the cutter.
-  auto offsetPaths = PathUtils::OffsetPath(sourcePath,
-                                           (tool.diameter / 2) - 0.6);
-  assert(offsetPaths.size() == 1);
-  auto grooveInner = offsetPaths[0];
-  // One more pass, an extra .200" out for a groove .450" wide
-  // (assuming a .250" cutter) which should accomidate the whole width
-  // of the edge plus clean up the sidewall to ensure resin can flow
-  // out easily.
-  offsetPaths = PathUtils::OffsetPath(sourcePath,
-                                      (tool.diameter / 2) - 0.6 +
-                                      MCFixed::fromInches(0.200));
-  assert(offsetPaths.size() == 1);
-  auto grooveOutter = offsetPaths[0];
+  auto edgeWidth = machine.edgeGrooveEdgeWidth(); // Entire edge, not just tines
+  auto grooveWidth = machine.sidewallOverhang() + edgeWidth;
+  assert(grooveWidth >= tool.diameter);
+
+  // Debugging... true inside and outside groove edges.
+  addDebugPath([&] {
+      return DebugPath { "Edge Groove Inner", "rgb(255,255,0)",
+          PathUtils::OffsetPath(overallPath, -edgeWidth)[0] };
+    });
+  addDebugPath([&] {
+      return DebugPath { "Edge Groove Inner", "rgb(255,255,0)",
+          PathUtils::OffsetPath(overallPath, grooveWidth - edgeWidth)[0] };
+    });
+
+  // Outter path is exact, inner path is exact. Build others inbetween
+  // as appropriate.
+  auto stepOffset = tool.diameter * machine.edgeGrooveOverlapPercentage();
+  auto currentOffset = machine.sidewallOverhang() - (tool.diameter / 2);
+  auto endOffset = -machine.edgeGrooveEdgeWidth() + (tool.diameter / 2);
+  vector<vector<Path>> groovePathSets;
+  while (true) {
+    auto paths = PathUtils::OffsetPath(overallPath, currentOffset);
+    assert(paths.size() == 1);
+    groovePathSets.push_back(paths);
+    addDebugPath([&] {
+        return DebugPath { "tmp1", "rgb(255,0,255)", paths[0] };
+      });
+    if (currentOffset == endOffset) break;
+    currentOffset -= stepOffset;
+    if (currentOffset < endOffset) currentOffset = endOffset;
+  }
   GCodeWriter g(m_name + "-core-edge-groove.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.bottomRapidHeight());
-  g.rapidToPoint(grooveOutter[0]);
   g.spindleOn();
-  g.emitPath(grooveOutter, machine.edgeGrooveDepth());
-  g.emitPath(grooveInner, machine.edgeGrooveDepth());
-  g.rapidToPoint(grooveInner[0]);
+  g.emitPathSets(groovePathSets, true, machine.bottomRapidHeight(), 0,
+                 machine.normalSpeed());
   g.spindleOff();
   g.close();
   return g;
@@ -408,7 +451,8 @@ void emitBowl(GCodeWriter& g, MCFixed outterRimDia, MCFixed outterRimDepth) {
   g.setAbsolute();
 }
 
-void emitInsert(GCodeWriter& g, Machine& machine, MCFixed heightAboveMaterial) {
+void emitInsert(GCodeWriter& g, const Machine& machine,
+                MCFixed heightAboveMaterial) {
   auto outterRimDia = machine.insertRimDiameter();
   auto outterRimDepth = machine.insertRimDepth();
   auto insertCenterHoleDia = machine.insertHoleDiameter();
@@ -435,7 +479,7 @@ void emitInsert(GCodeWriter& g, Machine& machine, MCFixed heightAboveMaterial) {
   g.rapidToPoint(startPosition);
 }
 
-const GCodeWriter BoardShape::generateInsertHoles(Machine& machine) {
+const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
   auto tool = machine.tool(machine.insertHolesTool());
   auto rapidHeight = machine.bottomRapidHeight();
   GCodeWriter g(m_name + "-core-insert-holes.nc", tool,
@@ -460,8 +504,8 @@ const GCodeWriter BoardShape::generateInsertHoles(Machine& machine) {
 // thing. I.e., cut all of it 0.020" above the final part, then speed
 // thru a final finish pass.
 
-const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
-                                              BoardProfile profile) {
+const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
+                                                 BoardProfile profile) {
   auto tool = machine.tool(machine.topProfileTool());
   // Fatten up the overall path by 1/4" to allow room for a 1/4"
   // cutter to remove the core without having to chew thru a shit-ton
@@ -492,27 +536,9 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.topProfileDeepSpeed(), rapidHeight);
   g.spindleOn();
-  bool rapidMove = true;
-  for (auto& pathSet : boost::adaptors::reverse(pathSets)) {
-    for (auto& path : pathSet) {
-      if (rapidMove) {
-        rapidMove = false;
-        auto leadIn =
-          PathUtils::SimpleLeadIn(path, rapidHeight,
-                                  machine.topProfileLeadinLength());
-        if (leadIn.size() > 0) {
-          g.rapidToPoint(leadIn.front());
-          g.emitPath(leadIn);
-        } else {
-          g.rapidToPoint(path.front());
-        }
-      }
-      g.feedToPoint(path.front(), machine.topProfileTransitionSpeed());
-      g.emitPath(path);
-      // Rapid between disconnected paths.
-      if (pathSet.size() > 1) rapidMove = true;
-    }
-  }
+  g.emitPathSets(pathSets, true, rapidHeight,
+                 machine.topProfileLeadinLength(),
+                 machine.topProfileTransitionSpeed());
   g.spindleOff();
   g.close();
   return g;
@@ -521,7 +547,9 @@ const GCodeWriter BoardShape::generateTopProfile(Machine& machine,
 //------------------------------------------------------------------------------
 // Nose and tail spacer cutouts
 
-const GCodeWriter BoardShape::generateNoseTailSpacerCutout(Machine& machine) {
+const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
+  const Machine& machine)
+{
   auto tool = machine.tool(machine.baseCutoutTool());
   auto nosePath = m_noseSpacerPath;
   auto tailPath = m_tailSpacerPath;
@@ -614,7 +642,7 @@ void extendLine(Path& p, MCFixed length) {
   p[e] = newEnd;
 }
 
-const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
+const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   // The outter edge of the edge trench is at the sidewall overhang.
   // We need to move the edge of the overall shape to the center of
   // the edge trench so we can offset it evenly on each side.
@@ -707,7 +735,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(Machine& machine) {
 // within the core blank for removal later. This makes it a lot easier
 // to hold the core down if you don't have vacuum hold down.
 
-const GCodeWriter BoardShape::generateTopCutout(Machine& machine) {
+const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   // Offset the core path as usual
   auto tool = machine.tool(machine.coreCutoutTool());
   auto paths = PathUtils::OffsetPath(buildCorePath(machine),

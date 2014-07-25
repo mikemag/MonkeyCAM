@@ -194,6 +194,18 @@ ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
 }
 
 //------------------------------------------------------------------------------
+// DebugPath
+
+DebugPath::DebugPath(const std::string name, const std::string color,
+                     const Path& path)
+    : m_name(name)
+    , m_color(color)
+{
+  push_back_path(path);
+}
+
+
+//------------------------------------------------------------------------------
 // Utils
 
 namespace PathUtils {
@@ -334,8 +346,9 @@ void RemoveShortLines(Path& path, MCFixed minLength) {
 // is shorter than the lead-in length, then we simply spiral down the
 // path, possibly multiple times.
 Path SimpleLeadIn(const Path& path, MCFixed startHeight, MCFixed length) {
-  assert(path.size() > 1);
   Path leadIn;
+  if (length == 0) return leadIn;
+  assert(path.size() > 1);
   const double leadInLen = length.dbl();
   // Backup until we pass the lead-in length.
   int i = path.size() - 1;

@@ -26,7 +26,8 @@ class SVGWriter {
  public:
   SVGWriter(std::string filename, int yShift = 5, double scale = 100.0);
   ~SVGWriter();
-  void addPath(const Path& path, std::string color = "rgb(0,0,0)");
+  void addPath(const Path& path, std::string color = "rgb(0,0,0)",
+               std::string desc = "");
   void addPointMark(const Point& p, std::string color = "rgb(0,0,255)");
 
  private:

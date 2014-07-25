@@ -25,7 +25,7 @@ namespace MonkeyCAM {
 //------------------------------------------------------------------------------
 // Machine
 
-Machine::Machine(boost::property_tree::ptree& config)
+Machine::Machine(const boost::property_tree::ptree& config)
     : m_config(config)
 {
   for (auto& tool : config.get_child("machine.tools")) {
@@ -33,7 +33,7 @@ Machine::Machine(boost::property_tree::ptree& config)
     auto name = tool.second.get<std::string>("name");
     auto dia = MCFixed::fromInches(tool.second.get<double>("diameter"));
     auto gcodeNum = tool.second.get<int>("G-code #");
-    m_tools[id] = Tool { name, dia, gcodeNum };
+    m_tools.insert({ id, { name, dia, gcodeNum } });
   }
 }
 

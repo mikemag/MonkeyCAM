@@ -44,18 +44,19 @@ class BoardShape {
              std::unique_ptr<InsertPack>& tailPack,
              MCFixed spacerWidth);
   const Path& buildOverallPath();
-  const Path& buildCorePath(Machine& machine);
+  const Path& buildCorePath(const Machine& machine);
 
-  const GCodeWriter generateBaseCutout(Machine& machine);
-  const GCodeWriter generateNoseTailSpacerCutout(Machine& machine);
-  const GCodeWriter generateCoreAlignmentMarks(Machine& machine);
-  const GCodeWriter generateGuideHoles(Machine& machine);
-  const GCodeWriter generateCoreEdgeGroove(Machine& machine);
-  const GCodeWriter generateEdgeTrench(Machine& machine);
-  const GCodeWriter generateInsertHoles(Machine& machine);
-  const GCodeWriter generateTopProfile(Machine& machine,
+  const GCodeWriter generateBaseCutout(const Machine& machine);
+  const GCodeWriter generateNoseTailSpacerCutout(const Machine& machine);
+  const Path alignmentMarksPath(const Machine& machine);
+  const GCodeWriter generateCoreAlignmentMarks(const Machine& machine);
+  const GCodeWriter generateGuideHoles(const Machine& machine);
+  const GCodeWriter generateCoreEdgeGroove(const Machine& machine);
+  const GCodeWriter generateEdgeTrench(const Machine& machine);
+  const GCodeWriter generateInsertHoles(const Machine& machine);
+  const GCodeWriter generateTopProfile(const Machine& machine,
                                        BoardProfile profile);
-  const GCodeWriter generateTopCutout(Machine& machine);
+  const GCodeWriter generateTopCutout(const Machine& machine);
 
   const Path& insertsPath() const { return m_insertsPath; }
   MCFixed noseLength() const { return m_noseLength; }
@@ -64,9 +65,17 @@ class BoardShape {
       m_effectiveEdge; }
   const std::string name() const { return m_name; }
 
+  const std::vector<DebugPath>& debugPaths() const {
+    return m_debugPaths;
+  }
+
  private:
   void setupInserts();
   void addInsertPack(InsertPack& pack, Point center);
+  const Point leftGuideHole(const Machine& machine) const;
+  const Point rightGuideHole(const Machine& machine) const;
+
+  const void addDebugPath(std::function<DebugPath()> pathFunc);
 
   std::string m_name;
 
@@ -99,8 +108,7 @@ class BoardShape {
 
   MCFixed m_maxCoreX;
 
-  Point m_leftGuideHole;
-  Point m_rightGuideHole;
+  std::vector<DebugPath> m_debugPaths;
 };
 
 } // namespace MonkeyCAM

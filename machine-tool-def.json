@@ -17,14 +17,17 @@
     "guide hole tool": 1,
     "guide hole depth": -0.600,
     "guide hole diameter": 0.505,
+    "guide hole offset": 0.5,
 
     "alignment mark tool": 3,
-    "alignment mark offset": 0.75,
-    "alignment mark depth": -0.030,
-    "alignment mark deep depth": -0.100,
+    "alignment mark offset": 0.5,
+    "alignment mark depth": -0.025,
+    "alignment mark deep depth": -0.150,
 
     "edge groove tool": 1,
     "edge groove depth": -0.025,
+    "edge groove edge width": 0.354,
+    "edge groove overlap percentage": 0.75,
 
     "insert tool": 1,
     "insert rim depth": -0.045,

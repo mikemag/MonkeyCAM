@@ -90,6 +90,21 @@ class ProfiledPath : public Path {
 };
 
 //------------------------------------------------------------------------------
+// A path which holds extra information for debugging.
+
+class DebugPath : public Path {
+ public:
+  DebugPath(const std::string name, const std::string color, const Path& path);
+
+  const std::string& name() const { return m_name; }
+  const std::string& color() const { return m_color; }
+
+ private:
+  const std::string m_name;
+  const std::string m_color;
+};
+
+//------------------------------------------------------------------------------
 // A collection of help functions which operate on paths.
 
 namespace PathUtils {

@@ -59,6 +59,9 @@ class GCodeWriter {
 
   void emitPath(Path& path);
   void emitPath(Path& path, MCFixed depth);
+  void emitPathSets(std::vector<std::vector<Path>>& pathSets, bool rapidMove,
+                    MCFixed rapidHeight, MCFixed leadInLength,
+                    int transitionSpeed);
   void emitSpiralPath(Path& path, MCFixed startDepth, int numberOfLevels);
 
   void emitClockwiseArc(Point dest, MCFixed radius);

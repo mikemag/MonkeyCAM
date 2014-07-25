@@ -46,7 +46,7 @@ SVGWriter::~SVGWriter() {
   }
 }
 
-void SVGWriter::addPath(const Path& path, std::string color) {
+void SVGWriter::addPath(const Path& path, std::string color, std::string desc) {
   assert(m_outputStream.is_open());
   m_outputStream << "<polyline points=\"";
   for (auto const& p : path) {
