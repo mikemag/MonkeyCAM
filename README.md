@@ -37,10 +37,10 @@ receive to my code is from me and not from my employer (Facebook).
 ## Features and Current Status
 
 MonkeyCAM is currently a command-line program distributed in
-source-form only. It currently compiles with GCC 4.8.1 for Mac
-OSX. The program takes configuration files to describe the ski or
-snowboard shape via a small set of parameters and generates the following
-G-code programs:
+source-form only. It currently compiles on OSX 10.9 with the system
+compiler (Apple LLVM 5.1). The program takes configuration files to
+describe the ski or snowboard shape via a small set of parameters and
+generates the following G-code programs:
 
 * Base cutout
 * Core:
@@ -62,7 +62,8 @@ but the ones with holes do not work for ShopBot right now.
 
 There is no UI, and all configuration and results are in files.
 
-You can see a sample set of programs here: [MonkeyCAM Visualization Example](http://www.happymonkeysnowboards.com/MonkeyCAM/path-viewer.html)
+You can see a sample set of programs here: [MonkeyCAM Visualization
+Example](http://www.happymonkeysnowboards.com/MonkeyCAM/path-viewer.html)
 
 ## Future Work
 
@@ -77,17 +78,20 @@ order:
 
 * Target more G-code controllers with different formats and requirements.
 * Provide distribution of binaries for Mac OSX and Windows 8.
-* More options for effective edge, nose, and tail. (MonkeyCAM v3, for instance, had 6 tail options.)
-* Port the code to soften the transition between edge and nose/tail. (You can work around this with a sandblock and two min of your time for now.)
-* Port the MonkeyCAM design UI to a web-based UI built on HTML 5, and enable
-local execution.
+* More options for effective edge, nose, and tail. (MonkeyCAM v3, for
+  instance, had 6 tail options.)
+* Port the code to soften the transition between edge and
+  nose/tail. (You can work around this with a sandblock and two min of
+  your time for now.)
+* Port the MonkeyCAM design UI to a web-based UI built on HTML 5, and
+enable local execution.
   * The UI will include easy controls for inputting the shape
-parameters, plus live visualization of the overall shape, profile,
-insert placement, etc. It also includes specifying the machining
-parameters. Right now I'm thinking about a combination of React and
-three.js.
+    parameters, plus live visualization of the overall shape, profile,
+    insert placement, etc. It also includes specifying the machining
+    parameters. Right now I'm thinking about a combination of React and
+    three.js.
 * Port the MonkeyCAM G-code validation UI, built on the same framework
-as the design UI.
+  as the design UI.
   * This includes import of the G-code programs output from MonkeyCAM,
     as well as pretty much any G-code program, visualization of the
     tool path, overlay of multiple programs together for validation,
@@ -113,14 +117,16 @@ that code again. :)
 
 MonkeyCAM currently depends on the following packages:
 
-* Up thru 953fe71b, GCC 4.8.1. See http://gcc.gnu.org/ or install via something like Ports. I'll ressurect the GCC build once I start deploying on AWS.
-* Currently, builds on MacOS X Mavericks with the system compiler.
-* CMake 2.8. See http://www.cmake.org/ or install via something like Ports.
-* Boost 1.54.0. See http://www.boost.org/ or install via something like Ports.
+* Currently, builds on Mac OSX 10.9.4 Mavericks with the system compiler.
+* CMake 3.0.0. See http://www.cmake.org/ or install via something like Ports.
+* Boost 1.55.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See
   http://sourceforge.net/projects/polyclipping/. The CMake files
   assume this is installed in a sibling directory with the top-level
   MonkeyCAM directory, named clipper_ver5.1.6.
+* Up thru 953fe71b, GCC 4.8.1. See http://gcc.gnu.org/ or install via
+  something like Ports. I'll ressurect the GCC build once I start
+  deploying on AWS.
 
 ## Contributing
 
