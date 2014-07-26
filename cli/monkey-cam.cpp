@@ -212,12 +212,12 @@ int main(int argc, char *argv[]) {
   printf("%s\n", overviewSvgName.c_str());
   MonkeyCAM::SVGWriter overallSvg(outdir + overviewSvgName, 16, 7);
   overallSvg.addPath(shape->buildOverallPath());
-  overallSvg.addPath(profile.path());
   overallSvg.addPath(shape->buildCorePath(machine));
-  overallSvg.addPath(shape->alignmentMarksPath(machine));
 #if 0
   for (auto& path : shape->debugPaths()) {
-    overallSvg.addPath(path, path.color(), path.name());
+    if (path.name().find("Top profile") != std::string::npos) {
+      overallSvg.addPath(path, path.color(), path.name());
+    }
   }
 #endif
 

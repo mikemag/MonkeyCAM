@@ -403,7 +403,7 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
     assert(paths.size() == 1);
     groovePathSets.push_back(paths);
     addDebugPath([&] {
-        return DebugPath { "tmp1", "rgb(255,0,255)", paths[0] };
+        return DebugPath { "Edge Groove cut", "rgb(255,0,255)", paths[0] };
       });
     if (currentOffset == endOffset) break;
     currentOffset -= stepOffset;
@@ -507,18 +507,26 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
 const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                                                  BoardProfile profile) {
   auto tool = machine.tool(machine.topProfileTool());
-  // Fatten up the overall path by 1/4" to allow room for a 1/4"
-  // cutter to remove the core without having to chew thru a shit-ton
-  // of material.
-  auto offsetPaths = PathUtils::OffsetPath(
-    buildOverallPath(),
-    machine.tool(machine.coreCutoutTool()).diameter);
+  // nb: use the overall path plus the sidewall overhand to limit the
+  // profiling paths. This ensures the entire sidewall, even outside
+  // the final edge, is profiled. It does mean we'll profile too much
+  // on the nose and tail, since those are inset by the nose and tail
+  // spacers, but that's an acceptable tradeoff for the simplicity of
+  // this.
+  auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(),
+                                           machine.sidewallOverhang());
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
+  addDebugPath([&] {
+      return DebugPath { "Top profile overall", "rgb(128,0,255)",
+          overallOffset };
+    });
   // Offset the profile path to account for the width of the cutter.
   auto profileOffset = ToolOffsetPath(profile.path(), tool.diameter);
-  // Offset the outter path until the offset disappears.
-  auto overlap = machine.topProfileOverlapPercentage();
+  // Offset the outter path until the offset disappears. nb: the first
+  // path must be offset by half the tool diameter to ensure we follow
+  // the limiting path correctly.
+  double overlap = 0.5;
   vector<vector<Path>> pathSets;
   for (int i = 1; i < 100; i++) { // Artifical upper limit
     auto resultPaths = PathUtils::OffsetPath(overallOffset,
@@ -530,6 +538,11 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
       path = ProfiledPath(path, profileOffset);
     }
     pathSets.push_back(resultPaths);
+    addDebugPath([&] {
+        return DebugPath { "Top profile cut", "rgb(128,0,128)",
+            resultPaths[0] };
+      });
+    overlap = machine.topProfileOverlapPercentage(); // Use real overlap % now
   }
   auto rapidHeight = machine.topRapidHeight();;
   GCodeWriter g(m_name + "-top-profile.nc", tool,
