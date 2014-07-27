@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Michael M. Magruder (https://github.com/mikemag)
+ * Copyright 2014 Michael M. Magruder (https://github.com/mikemag)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef incl_version_H_
-#define incl_version_H_
-
-namespace MonkeyCAM {
-
-#define MC_VER_MAJOR 4
-#define MC_VER_MINOR 0
-
-} // namespace MonkeyCAM
-
-#endif // incl_version_H_
+#define MonkeyCAM_VERSION_MAJOR @MonkeyCAM_VERSION_MAJOR@
+#define MonkeyCAM_VERSION_MINOR @MonkeyCAM_VERSION_MINOR@
+#define MonkeyCAM_VERSION_PATCH @MonkeyCAM_VERSION_PATCH@
+#define MonkeyCAM_VERSION_ID    "@MonkeyCAM_VERSION_ID@"

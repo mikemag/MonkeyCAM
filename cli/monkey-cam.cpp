@@ -29,7 +29,7 @@
 #include "shapes.h"
 #include "gcode-writer.h"
 #include "svg-writer.h"
-#include "version.h"
+#include "MonkeyCAMConfig.h"
 
 using std::string;
 using std::vector;
@@ -122,8 +122,11 @@ void usage(const char* program) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("MonkeyCAM v%d.%d, Copyright (C) 2013 Michael M. Magruder\n",
-         MC_VER_MAJOR, MC_VER_MINOR);
+  printf("MonkeyCAM v%d.%d.%d-%s, Copyright (C) 2013 Michael M. Magruder\n",
+         MonkeyCAM_VERSION_MAJOR,
+         MonkeyCAM_VERSION_MINOR,
+         MonkeyCAM_VERSION_PATCH,
+         MonkeyCAM_VERSION_ID);
   printf("This is free software; see the source for license information. There "
          "is\nNO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
          "PARTICULAR PURPOSE.\n");

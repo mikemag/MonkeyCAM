@@ -17,3 +17,16 @@ add_executable(MonkeyCAM
 target_link_libraries(MonkeyCAM util core clipper ${Boost_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
+
+install(CODE "
+  message(\"Signing ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
+  execute_process(
+    COMMAND codesign -s \"Developer ID Application\" ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
+  )
+  message(\"Verifying ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
+  execute_process(
+    COMMAND codesign --display --verbose=4 ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
+  )
+")
+
+install(TARGETS MonkeyCAM DESTINATION bin/MacOS)

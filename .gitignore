@@ -19,3 +19,5 @@ CMakeCache.txt
 cmake_install.cmake
 cli/MonkeyCAM
 test/test
+util/MonkeyCAMConfig.h
+install_manifest.txt
