@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Michael M. Magruder (https://github.com/mikemag)
+ * Copyright 2013-2014 Michael M. Magruder (https://github.com/mikemag)
  *
  * The vast majority of this file is due to the original author, listed below.
  *
