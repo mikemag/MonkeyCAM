@@ -1,0 +1,81 @@
+{
+  // All measurements for the machine and tools are in inches.
+  "machine":
+  {
+    "rapid speed": 100,
+    "normal speed": 70,
+
+    "bottom rapid height": 0.100,
+    "top rapid height": 0.600,
+
+    "core blank thickness": 0.420,
+
+    "base cutout tool": 2,
+    "base rapid height": 0.100,
+    "base cut thru height": -0.010,
+
+    "guide hole tool": 1,
+    "guide hole depth": -0.600,
+    "guide hole diameter": 0.505,
+    "guide hole offset": 0.5,
+
+    "alignment mark tool": 3,
+    "alignment mark offset": 0.5,
+    "alignment mark depth": -0.025,
+    "alignment mark deep depth": -0.150,
+
+    "edge groove tool": 1,
+    "edge groove depth": -0.025,
+    "edge groove edge width": 0.354,
+    "edge groove overlap percentage": 0.75,
+
+    "insert tool": 1,
+    "insert rim depth": -0.045,
+    "insert rim diameter": 0.750,
+    "insert hole diameter": 0.373,
+
+    "top profile tool": 4,
+    "top profile transition speed": 20,
+    "top profile deep speed": 50,
+    "top profile overlap percentage": 0.50,
+    "top profile lead-in length": 4.0,
+
+    "core cutout tool": 1,
+
+    "spacer end overhang": 1,
+    "spacer side overhang": 0.5,
+
+    "sidewall overhang": 0.118,
+
+    "edge trench width": 1.2874,
+    "edge trench extension": 3,
+
+    "tools":
+    [
+      {
+        "id": 1,
+        "name": "Quarter Inch Upcut Spiral",
+        "diameter": 0.247,
+        "G-code #": 1
+      },
+      {
+        "id": 2,
+        "name": "Quarter Inch Straight",
+        "diameter": 0.250,
+        "G-code #": 1
+      },
+      {
+        "id": 3,
+        "name": "Quarter Inch V",
+        "diameter": 0.250,
+        "G-code #": 1
+      },
+      {
+        "id": 4,
+        "name": "1.5 Inch Straight",
+        "diameter": 1.496,
+        "G-code #": 1
+      }
+    ]
+  }
+}
