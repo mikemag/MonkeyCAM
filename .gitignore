@@ -21,3 +21,6 @@ cli/MonkeyCAM
 test/test
 util/MonkeyCAMConfig.h
 install_manifest.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+_CPack_Packages

@@ -27,6 +27,7 @@ install(CODE "
   execute_process(
     COMMAND codesign --display --verbose=4 ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
   )
+  message(\"Done signing.\")
 ")
 
 install(TARGETS MonkeyCAM DESTINATION bin/MacOS)
