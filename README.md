@@ -117,7 +117,7 @@ that code again. :)
 
 MonkeyCAM currently depends on the following packages:
 
-* Currently, builds on Mac OSX 10.9.4 Mavericks with the system compiler.
+* Currently, builds on Mac OSX 10.9.4 Mavericks with the system compiler, Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
 * CMake 3.0.0. See http://www.cmake.org/ or install via something like Ports.
 * Boost 1.55.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See
