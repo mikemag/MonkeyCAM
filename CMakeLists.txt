@@ -4,17 +4,7 @@ project(MonkeyCAM)
 set(MonkeyCAM_VERSION_MAJOR 4)
 set(MonkeyCAM_VERSION_MINOR 0)
 set(MonkeyCAM_VERSION_PATCH 1)
-execute_process(
-  COMMAND git log --pretty=format:%h -n 1 OUTPUT_VARIABLE MonkeyCAM_GIT_REV
-)
-execute_process(
-  COMMAND git ls-files -m OUTPUT_VARIABLE MonkeyCAM_GIT_CHANGED
-)
-if (MonkeyCAM_GIT_CHANGED)
-  set(MonkeyCAM_GIT_CHANGED "-PendingChanges")
-endif()
-set(MonkeyCAM_VERSION_ID "${MonkeyCAM_GIT_REV}${MonkeyCAM_GIT_CHANGED}")
-set(MonkeyCAM_VERSION ${MonkeyCAM_VERSION_MAJOR}.${MonkeyCAM_VERSION_MINOR}.${MonkeyCAM_VERSION_PATCH}-${MonkeyCAM_VERSION_ID})
+set(MonkeyCAM_VERSION ${MonkeyCAM_VERSION_MAJOR}.${MonkeyCAM_VERSION_MINOR}.${MonkeyCAM_VERSION_PATCH})
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/util/MonkeyCAMConfig.h.in"
@@ -39,7 +29,6 @@ set(CPACK_GENERATOR "DragNDrop")
 set(CPACK_PACKAGE_VERSION_MAJOR "${MonkeyCAM_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${MonkeyCAM_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${MonkeyCAM_VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION_ID "${MonkeyCAM_VERSION_ID}")
 set(CPACK_DMG_FORMAT "UDZO")
 set(CPACK_DMG_VOLUME_NAME "MonkeyCAM-${MonkeyCAM_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "MonkeyCAM-${MonkeyCAM_VERSION}")

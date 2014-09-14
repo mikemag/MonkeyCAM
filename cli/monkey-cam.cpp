@@ -122,11 +122,10 @@ void usage(const char* program) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("MonkeyCAM v%d.%d.%d-%s, Copyright (C) 2013 Michael M. Magruder\n",
+  printf("MonkeyCAM v%d.%d.%d, Copyright (C) 2013-2014 Michael M. Magruder\n",
          MonkeyCAM_VERSION_MAJOR,
          MonkeyCAM_VERSION_MINOR,
-         MonkeyCAM_VERSION_PATCH,
-         MonkeyCAM_VERSION_ID);
+         MonkeyCAM_VERSION_PATCH);
   printf("This is free software; see the source for license information. There "
          "is\nNO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
          "PARTICULAR PURPOSE.\n");
