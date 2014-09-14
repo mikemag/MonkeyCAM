@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <stdarg.h>
 
 #include "machine.h"
 #include "paths.h"

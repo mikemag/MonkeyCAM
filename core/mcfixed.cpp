@@ -16,6 +16,9 @@
 
 #include "mcfixed.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 namespace MonkeyCAM {
 
 std::ostream& operator << (std::ostream& outs, const MCFixed& mcf) {
