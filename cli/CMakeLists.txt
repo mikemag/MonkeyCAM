@@ -1,7 +1,13 @@
 # cli
 include_directories(${MonkeyCAM_SOURCE_DIR}/util)
 include_directories(${MonkeyCAM_SOURCE_DIR}/core)
-include_directories(/opt/local/include) # For boost
+if(UNIX)
+  include_directories(/opt/local/include) # For boost
+  set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
+elseif(MINGW)
+  include_directories(../../boost_1_55_0)
+  set(CMAKE_CXX_FLAGS "-g -Werror -std=c++11") # NB Boost warnings with GCC
+endif(UNIX)
 
 link_directories(${MonkeyCAM_BINARY_DIR}/util)
 link_directories(${MonkeyCAM_BINARY_DIR}/core)
@@ -12,8 +18,6 @@ add_executable(MonkeyCAM
                )
 
 target_link_libraries(MonkeyCAM util core clipper)
-
-set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
 
 install(CODE "
   message(\"Signing ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
