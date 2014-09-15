@@ -17,7 +17,7 @@ add_executable(MonkeyCAM
                monkey-cam.cpp
                )
 
-target_link_libraries(MonkeyCAM util core clipper)
+target_link_libraries(MonkeyCAM core clipper util)
 
 install(CODE "
   message(\"Signing ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
