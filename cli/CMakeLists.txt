@@ -19,16 +19,18 @@ add_executable(MonkeyCAM
 
 target_link_libraries(MonkeyCAM core clipper util)
 
-install(CODE "
-  message(\"Signing ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
-  execute_process(
-    COMMAND codesign -s \"Developer ID Application\" ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
-  )
-  message(\"Verifying ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
-  execute_process(
-    COMMAND codesign --display --verbose=4 ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
-  )
-  message(\"Done signing.\")
-")
+if(APPLE)
+  install(CODE "
+    message(\"Signing ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
+    execute_process(
+      COMMAND codesign -s \"Developer ID Application\" ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
+    )
+    message(\"Verifying ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM...\")
+    execute_process(
+      COMMAND codesign --display --verbose=4 ${CMAKE_CURRENT_BINARY_DIR}/MonkeyCAM
+    )
+    message(\"Done signing.\")
+  ")
+endif(APPLE)
 
-install(TARGETS MonkeyCAM DESTINATION bin/MacOS)
+install(TARGETS MonkeyCAM DESTINATION bin)
