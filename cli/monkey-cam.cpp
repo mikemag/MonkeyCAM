@@ -21,7 +21,6 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/program_options.hpp>
 
 #include "machine.h"
 #include "point.h"
@@ -131,44 +130,33 @@ int main(int argc, char *argv[]) {
          "PARTICULAR PURPOSE.\n");
   printf("\n");
 
-  namespace po = boost::program_options;
-  po::options_description desc("Options");
-  desc.add_options()
-    ("help,?", "Help")
-    ("board", po::value<string>(), "Board defintion file (JSON)")
-    ("machine", po::value<string>(), "Machine definition file (JSON)")
-    ("outdir", po::value<string>(), "Output directory");
-  po::variables_map vm;
-  try {
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-  } catch (boost::program_options::error& e) {
-    printf("%s\n", e.what());
-    return 1;
+  string boardDef = "";
+  string machineDef = "";
+  string outdir = "";
+  for (int i = 1; i < argc; ++i) {
+    if ((string(argv[i]) == "--board") && (i + 1 < argc)) {
+      boardDef = string(argv[++i]);
+    } else if ((string(argv[i]) == "--machine") && (i + 1 < argc)) {
+      machineDef = string(argv[++i]);
+    } else if ((string(argv[i]) == "--outdir") && (i + 1 < argc)) {
+      outdir = string(argv[++i]);
+    }
   }
-  if (vm.count("help") || vm.empty()) {
-    usage(argv[0]);
-    std::cout << desc << "\n";
-    return 1;
-  }
-  if (!vm.count("board")) {
+  if (boardDef == "") {
     printf("Missing required board definition file\n");
     usage(argv[0]);
     return 1;
   }
-  if (!vm.count("machine")) {
+  if (machineDef == "") {
     printf("Missing required machine definition file\n");
     usage(argv[0]);
     return 1;
   }
-  if (!vm.count("outdir")) {
+  if (outdir == "") {
     printf("Missing required output directory\n");
     usage(argv[0]);
     return 1;
   }
-  auto boardDef = vm["board"].as<string>();
-  auto machineDef = vm["machine"].as<string>();
-  auto outdir = vm["outdir"].as<string>();
   if (outdir[outdir.size() - 1] != '/') {
     outdir += '/';
   }
