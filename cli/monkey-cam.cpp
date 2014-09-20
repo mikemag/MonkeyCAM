@@ -21,6 +21,7 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <sys/stat.h>
 
 #include "machine.h"
 #include "point.h"
@@ -116,7 +117,8 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
 
 
 void usage(const char* program) {
-  printf("\nUsage: %s --board brd.json --machine mach.json --outdir <dir>\n\n",
+  printf("\nUsage: %s --board brd.json --machine mach.json "
+         "[--outdir <existing dir>]\n\n",
          program);
 }
 
@@ -153,13 +155,23 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   if (outdir == "") {
-    printf("Missing required output directory\n");
-    usage(argv[0]);
+    outdir = ".";
+  }
+  struct stat stats;
+  if ((stat(outdir.c_str(), &stats) != 0) || !S_ISDIR(stats.st_mode)) {
+    printf("Output directory '%s' does not exist, please create it first.\n",
+           outdir.c_str());
     return 1;
   }
+#ifndef __MINGW32__
   if (outdir[outdir.size() - 1] != '/') {
     outdir += '/';
   }
+#else
+  if (outdir[outdir.size() - 1] != '\\') {
+    outdir += '\\';
+  }
+#endif
   printf("Using board '%s', machine '%s'\n",
          boardDef.c_str(), machineDef.c_str());
 

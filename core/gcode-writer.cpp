@@ -409,6 +409,7 @@ void GCodeWriter::write(string directory) const {
   printf("%s\n", m_filename.c_str());
   std::ofstream o;
   o.open(directory + m_filename);
+  assert(o.is_open());
   // Controllers like DOS line endings better.
   for (const auto& l : m_headerComments) o << l << "\r\n";
   o << "\r\n";
