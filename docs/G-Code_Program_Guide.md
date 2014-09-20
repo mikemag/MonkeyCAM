@@ -12,10 +12,48 @@ See the [MonkeyCAM v4.0 User’s Guide](
 https://github.com/mikemag/MonkeyCAM/blob/master/docs/Users_Guide.md)
 for an overview.
 
+
 ## Guide Holes
+
+The “Guide Holes” program creates two holes in the core blank, one at
+each end of the core, centered on the long axis of the core. These
+guide holes pass all the way thru the core and into the table surface
+a short distance. These are used to allow you to remove the core from
+the table and replace it accurately later, possibly flipping it over.
+
+This program uses a straight cutter, typically 0.250”. I use 0.505”
+guide holes with 2” long, 0.5” diameter steel pins to realign the
+core, and I typically cut ~0.100” into the table.
+
+Before removing the core, I write the core number in the hole with a
+pencil so I know which of the many holes in my sacrificial table top I
+should use later.
+
+If you have an alternative, reliable way of realigning the core to the
+table then you don’t need this program. Be sure that your method
+allows you to flip the core over and align the center axis perfectly.
 
 
 ## Alignment Marks
+
+The “Alignment Marks” program places small dimples in various places
+over the base of the core blank to mark very useful points for use
+after the core has been completely cut out. These mark the following:
+
+* The long center axis of the board.
+* The short center axis of the board.
+* The center of the effective edge.
+
+These allow you to transfer these guide lines to the base and mold
+later.
+
+This program also sinks two extra, deep alignment marks outside of the
+core. These are for use in an emergency: if you crash your machine and
+do not have accurate limit switches to re-home the machine, then you
+can use these marks to very accurately re-home the machine manually.
+
+This program uses a V-shaped cutter of any size, though I use a 0.25”
+diameter cutter. Any cutter with a sharp point will do.
 
 
 ## Edge Trench

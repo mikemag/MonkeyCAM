@@ -14,7 +14,8 @@ for an overview.
 
 ## File Format
 
-The configuration files are in JSON format, which makes them easy to
+The configuration files are in [JSON
+format](http://en.wikipedia.org/wiki/JSON), which makes them easy to
 parse programmatically and also pretty easy for humans to read and
 edit.
 
