@@ -19,6 +19,12 @@ More information about ski and snowboard construction can be found at
 [Monkey Wiki](http://www.happymonkeysnowboards.com/MonkeyWiki) and
 [SkiBuilders.com](http://www.skibuilders.com/).
 
+## Documentation
+
+See the [MonkeyCAM v4.0 User’s Guide](
+https://github.com/mikemag/MonkeyCAM/blob/master/docs/Users_Guide.md)
+for an overview of how to use and configure MonkeyCAM.
+
 ## License
 
 MonkeyCAM is licensed under the Apache License, Version 2.0 except as
