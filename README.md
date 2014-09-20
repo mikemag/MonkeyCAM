@@ -38,8 +38,6 @@ receive to my code is from me and not from my employer (Facebook).
 
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases) for the current release, which includes release notes and links to download binaries.
 
-At this time there are only Mac OSX binaries, sorry! [That will change soon](https://github.com/mikemag/MonkeyCAM/issues/4). 
-
 ## Features and Current Status
 
 MonkeyCAM is currently a command-line program only. The program takes configuration files to
@@ -81,7 +79,6 @@ months. The old UI will be discarded. The plan includes, roughly in
 order:
 
 * Target more G-code controllers with different formats and requirements.
-* Provide distribution of binaries for Mac OSX and Windows 8.
 * More options for effective edge, nose, and tail. (MonkeyCAM v3, for
   instance, had 6 tail options.)
 * Port the code to soften the transition between edge and
@@ -121,16 +118,14 @@ that code again. :)
 
 MonkeyCAM currently depends on the following packages:
 
-* Currently, builds on Mac OSX 10.9.4 Mavericks with the system compiler, Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
+* Mac build: Mac OSX 10.9.4 Mavericks with the system compiler, Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
+* Windows build: Windows 8.1, MinGW with GCC 4.8.1.
 * CMake 3.0.0. See http://www.cmake.org/ or install via something like Ports.
 * Boost 1.55.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See
   http://sourceforge.net/projects/polyclipping/. The CMake files
   assume this is installed in a sibling directory with the top-level
   MonkeyCAM directory, named clipper_ver5.1.6.
-* Up thru 953fe71b, GCC 4.8.1. See http://gcc.gnu.org/ or install via
-  something like Ports. I'll ressurect the GCC build once I start
-  deploying on AWS.
 
 ## Contributing
 
