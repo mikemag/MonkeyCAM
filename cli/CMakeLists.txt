@@ -34,3 +34,7 @@ if(APPLE)
 endif(APPLE)
 
 install(TARGETS MonkeyCAM DESTINATION bin)
+if(MINGW)
+install(FILES "/mingw/bin/libgcc_s_dw2-1.dll" DESTINATION bin)
+install(FILES "/mingw/bin/libstdc++-6.dll" DESTINATION bin)
+endif(MINGW)
