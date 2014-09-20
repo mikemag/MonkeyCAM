@@ -3,7 +3,7 @@ project(MonkeyCAM)
 
 set(MonkeyCAM_VERSION_MAJOR 4)
 set(MonkeyCAM_VERSION_MINOR 0)
-set(MonkeyCAM_VERSION_PATCH 1)
+set(MonkeyCAM_VERSION_PATCH 2)
 set(MonkeyCAM_VERSION ${MonkeyCAM_VERSION_MAJOR}.${MonkeyCAM_VERSION_MINOR}.${MonkeyCAM_VERSION_PATCH})
 
 configure_file(
