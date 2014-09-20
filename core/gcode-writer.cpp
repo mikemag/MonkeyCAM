@@ -153,7 +153,7 @@ void GCodeWriter::headerBlock() {
                  m_tool.name.c_str(),
                  m_tool.diameter.inchesStr().c_str(),
                  m_tool.diameter.str().c_str());
-  headerCommentF("* Height basline [Z=0.0] is %s.", m_zeroHeight == TableTop ?
+  headerCommentF("* Height baseline [Z=0.0] is %s.", m_zeroHeight == TableTop ?
                  "the top of the table" : "the top of the material");
   headerCommentF("* XY origin is %s.", m_xyOrigin == LowerLeft ?
                  "the lower left of the table" :

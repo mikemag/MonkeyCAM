@@ -6,11 +6,17 @@ snowboard. This includes the core, base material, and nose/tail filler
 material.
 
 Each program is described below, in the order in which it should be
-used.
+used. General information about using the programs is provided after
+the program descriptions.
 
 See the [MonkeyCAM v4.0 User’s Guide](
 https://github.com/mikemag/MonkeyCAM/blob/master/docs/Users_Guide.md)
 for an overview.
+
+**Note: this guide assumes you are very familiar with operating a CNC
+  machine, and have a good working understanding of reading and
+  writing G-Code, work holding for CNC machines, etc. I will make no
+  effort to teach you these things as part of this guide.**
 
 
 ## Guide Holes
@@ -58,20 +64,191 @@ diameter cutter. Any cutter with a sharp point will do.
 
 ## Edge Trench
 
+The “edge trench” program cuts trenches along the effective edge of
+the core to allow you to easily inlay sidewall material, and/or a
+different species of wood to change the properties of the effective
+edge.
+
+This is easier to show than to explain, so check out the [Ash edge
+stringer and sidewalls](
+http://www.happymonkeysnowboards.com/MonkeyWiki/Ash_edge_stringer_and_sidewalls)
+page on MonkeyWiki for pictures.
+
+This program is run and sidewall material added before proceeding
+further. This ensures that the sidewalls are machined along with the
+rest of the core, so everything matches perfectly.
+
+This program uses a straight cutter, typically 0.250”. It cuts all the
+way thru the core
+
 
 ## Edge Groove
+
+The “edge groove” program is run on the base of the core, and creates
+a relief for the steel edges so the core sits flat on the base between
+the edges. Like most parameters of these programs you can control the
+relief depth. It makes a groove wide enough to ensure that the entire
+edge will fit, and it ensures that if there is sidewall overhang (see
+below) that the sidewall is also cut so epoxy can flow easily past
+during pressing.
+
+This program uses a straight cutter, typically 0.250”.
 
 
 ## Insert Holes
 
+The “insert holes” program is run on the base of the core and places
+insert holes as specified in the program configuration. The center
+holes go almost all the way thru the core (and will be all the way
+thru the core after top profiling below), while the “bowls” are set to
+the standard depth to accommodate typical snowboard insert parts. The
+bowls are not flat and are, well, bowl-shaped since inserts I use have
+flanges which are crowned towards the center.
+
+This program uses a straight cutter, typically 0.250”.
+
 
 ## Top Profile
+
+The “top profile” program is run on the top of the core blank and
+imparts the final thickness to the core. This is the longest running
+of the programs, and it works from the inside out, eventually stopping
+when it reaches the just past the final shape of the board. It goes
+further than the final shape because the sidewalls overhang the edge a
+bit to allow for alignment error, and of course you want the sidewalls
+to have an even thickness their entire width.
+
+This is the longest running program, and it uses a straight cutter. I
+use a 1.5” cutter as shown on the [router bits](
+http://www.happymonkeysnowboards.com/MonkeyWiki/Router_Bits) page of
+MonkeyWiki.
+
+This program also includes a lead-in ramp whenever the cutter plunges
+into the core blank to reduce load on the router.
 
 
 ## Top Cutout
 
+The “top cutout” program cuts the final shape of the core and is the
+last core program. It runs on the top of the core blank. This cuts the
+shape defined by the configuration parameters for the nose and tail
+spacers, and it also cuts the sidewalls wider than the final board to
+allow for some “overhang” to allow for minor alignment error with the
+core.
+
+The core is held in place during the last pass by leaving thin “tabs”,
+two on each side, to keep the core stable. After the program
+completes, remove the core blank carefully from the machine and cut
+thru the tabs to release the core.
+
+This program uses a straight cutter, typically 0.250”, and cuts all
+the way thru the core blank.
+
 
 ## Base Cutout
 
+The “base cutout” program cuts a base out of PTEX in a single pass
+which is exactly 2mm narrower all the way around than the final board
+shape. This is for full-wrap edges.
+
+This program uses a straight cutter, typically 0.250”, and cuts all
+the way thru the base material.
+
 
 ## Nose Tail Spacers
+
+The “nose and tail spacers” program cuts nose and tail fillers (the
+sidewalls for the nose and tail, essentially) out of thicker PTEX
+material in a single pass. These will exactly match the shape of the
+nose and tail on the core.
+
+This program uses a straight cutter, typically 0.250”, and cuts all
+the way thru the spacer material.
+
+
+## G-Code Details
+
+The G-Code programs all share many common properties, which is part of
+the power of MonkeyCAM. If you set your machine up properly for one,
+they will all work.
+
+### Program Header
+
+Each G-Code program has a comment header which contains valuable
+information specific to each program. Read it carefully and it will
+remind you how to setup the machine for each program, which cutter to
+use, etc. All programs contain the following:
+
+* Program name, generation time, and MonkeyCAM version.
+* The rapid height the program will use, so ensure you have this
+  clearance on all work-holding devices (clamps, etc.)
+* Which tool to use.
+* Where zero is for the Z axis, which will be the top of the material
+  or the top of the table.
+* Where X0 Y0 is, typically the left-hand side of the part, with Y at
+  the center of the long axis of the board (center of the tip of the
+  board.)
+* A reminder that G54 is the work coordinates, and G55 is expected to
+  be the machine coordinates.
+* A reminder that the units are in **inches**.
+* The cutter bounding box in G54, which tells you the maximum range
+the cutter will move in any axis. This is computed from the generated
+G-Code in a separate step from the math which generated it as a safety
+measure. If the bounding box looks odd, don’t run the program without
+simulating it carefully.
+
+
+### Program Start
+
+Every program starts with essentially the same block of G-Code. It
+sets the coordinate system, cancels any tool offsets, and selects the
+tool height offset for the proper tool (as specific in the machine and
+tool configuration file). Next, it sets the coordinate system to G54
+and moves to X0 Y0 at the proper rapid height, then to the first X,Y
+point of the program, still at the rapid height. The spindle is turned
+on, followed by a short delay to let the spindle come up to speed,
+then the program starts with the first plunge into the part which
+includes the first setting of the feed rate.
+
+Every program assumes it is starting at G55 X0 Y0 Z0. This must be
+away from the part, and **above the rapid height**, typically at the
+lower left-hand corner of the table, at maximum Z height.
+
+CNC controller are inconsistent about how they specify what machine
+coordinates are, so I abuse G55 for our machine coordinates since it
+will work everywhere.
+
+**Note: these programs assume that altering the cutter height offset
+  does not cause motion in the Z axis.**
+
+```
+G90 G20 G17 G40 G49
+G43 H1 T1
+G00 G54 X0 Y0 Z0.1000
+
+G00 X-0.0462 Y-0.0015 Z0.1000
+M03
+G04 P5
+```
+
+### Program End
+
+Every program ends with the same block of code. After completing the
+last cut in the part, it rapids straight up to the rapid height, turns
+off the spindle, then rapids back to X0 Y0 at the rapid height, still
+in G54. It then cancels the tool height offset, feeds slowly up to Z0
+in machine coordinates (G55), then homes the machine and ends the
+program.
+
+**Note: these programs assume that altering the cutter height offset
+  does not cause motion in the Z axis.**
+
+```
+G00 X-0.0462 Y-0.0015 Z0.1000
+M05
+G00 X0.0000 Y0.0000 Z0.1000
+G49
+G01 G55 Z0 F20
+G00 G55 X0 Y0 Z0
+M30
+```
