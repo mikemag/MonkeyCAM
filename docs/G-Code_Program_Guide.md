@@ -49,6 +49,9 @@ after the core has been completely cut out. These mark the following:
 * The long center axis of the board.
 * The short center axis of the board.
 * The center of the effective edge.
+* The center of the board from nose to tail. If the nose is longer
+  than the tail, then this measurement will be closer to the nose than
+  the center of the effective edge.
 
 These allow you to transfer these guide lines to the base and mold
 later.
