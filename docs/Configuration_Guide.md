@@ -139,9 +139,9 @@ of the nose.
 ```
 "nose shape":
 {
-    "type": `string`,
-    "end handle": `percentage`,
-    "transition handle": `percentage`
+    "type": string,
+    "end handle": percentage,
+    "transition handle": percentage
 }
 ```
 
@@ -179,7 +179,7 @@ The edge shape specifies parameters to control the shape of the effective edge.
 ```
 "edge shape":
 {
-    "type": `string`
+    "type": string
 }
 ```
 
@@ -203,9 +203,9 @@ of the tail.
 ```
 "tail shape":
 {
-    "type": `string`,
-    "end handle": `percentage`,
-    "transition handle": `percentage`
+    "type": string,
+    "end handle": percentage,
+    "transition handle": percentage
 }
 ```
 
@@ -258,11 +258,11 @@ defined. Additional groups are specified with the other parameters.
 ```
 "nose insert pack":
 {
-    "count nose": `number`,
-    "count tail": `number`,
-    "offset": `number`,
-    "horizontal spacing": `number`,
-    "vertical spacing": `number`
+    "count nose": number,
+    "count tail": number,
+    "offset": number,
+    "horizontal spacing": number,
+    "vertical spacing": number
 }
 ```
 
@@ -341,11 +341,11 @@ defined. Additional groups are specified with the other parameters.
 ```
 "tail insert pack":
 {
-    "count nose": `number`,
-    "count tail": `number`,
-    "offset": `number`,
-    "horizontal spacing": `number`,
-    "vertical spacing": `number`
+    "count nose": number,
+    "count tail": number,
+    "offset": number,
+    "horizontal spacing": number,
+    "vertical spacing": number
 }
 ```
 
@@ -406,10 +406,10 @@ center of the effective edge.
 ```
 "nose taper":
 {
-    "taper start": `percentage`,
-    "start handle": `percentage`,
-    "end handle": `percentage`,
-    "taper end": `percentage`
+    "taper start": percentage,
+    "start handle": percentage,
+    "end handle": percentage,
+    "taper end": percentage
 }
 ```
 
@@ -437,10 +437,10 @@ the tail from the center of the effective edge.
 ```
 "tail taper":
 {
-    "taper start": `percentage`,
-    "start handle": `percentage`,
-    "end handle": `percentage`,
-    "taper end": `percentage`
+    "taper start": percentage,
+    "start handle": percentage,
+    "end handle": percentage,
+    "taper end": percentage
 }
 ```
 
