@@ -39,7 +39,7 @@ The values may be strings or numbers as defined here.
 
 | Datatype | Definition |
 |:---:| --- |
-| `”string”` | a sequence of zero or more characters, delimted with double-quotation marks. |
+| `"string"` | a sequence of zero or more characters, delimted with double-quotation marks. |
 | `number` | a signed decimal number that may contain a fractional part. May denote inches or centimeters, depending on the parameter. |
 
 Furthermore, will define a `percentage` as a number from 0.0 to 1.0.
@@ -55,11 +55,11 @@ profile.
 
 ```
 {
-    “board”:
+    "board":
     {
          parameters
      },
-    “profile”:
+    "profile":
     {
         parameters
      }
@@ -87,7 +87,7 @@ generated files.
 
 
 #### Nose Length
-”nose length”: `number`
+"nose length": `number`
 
 The length, in centimeters, of the nose from the tip of the board to
 the start of the effective edge.
@@ -145,7 +145,7 @@ of the nose.
 }
 ```
 
-The `type` may currently be only `”Basic Bezier”`, though other
+The `type` may currently be only `"Basic Bezier"`, though other
 options will be available in the future. This specifies a classic
 Bezier curve with two control points for one half of the nose shape,
 and this curve is mirrored to get the other half. The control points
@@ -183,7 +183,7 @@ The edge shape specifies parameters to control the shape of the effective edge.
 }
 ```
 
-The `type` may currently be only `”Basic Arc”`, though other options
+The `type` may currently be only `"Basic Arc"`, though other options
 will be available in the future. This specifies a very simple arc for
 the effective edge, and has been sufficient for every board I’ve built
 to-date.
@@ -215,7 +215,7 @@ same.
 
 ### Inserts
 
-Inserts are collected into “packs” which consist of "groups" of four
+Inserts are collected into "packs" which consist of "groups" of four
 inserts in a standard 4x4 pattern, with each group staggered from the
 other by a given amount. Packs are defined by how many groups they
 have, and their spacing. Typically some inserts from one group overlap
@@ -251,8 +251,8 @@ shifts the reference stance towards the tail.
 #### Nose Insert Pack
 
 The nose insert pack specifies the number and relative location of the
-groups of inserts closest to the nose of the board. The “reference
-group” is the only required group of inserts and is implicitly
+groups of inserts closest to the nose of the board. The "reference
+group" is the only required group of inserts and is implicitly
 defined. Additional groups are specified with the other parameters.
 
 ```
@@ -297,7 +297,7 @@ and separated side-to-side by 4cm.
 ```
 
 
-##### Typical “Shotgun” Snowboard Pattern
+##### Typical "Shotgun" Snowboard Pattern
 
 This is a pack of 14 inserts, separated nose-to-tail by 2cm each, and
 separated side-to-side by 4cm.
@@ -334,8 +334,8 @@ one more group towards the tail, which adds just two more inserts.
 #### Tail Insert Pack
 
 The tail insert pack specifies the number and relative location of the
-groups of inserts closest to the tail of the board. The “reference
-group” is the only required group of inserts and is implicitly
+groups of inserts closest to the tail of the board. The "reference
+group" is the only required group of inserts and is implicitly
 defined. Additional groups are specified with the other parameters.
 
 ```
@@ -362,31 +362,89 @@ will be inset by this amount.
 
 ### Profile Section
 
+The profile specifies the thickness of the core from nose to
+tail. Currently, MonkeyCAM generates profiles which are constant
+thickness throughout the nose and tail, and are a constant thickness
+throughout the bulk of the center of the board. The transition from
+the thickest portion at the center to the thinner nose and tail is
+defined with Bezier curves for a smooth and highly customizable
+transition.
+
+
 #### Nose Thickness
 "nose thickness": `number`
+
+The thickness, in centimeters, of the nose. The entire nose right up
+to the effective edge will be this thickness.
+
 
 #### Center Thickness
 "center thickness": `number`
 
+The thickness, in centimeters, of the center of the board. How much of
+the center is this thickness is determined by the nose and tail taper
+parameters.
+
+
 #### Tail Thickness
 "tail thickness": `number`
 
+The thickness, in centimeters, of the tail. The entire tail right up
+to the effective edge will be this thickness.
+
+
 #### Nose Taper
+
+The nose taper defines how the profile transitions from the larger
+center thickness to the thinner nose thickness. A Bezier is used to
+generate a smooth transition. To understand these parameters, first
+consider the distance from the center of the effective edge to the
+start of the nose. This is one half the effective edge length. The
+taper is defined using percentages of this distance, starting from the
+center of the effective edge.
+
+```
 "nose taper":
 {
-"taper start": `number`,
-"start handle": `number`,
-"end handle": `number`,
-"taper end": `number`
-},
+    "taper start": `percentage`,
+    "start handle": `percentage`,
+    "end handle": `percentage`,
+    "taper end": `percentage`
+}
+```
+
+`taper start` specifies, as a percentage of half the effective edge
+length, the distance from the center of the effective edge towards the
+nose where the taper will begin.
+
+`taper end` specifies, as a percentage of half the effective edge
+length, the distance from the center of the effective edge towards the
+nose where the taper will end.
+
+`start handle` and `end handle` specify the location of two Bezier
+control points. These are also percentages of half the effective edge
+length. The further a handle is from the start or end, the more it
+pulls on the curve and makes the start or end of the transition more
+gradual. If the handles are very close to the start and end the
+transition will be sharper.
+
 
 #### Tail Taper
+
+The tail taper is the same as the nose taper, simply directed towards
+the tail from the center of the effective edge.
+
+```
 "tail taper":
 {
-"taper start": `number`,
-"start handle": `number`,
-"end handle": `number`,
-"taper end": `number`
+    "taper start": `percentage`,
+    "start handle": `percentage`,
+    "end handle": `percentage`,
+    "taper end": `percentage`
 }
+```
+
 
 ## Machine and Tool definition
+
+Coming soon... only 40 more parameters to document ;)
