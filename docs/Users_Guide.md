@@ -1,7 +1,5 @@
 # MonkeyCAM v4.0 User's Guide
 
-**THIS GUIDE IS STILL UNDER CONSTRUCTION as of 2014/09/20 13:00PST**
-
 MonkeyCAM v4.0 is an open source CAD/CAM program for designing skis
 and snowboards, and generating
 [G-code](http://en.wikipedia.org/wiki/G-code) programs to cut board
