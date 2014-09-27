@@ -42,7 +42,7 @@ The values may be strings or numbers as defined here.
 | `"string"` | a sequence of zero or more characters, delimted with double-quotation marks. |
 | `number` | a signed decimal number that may contain a fractional part. May denote inches or centimeters, depending on the parameter. |
 
-Furthermore, will define a `percentage` as a number from 0.0 to 1.0.
+Furthermore, we define a `percentage` as a number from `0.0` to `1.0`.
 
 Avoid changing the structure of the file, i.e., the braces (`{`, `}`)
 and names of the parameters. **Only change the values.**
@@ -280,7 +280,7 @@ side-to-side. (Think about looking at a board from above, with the
 nose pointing to the left.)
 
 
-##### Classic 4x4 Snowboard Pattern
+##### Example: Classic 4x4 Snowboard Pattern
 
 This is a pack of eight inserts, separated nose-to-tail by 4cm each,
 and separated side-to-side by 4cm.
@@ -297,7 +297,7 @@ and separated side-to-side by 4cm.
 ```
 
 
-##### Typical "Shotgun" Snowboard Pattern
+##### Example: Typical "Shotgun" Snowboard Pattern
 
 This is a pack of 14 inserts, separated nose-to-tail by 2cm each, and
 separated side-to-side by 4cm.
@@ -314,7 +314,7 @@ separated side-to-side by 4cm.
 ```
 
 
-##### Minimal Snowboard Pattern with Powder Option
+##### Example: Minimal Snowboard Pattern with Powder Option
 
 This is a pack of 6 inserts, separated nose-to-tail by 4cm each, and
 separated side-to-side by 4cm. The reference group is accompanied by
@@ -447,4 +447,283 @@ the tail from the center of the effective edge.
 
 ## Machine and Tool definition
 
-Coming soon... only 40 more parameters to document ;)
+The machine and tool configuration file contains a single section
+which describes parameters to control the machining process. Any
+dimension which depends on a cutting tool, material thickness, or is
+related to the machining or assembly process is represented here. If
+your manufacturing process and materials are fairly consistent then it
+will be rare for you to change this file.
+
+```
+{
+    “machine”:
+    {
+        parameters
+    }
+}
+```
+### Overall speeds and feeds
+
+All feed rates are emitted as `F` codes in the G-Code programs,
+without translation. The units are defined by your CNC controller
+configuration. Inches per minute (IPM) or millimeters per minute
+(mm/min) are common.
+
+#### Rapid Speed
+"rapid speed": `number`
+
+The velocity at which the machine will move during rapid movements via
+`G00`.
+
+#### Normal Speed
+"normal speed": `number`
+
+The velocity at which the machine will move during interpolated
+movements via `G01`, `G02`, `G03`.
+
+### Heights and Depths
+
+All heights and depths in the machine configuration are measured
+assuming the table or part top is at `Z = 0`, and positive values of
+`Z` are **above** the table or part.
+
+#### Bottom Rapid Height
+
+"bottom rapid height": `number`
+
+The height, in inches, at which the cutter will move during all rapid
+motions via `G00` when working the bottom of the board. All programs
+which work on the bottom of the board use `Z = 0` at the top of the
+core blank, thus this is the height above the core blank for all rapid
+moves.
+
+#### Top Rapid Height
+
+"top rapid height": `number`
+
+The height, in inches, at which the cutter will move during all rapid
+motions via `G00` when working the top of the board. All programs
+which work on the top of the board use `Z = 0` at the top of the
+table, thus this is the height above the table for all rapid moves and
+must be sufficient to clear the core.
+
+### Material Thicknesses
+
+#### Core Blank Thickness
+
+"core blank thickness": `number`
+
+The thickness, in inches, of the core blank. This does not have to be
+precise so long as it is **at least** as thick as your thickest core
+blank. A value larger than the true thickness of the core blank will
+cause some of the G-Code programs to be less efficient than they
+otherwise could be, but they will still work.
+
+### Base Cutout Parameters
+
+Each of these effects the [Base Cutout program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#base-cutout).
+
+#### Base Cutout Tool
+
+"base cutout tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the base.
+
+#### Base Rapid Height
+
+"base rapid height": `number`
+
+The height, in inches, at which the cutter will move during all rapid
+motions via `G00` when working the base and nose/tail spacer
+material. All programs which work on the base use `Z = 0` at the top
+of the table, thus this is the height above the table for all rapid
+moves and must be sufficient to clear the base.
+
+#### Base Cut Thru Height
+
+"base cut thru height": `number`
+
+The depth, in inches, at which the cutter will descend to in order to
+cut thru the base material. This should be a negative number slightly
+less than `0` in order to ensure the cutter completely penetrates the
+base material, i.e., `-0.010` or so.
+
+### Guide Holes Parameters
+
+Each of these effects the [Guide Holes program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#guide-holes).
+
+#### Guide Hole Tool
+"guide hole tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the guide holes in the core blank.
+
+#### Guide Hole Depth
+"guide hole depth": -0.600,
+
+#### Guide Hole Diameter
+"guide hole diameter": 0.505,
+
+#### Guide Hole Offset
+"guide hole offset": 0.5,
+
+### Alignment Marks Parameters
+
+Each of these effects the [Alignment Marks program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#alignment-marks).
+
+#### Alignment Mark Tool
+
+"alignment mark tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the alignment marks on the bottom of the core.
+
+#### Alignment Mark Offset
+"alignment mark offset": 0.5,
+
+#### Alignment Mark Depth
+"alignment mark depth": -0.025,
+
+#### Alignment Mark Deep Depth
+"alignment mark deep depth": -0.150,
+
+### Edge Groove Parameters
+
+Each of these effects the [Edge Groove program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#edge-groove).
+
+#### Edge Groove Tool
+
+"edge groove tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the edge groove.
+
+#### Edge Groove Depth
+"edge groove depth": -0.025,
+
+#### Edge Groove Edge Width
+"edge groove edge width": 0.354,
+
+#### Edge Groove Overlap Percentage
+"edge groove overlap percentage": 0.75,
+
+### Insert Holes Parameters
+
+Each of these effects the [Insert Holes program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#insert-holes).
+
+#### Insert Tool
+
+"insert tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the insert holes.
+
+#### Insert Rim Depth
+"insert rim depth": -0.045,
+
+#### Insert Rim Diameter
+"insert rim diameter": 0.750,
+
+#### Insert Hole Diameter
+"insert hole diameter": 0.373,
+
+### Top Profile Parameters
+
+Each of these effects the [Top Profile program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#top-profile).
+
+#### Top Profile Tool
+
+"top profile tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to profile the core.
+
+#### Top Profile Transition Speed
+"top profile transition speed": 20,
+
+#### Top Profile Deep Speed
+"top profile deep speed": 50,
+
+#### Top Profile Overlap Percentage
+"top profile overlap percentage": 0.50,
+
+#### Top Profile Lead-in Length
+"top profile lead-in length": 4.0,
+
+### Top Cutout Parameters
+
+Each of these effects the [Top Cutout program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#top-cutout).
+
+#### Core Cutout Tool
+
+"core cutout tool": `tool number`
+
+The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut out the core.
+
+#### Sidewall Overhang
+"sidewall overhang": 0.118,
+
+### Nose Tail Spacers Parameters
+
+Each of these effects the [Nose Tail Spacers program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#nose-tail-spacers).
+
+#### Spacer End Overhang
+"spacer end overhang": 1,
+
+#### Spacer Side Overhang
+"spacer side overhang": 0.5,
+
+### Edge Trench Parameters
+
+Each of these effects the [Edge Trench program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#edge-trench).
+
+#### Edge Trench Width
+"edge trench width": 1.2874,
+
+#### Edge Trench Extension
+"edge trench extension": 3,
+
+### Tools
+
+The `tools` section has an entry for each tool which will be used by
+the generated G-Code programs. Each tool is given an `id` which is
+used to reference the tool from other parameters, and is called the
+`tool number` in the documentation for those parameters.
+
+```
+"tools":
+[
+    {
+        "id": 1,
+        "name": "Quarter Inch Upcut Spiral",
+        "diameter": 0.247,
+        "G-code #": 1
+    }
+]
+```
+
+#### ID
+
+"id": `tool number`
+
+A unique numeric id for the tool, so it can be referenced from other
+machine configuration parameters.
+
+#### Name
+
+"name": `string`
+
+A name for the tool, which can be whatever you like and will appear in
+the header block of the G-Code programs which use this tool.
+
+#### Diameter
+
+"diameter": `number`
+
+The diameter, in inches, of the tool. Be precise and measure carefully
+with precision calipers. If you have a quarter-inch cutter which is
+really `0.247` inches in diameter, then enter that.
+
+#### G-code #
+
+"G-code #": `number`
+
+The tool number, as defined in your CNC controller, which will be
+emitted via `G43`. I.e., `G43 H1 T4` if the number is `4`. This is for
+CNC machines with automatic tool changers, or for those who configure
+tool height offsets in the CNC controller.
