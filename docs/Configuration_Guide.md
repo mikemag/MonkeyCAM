@@ -558,13 +558,28 @@ Each of these effects the [Guide Holes program](https://github.com/mikemag/Monke
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the guide holes in the core blank.
 
 #### Guide Hole Depth
-"guide hole depth": -0.600,
+
+"guide hole depth": `number`
+
+The depth, in inches, to which the guide holes will be cut thru the
+core. Note that this program uses `Z = 0` as the top of the core
+blank, so this should be thicker than the core blank and thick enough
+to ensure a reasonable hole is left in the table top for alignment
+pins.
 
 #### Guide Hole Diameter
-"guide hole diameter": 0.505,
+
+"guide hole diameter": `number`
+
+The diameter, in inches, of the guide holes. Make this slightly larger
+than the true diameter of your alignment pins, i.e., `0.505` inches
+for half inch pins.
 
 #### Guide Hole Offset
-"guide hole offset": 0.5,
+
+"guide hole offset": `number`
+
+The offset, in inches, of the guide holes from the ends of the core.
 
 ### Alignment Marks Parameters
 
@@ -577,13 +592,26 @@ Each of these effects the [Alignment Marks program](https://github.com/mikemag/M
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the alignment marks on the bottom of the core.
 
 #### Alignment Mark Offset
-"alignment mark offset": 0.5,
+
+"alignment mark offset": `number`
+
+The offset, in inches, of all alignment marks from the edges of the
+core.
 
 #### Alignment Mark Depth
-"alignment mark depth": -0.025,
+
+"alignment mark depth": `number`
+
+The depth, in inches, of all alignment marks into the core. Typically
+quite small, e.g. `-0.025`, but adjust based on personal preference.
 
 #### Alignment Mark Deep Depth
-"alignment mark deep depth": -0.150,
+
+"alignment mark deep depth": `number`
+
+The depth, in inches, of the extra-deep alignment marks near past the
+ends of the core that can be used to re-align the machine in the event
+of a horrible mistake.
 
 ### Edge Groove Parameters
 
@@ -596,13 +624,26 @@ Each of these effects the [Edge Groove program](https://github.com/mikemag/Monke
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the edge groove.
 
 #### Edge Groove Depth
-"edge groove depth": -0.025,
+
+"edge groove depth": `number`
+
+The depth, in inches, of the edge groove around the perimeter of the
+core to accommodate the edges.
 
 #### Edge Groove Edge Width
-"edge groove edge width": 0.354,
+
+"edge groove edge width": `number`
+
+The width, in inches, of the edge groove. This should match the width
+of your edge stock plus a little extra for some play when aligning the
+core to the base.
 
 #### Edge Groove Overlap Percentage
-"edge groove overlap percentage": 0.75,
+
+"edge groove overlap percentage": `percentage`
+
+The percentage of the selected tool diameter that each successive
+cutting pass will overlap with the prior pass.
 
 ### Insert Holes Parameters
 
@@ -615,13 +656,22 @@ Each of these effects the [Insert Holes program](https://github.com/mikemag/Monk
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the insert holes.
 
 #### Insert Rim Depth
-"insert rim depth": -0.045,
+
+"insert rim depth": `number`
+
+The depth, in inches, of the outter edge of the insert holes.
 
 #### Insert Rim Diameter
-"insert rim diameter": 0.750,
+
+"insert rim diameter": `number`
+
+The diameter, in inches, of the rim of the insert holes.
 
 #### Insert Hole Diameter
-"insert hole diameter": 0.373,
+
+"insert hole diameter": `number
+
+The diameter, in inches, of the barrel of the inserts.
 
 ### Top Profile Parameters
 
@@ -634,16 +684,35 @@ Each of these effects the [Top Profile program](https://github.com/mikemag/Monke
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to profile the core.
 
 #### Top Profile Transition Speed
-"top profile transition speed": 20,
+
+"top profile transition speed": `number`
+
+The feed rate used when transitioning to the next larger profiling
+pass. Since the cutter is typically quite large, a slower feed rate
+when driving it into the core blank to start the next pass is advised.
 
 #### Top Profile Deep Speed
-"top profile deep speed": 50,
+
+"top profile deep speed": `number`
+
+The feed rate used at maximum cutting depth during core
+profiling. Typically slower than the normal feed rate due to the
+likely large diameter of the cutter.
 
 #### Top Profile Overlap Percentage
-"top profile overlap percentage": 0.50,
+
+"top profile overlap percentage": `number`
+
+The percentage of the selected tool diameter that each successive
+profiling pass will overlap with the prior pass.
 
 #### Top Profile Lead-in Length
-"top profile lead-in length": 4.0,
+
+"top profile lead-in length": `number`
+
+The distance, in inches, over which the cutter will ramp into the core
+blank before reaching the full cutting depth. A longer lead-in may be
+appropriate for thicker core blanks, or larger cutters.
 
 ### Top Cutout Parameters
 
@@ -656,27 +725,56 @@ Each of these effects the [Top Cutout program](https://github.com/mikemag/Monkey
 The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut out the core.
 
 #### Sidewall Overhang
-"sidewall overhang": 0.118,
+
+"sidewall overhang": `number`
+
+The amount, in inches, of sidewall which will remain past the edges, outside the final board shape. Leave a few mm to account for core-to-base alignment error.
 
 ### Nose Tail Spacers Parameters
 
 Each of these effects the [Nose Tail Spacers program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#nose-tail-spacers).
 
 #### Spacer End Overhang
-"spacer end overhang": 1,
+
+"spacer end overhang": `number`
+
+The minimum amount, in inches, of spacer material which will be left
+past the ends of the final board shape.
 
 #### Spacer Side Overhang
-"spacer side overhang": 0.5,
+
+"spacer side overhang": `number`
+
+The minimum amount, in inches, of spacer material which will be left
+past the sides of the final board shape.
 
 ### Edge Trench Parameters
 
 Each of these effects the [Edge Trench program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#edge-trench).
 
 #### Edge Trench Width
-"edge trench width": 1.2874,
+
+"edge trench width": `number`
+
+The width, in inches, of the edge trench. This should be the width of
+your sidewall material, and of any additional stringers you want to
+lay down perfectly along the effective edge. Recognize that a portion
+of this trench will extend past the final board shape as determined by
+the sidewall overhang.
 
 #### Edge Trench Extension
-"edge trench extension": 3,
+
+"edge trench extension": `number`
+
+The distance, in inches, the edge trench will extend past the ends of
+the effective edge. This distance needs to be sufficient to ensure
+sidewall and extra stringer material will fill the core a bit past
+where it will be shaped by the core cutout program, but not so long
+that the trench cuts beyond the boundaries of the core blank.
+
+Currently this measurement is a bit of trial-and-error, though a value
+of about `3` inches is typically sufficient. See the [issue](
+https://github.com/mikemag/MonkeyCAM/issues/6) about improving this.
 
 ### Tools
 
@@ -693,7 +791,14 @@ used to reference the tool from other parameters, and is called the
         "name": "Quarter Inch Upcut Spiral",
         "diameter": 0.247,
         "G-code #": 1
-    }
+    },
+    {
+        "id": 2,
+        "name": "Quarter Inch Straight",
+        "diameter": 0.250,
+        "G-code #": 1
+    },
+
 ]
 ```
 
