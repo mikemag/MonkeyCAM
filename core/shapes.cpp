@@ -114,6 +114,12 @@ const Path& BoardShape::buildOverallPath() {
   return m_overallPath;
 }
 
+const void BoardShape::addCoreCenterComment(GCodeWriter& g) {
+  auto centerX = m_noseLength + (m_effectiveEdge / 2);
+  g.headerComment("* Center of the board in G54:");
+  g.headerCommentF("    X=%s Y=0.0000 Z=0.0000", centerX.inchesStr().c_str());
+}
+
 template<class TIter>
 void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
                      Point startPoint, MCFixed endX,
@@ -265,6 +271,7 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   GCodeWriter g(m_name + "-base-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.baseRapidHeight());
+  addCoreCenterComment(g);
   g.rapidToPoint(op[0]);
   g.spindleOn();
   g.emitPath(op, machine.baseCutThruHeight());
@@ -291,6 +298,7 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
                 machine.normalSpeed(), rapidHeight);
   g.comment("Guide holes should be milled first so we can re-align the core if "
             "something goes wrong.");
+  addCoreCenterComment(g);
   g.line();
   g.spindleOn();
   g.rapidToPoint(leftGuideHole(machine));
@@ -361,6 +369,7 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
   GCodeWriter g(m_name + "-core-alignment-marks.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.bottomRapidHeight());
+  addCoreCenterComment(g);
   g.spindleOn();
   for (auto& p : marks) {
     g.rapidToPoint(p);
@@ -412,6 +421,7 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
   GCodeWriter g(m_name + "-core-edge-groove.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.bottomRapidHeight());
+  addCoreCenterComment(g);
   g.spindleOn();
   g.emitPathSets(groovePathSets, true, machine.bottomRapidHeight(), 0,
                  machine.normalSpeed());
@@ -485,6 +495,7 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
   GCodeWriter g(m_name + "-core-insert-holes.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), rapidHeight);
+  addCoreCenterComment(g);
   g.spindleOn();
   for (auto& p : m_insertsPath) {
     g.rapidToPoint(p);
@@ -548,6 +559,7 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   GCodeWriter g(m_name + "-top-profile.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.topProfileDeepSpeed(), rapidHeight);
+  addCoreCenterComment(g);
   g.spindleOn();
   g.emitPathSets(pathSets, true, rapidHeight,
                  machine.topProfileLeadinLength(),
@@ -612,6 +624,7 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
                 machine.normalSpeed(), machine.baseRapidHeight());
   auto materialLength = m_noseLength + m_tailLength + 2 +
     machine.spacerEndOverhang() * 2;
+  addCoreCenterComment(g);
   g.headerComment();
   g.headerCommentF("Spacer material length: %s\" [%scm]",
                    materialLength.inchesStr().c_str(),
@@ -729,6 +742,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   GCodeWriter g(m_name + "-edge-trench.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.topRapidHeight());
+  addCoreCenterComment(g);
   g.rapidToPoint(t1[0]);
   g.spindleOn();
   g.emitSpiralPath(t1, machine.coreBlankThickness(), 3);
@@ -779,6 +793,7 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   GCodeWriter g(m_name + "-top-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.topRapidHeight());
+  addCoreCenterComment(g);
   g.rapidToPoint(profPath[0]);
   g.spindleOn();
   g.emitSpiralPath(profPath, machine.coreBlankThickness(), 3);

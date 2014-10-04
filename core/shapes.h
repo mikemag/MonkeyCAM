@@ -77,6 +77,8 @@ class BoardShape {
 
   const void addDebugPath(std::function<DebugPath()> pathFunc);
 
+  const void addCoreCenterComment(GCodeWriter& g);
+
   std::string m_name;
 
   MCFixed m_noseLength;
