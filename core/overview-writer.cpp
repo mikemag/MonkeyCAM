@@ -16,10 +16,11 @@
 
 #include "overview-writer.h"
 
-#include <cmath>
-#include <iostream>
-#include <fstream>
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <fstream>
+#include <iostream>
 
 namespace MonkeyCAM {
 

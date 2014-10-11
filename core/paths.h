@@ -17,6 +17,7 @@
 #ifndef incl_paths_H_
 #define incl_paths_H_
 
+#include <functional>
 #include <vector>
 #include "point.h"
 
