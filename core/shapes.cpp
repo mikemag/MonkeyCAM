@@ -239,7 +239,8 @@ void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
 const Path& BoardShape::buildCorePath(const Machine& machine) {
   if (m_corePath.size() != 0) return m_corePath;
   // 1. Offset the overall path inward by the spacer size.
-  auto spacerClip = PathUtils::OffsetPath(m_overallPath, -m_spacerWidth);
+  auto spacerClip = PathUtils::OffsetPath(buildOverallPath(machine),
+                                          -m_spacerWidth);
   assert(spacerClip.size() == 1);
 
   // 2. Form squares for the nose and tail which cut the nose and tail
@@ -331,6 +332,35 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
         }
       };
     });
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Width guides",
+          "Guidelines to mark key widths of the board: nose/tail maximum "
+          "width, waist width, and the true center of the board (shorter "
+          "line).", "blue", true
+        }
+      };
+      MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
+      MCFixed noseTranX = m_noseLength;
+      MCFixed eeCenterX = noseTranX + m_effectiveEdge / 2;
+      MCFixed tailTranX = noseTranX + m_effectiveEdge;
+      MCFixed noseHalfWidth = m_noseWidth / 2;
+      MCFixed waistHalfWidth = m_waistWidth / 2;
+      MCFixed tailHalfWidth = m_tailWidth / 2;
+      a.addSvgFormat(
+        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
+        noseTranX.dbl(), (-noseHalfWidth + 4).dbl(),
+        noseTranX.dbl(), (noseHalfWidth - 4).dbl(),
+        eeCenterX.dbl(), (-waistHalfWidth + 1).dbl(),
+        eeCenterX.dbl(), (waistHalfWidth - 1).dbl(),
+        trueCenterX.dbl(), (-waistHalfWidth + 5).dbl(),
+        trueCenterX.dbl(), (waistHalfWidth - 5).dbl(),
+        tailTranX.dbl(), (-tailHalfWidth + 4).dbl(),
+        tailTranX.dbl(), (tailHalfWidth - 4).dbl()
+      );
+      return a;
+    });
   return m_corePath;
 }
 
@@ -358,9 +388,40 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
   auto paths = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
   assert(paths.size() == 1);
-  auto offsetPaths = PathUtils::OffsetPath(paths[0], tool.diameter / 2);
+  auto trueBasePath = paths[0];
+  auto offsetPaths = PathUtils::OffsetPath(trueBasePath, tool.diameter / 2);
   assert(offsetPaths.size() == 1);
   auto op = offsetPaths[0];
+  DebugPathSet& dps = addDebugPathSet("Base Cutout");
+  dps.addPath([&] {
+      return DebugPath {
+        op,
+        DebugAnnotationDesc {
+          "Base cutout path",
+          "The path used to cut the base."
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        trueBasePath,
+        DebugAnnotationDesc {
+          "Base",
+            "The final shape of the base material.",
+            "orange", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        m_overallPath,
+        DebugAnnotationDesc {
+          "Overall shape",
+            "The final shape of the board, including edges.",
+            "green", true
+        }
+      };
+    });
   GCodeWriter g(m_name + "-base-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.baseRapidHeight());
@@ -386,6 +447,7 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
   auto holeDepth = machine.guideHoleDepth();
   auto holeDia = machine.guideHoleDiameter();
   auto tool = machine.tool(machine.guideHoleTool());
+  DebugPathSet& dps = addDebugPathSet("Guide Holes");
   GCodeWriter g(m_name + "-guide-holes.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), rapidHeight);
@@ -400,6 +462,29 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
   g.emitIncrementalHole(holeDia, holeDepth, rapidHeight, 3);
   g.spindleOff();
   g.close();
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Guide holes",
+          "Guide holes placed beyond the ends of the board."
+        }
+      };
+      a.addSvgCircle(leftGuideHole(machine), holeDia, "black");
+      a.addSvgCircle(leftGuideHole(machine), 0.05, "black");
+      a.addSvgCircle(rightGuideHole(machine), holeDia, "black");
+      a.addSvgCircle(rightGuideHole(machine), 0.05, "black");
+      return a;
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        m_overallPath,
+        DebugAnnotationDesc {
+          "Overall shape",
+            "The final shape of the board, including edges.",
+            "green", true
+        }
+      };
+    });
   return g;
 }
 
@@ -459,6 +544,28 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
 {
   auto marks = alignmentMarksPath(machine);
   auto tool = machine.tool(machine.alignmentMarkTool());
+  DebugPathSet& dps = addDebugPathSet("Core Alignment Marks");
+  dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "green", true
+        }
+      };
+    });
+  auto a = DebugAnnotation {
+    DebugAnnotationDesc {
+      "Alignment Marks",
+      "Small dimples placed on the bottom of the core which mark key locations "
+      "and are useful for aligning the base to the core. "
+      "Note: these are <b>very small</b> in the diagram, but they do "
+      "accuratley represent the diameter of the dimple which will be left in "
+      "the core. Zoom in!",
+      "red"
+    }
+  };
   GCodeWriter g(m_name + "-core-alignment-marks.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.bottomRapidHeight());
@@ -467,10 +574,13 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
   for (auto& p : marks) {
     g.rapidToPoint(p);
     g.feedToPoint(p);
+    a.addSvgCircle(p, p.Z * -2, "red");
+    a.addSvgCircle(p, 0.05, "red");
   }
   g.rapidToPoint(marks.back());
   g.spindleOff();
   g.close();
+  dps.addAnnotation([&] { return a; });
   return g;
 }
 
@@ -483,13 +593,10 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
   auto edgeWidth = machine.edgeGrooveEdgeWidth(); // Entire edge, not just tines
   auto grooveWidth = machine.sidewallOverhang() + edgeWidth;
   assert(grooveWidth >= tool.diameter);
-
-  // Debugging... true inside and outside groove edges.
-  auto corePath = buildCorePath(machine);
-  DebugPathSet& dps = addDebugPathSet("Edge Groove Paths");
+  DebugPathSet& dps = addDebugPathSet("Edge Groove");
   dps.addPath([&] {
       return DebugPath {
-        corePath,
+        buildCorePath(machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",
@@ -519,7 +626,6 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
         }
       };
     });
-
   // Outer path is exact, inner path is exact. Build others inbetween
   // as appropriate.
   auto stepOffset = tool.diameter * machine.edgeGrooveOverlapPercentage();
@@ -653,7 +759,7 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                                            machine.sidewallOverhang());
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
-  DebugPathSet& dps = addDebugPathSet("Top Profile Paths");
+  DebugPathSet& dps = addDebugPathSet("Top Profile");
   dps.addDescription("<p>These are the paths which apply the thickness profile "
                      "to the top of the core. They are joined inside-out, with "
                      "a lead-in of %s\" to the beginning of each island. A "
@@ -730,25 +836,44 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
 const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
   const Machine& machine)
 {
+  DebugPathSet& dps = addDebugPathSet("Nose Tail Spacers");
   auto tool = machine.tool(machine.baseCutoutTool());
   auto nosePath = m_noseSpacerPath;
   auto tailPath = m_tailSpacerPath;
-
-  // Shift the nose right so it starts at X=0.
-  auto nShift = -nosePath[0].X;
-  assert(nShift >= 0);
-  std::transform(nosePath.begin(), nosePath.end(), nosePath.begin(),
-                 [&](const Point& p) { return p + Point(nShift, 0); });
-
-  // Shift the tail left so it comes within 2cm of the nose path.
-  auto nmax = std::max_element(nosePath.begin(), nosePath.end(),
-                               [](const Point& a, const Point& b) {
-                                 return a.X < b.X;
-                               });
-  auto tShift = nmax->X + 2 - tailPath[0].X;
-  assert(tShift <= 0);
-  std::transform(tailPath.begin(), tailPath.end(), tailPath.begin(),
-                 [&](const Point& p) { return p + Point(tShift, 0); });
+  dps.addPath([&] {
+      return DebugPath {
+        nosePath,
+        DebugAnnotationDesc {
+          "Nose spacer",
+          "The shape of the nose spacer. Note that we only cut the curve which "
+          "interfaces with the core. The rest of the shape depends on the "
+          "length and width of your material.",
+          "orange", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        tailPath,
+        DebugAnnotationDesc {
+          "Tail spacer",
+          "The shape of the tail spacer. Note that we only cut the curve which "
+          "interfaces with the core. The rest of the shape depends on the "
+          "length and width of your material.",
+          "orange", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "green", true
+        }
+      };
+    });
 
   // Offset each
   auto ops = PathUtils::OffsetPath(nosePath, tool.diameter / 2);
@@ -773,6 +898,41 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
   e = std::remove_if(otp.begin(), otp.end(), trimmer);
   otp.resize(std::distance(otp.begin(), e));
   otp.erase(otp.begin()); // First element of the tail is redundant with the end
+
+  dps.addPath([&] {
+      return DebugPath {
+        onp,
+        DebugAnnotationDesc {
+          "Nose cut path",
+          "The path used to cut the nose spacer."
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        otp,
+        DebugAnnotationDesc {
+          "Tail cut path",
+          "The path used to cut the tail spacer."
+        }
+      };
+    });
+
+  // Shift the nose right so it starts at X=0.
+  auto nShift = -nosePath[0].X;
+  assert(nShift >= 0);
+  std::transform(onp.begin(), onp.end(), onp.begin(),
+                 [&](const Point& p) { return p + Point(nShift, 0); });
+
+  // Shift the tail left so it comes within 2cm of the nose path.
+  auto nmax = std::max_element(onp.begin(), onp.end(),
+                               [](const Point& a, const Point& b) {
+                                 return a.X < b.X;
+                               });
+  auto tShift = nmax->X + 2 - otp[0].X;
+  assert(tShift <= 0);
+  std::transform(otp.begin(), otp.end(), otp.begin(),
+                 [&](const Point& p) { return p + Point(tShift, 0); });
 
   GCodeWriter g(m_name + "-nose-tail-spacers.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
@@ -827,6 +987,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   // The outer edge of the edge trench is at the sidewall overhang.
   // We need to move the edge of the overall shape to the center of
   // the edge trench so we can offset it evenly on each side.
+  DebugPathSet& dps = addDebugPathSet("Edge Trench");
   auto& overallPath = buildOverallPath(machine);
   auto etCenterAdjust = machine.sidewallOverhang() -
     (machine.edgeTrenchWidth() / 2);
@@ -894,6 +1055,55 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   assert(ps.size() == 1);
   auto t2 = ps[0];
 
+  dps.addPath([&] {
+      return DebugPath {
+        t1,
+        DebugAnnotationDesc {
+          "Edge Trench Path",
+          "The path used to cut the edge trench"
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        t2,
+        DebugAnnotationDesc {
+          "Edge Trench Path",
+          "The path used to cut the edge trench"
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        trenches[0],
+        DebugAnnotationDesc {
+          "Edge Trench",
+          "The final shapre of the edge trench",
+          "blue", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        trenches[1],
+        DebugAnnotationDesc {
+          "Edge Trench",
+          "The final shapre of the edge trench",
+          "blue", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "orange", true
+        }
+      };
+    });
+
   GCodeWriter g(m_name + "-edge-trench.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.topRapidHeight());
@@ -918,12 +1128,33 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
 // to hold the core down if you don't have vacuum hold down.
 
 const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
+  DebugPathSet& dps = addDebugPathSet("Core Top Cutout");
   // Offset the core path as usual
   auto tool = machine.tool(machine.coreCutoutTool());
   auto paths = PathUtils::OffsetPath(buildCorePath(machine),
                                      tool.diameter / 2);
   assert(paths.size() == 1);
   auto op = paths[0];
+  dps.addPath([&] {
+      return DebugPath {
+        op,
+        DebugAnnotationDesc {
+          "Core top cutout path",
+          "The path used to cut the final core."
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "orange", true
+        }
+      };
+    });
+
   // Form a tab profile path
   Path tabProfile;
   auto quarterEELength = m_effectiveEdge / 4;
@@ -945,6 +1176,7 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   tabProfile.push_back(Point(boardLength + 1, cutThroughDepth));
   // Now deform the cutout path with the tab profile.
   auto profPath = ProfiledPath(op, tabProfile);
+
   GCodeWriter g(m_name + "-top-cutout.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.topRapidHeight());

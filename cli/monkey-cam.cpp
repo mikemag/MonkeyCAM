@@ -162,7 +162,8 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
     "<p>This overview is designed for you to zoom into it using your favorite "
     "browser. All of the diagrams are built with vector graphics and will "
     "scale perfectly. Zoom in to get a good look at the details, how shapes "
-    "fit together, and where they fall on the reference grid.</p>");
+    "fit together, and where they fall on the reference grid. In Chrome: "
+    "&#8984+/&#8984- (or Ctrl+/Ctrl- for Windows).</p>");
 
   overview.addRaw("<h4>Contents</h4><ul>");
   for (auto pathSet : shape.debugPathSets()) {
@@ -276,15 +277,18 @@ int main(int argc, char *argv[]) {
   auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
-  shape->generateBaseCutout(machine).write(outdir);
+  // Force the overall and core shapes to generate first, so they are
+  // first in the overview.
+  shape->buildCorePath(machine);
+  shape->generateTopProfile(machine, profile).write(outdir);
+  shape->generateEdgeTrench(machine).write(outdir);
+  shape->generateCoreEdgeGroove(machine).write(outdir);
+  shape->generateNoseTailSpacerCutout(machine).write(outdir);
   shape->generateGuideHoles(machine).write(outdir);
   shape->generateCoreAlignmentMarks(machine).write(outdir);
-  shape->generateCoreEdgeGroove(machine).write(outdir);
+  shape->generateBaseCutout(machine).write(outdir);
   shape->generateInsertHoles(machine).write(outdir);
   shape->generateTopCutout(machine).write(outdir);
-  shape->generateNoseTailSpacerCutout(machine).write(outdir);
-  shape->generateEdgeTrench(machine).write(outdir);
-  shape->generateTopProfile(machine, profile).write(outdir);
 
   string overviewName = shape->name() + "-overview.html";
   printf("Generating HTML overview %s%s\n",

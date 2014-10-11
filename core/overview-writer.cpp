@@ -27,6 +27,7 @@ OverviewWriter::OverviewWriter(std::string filename, std::string name)
     : m_outputStream(filename)
 {
   assert(m_outputStream.is_open());
+  m_outputStream << "<!DOCTYPE html>" << std::endl;
   m_outputStream << "<html>" << std::endl;
   m_outputStream << "<head><title>Overview of "
                  << name << "</title></head>" << std::endl;
@@ -114,13 +115,13 @@ void OverviewWriter::startDrawing(int width, int height) {
          R"(text-anchor="middle">)");
   for (int i = -widthExtra / 2; i < width - (widthExtra / 2); i++) {
     if (i % 10 == 0) {
-      addFormatted(R"(<text x="%d" y = "%d" dy="-0.5">%d%s</text>)",
+      addFormatted(R"(<text x="%d" y="%d" dy="-0.5">%d%s</text>)",
                    i, height / 2, i, i == 0 ? "cm" : "");
     }
   }
   for (int i = -height / 2; i < height / 2; i++) {
     if (i % 10 == 0) {
-      addFormatted(R"(<text x="%d" y = "%d" dx="1.5">%d%s</text>)",
+      addFormatted(R"(<text x="%d" y="%d" dx="1.5">%d%s</text>)",
                    -widthExtra / 2, i, i, i == 0 ? "cm" : "");
     }
   }
