@@ -27,7 +27,7 @@
     "edge groove tool": 1,
     "edge groove depth": -0.025,
     "edge groove edge width": 0.354,
-    "edge groove overlap percentage": 0.75,
+    "edge groove overlap percentage": 1.0,
 
     "insert tool": 1,
     "insert rim depth": -0.045,

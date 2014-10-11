@@ -43,7 +43,8 @@ class BoardShape {
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
              MCFixed spacerWidth);
-  const Path& buildOverallPath();
+  ~BoardShape();
+  const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
 
   const GCodeWriter generateBaseCutout(const Machine& machine);
@@ -63,10 +64,13 @@ class BoardShape {
   MCFixed eeLength() const { return m_effectiveEdge; }
   MCFixed overallLength() const { return m_noseLength + m_tailLength +
       m_effectiveEdge; }
+  MCFixed maxWidth() const {
+    return std::max(std::max(m_noseWidth, m_waistWidth), m_tailWidth);
+  }
   const std::string name() const { return m_name; }
 
-  const std::vector<DebugPath>& debugPaths() const {
-    return m_debugPaths;
+  const std::vector<DebugPathSet*>& debugPathSets() const {
+    return m_debugPathSets;
   }
 
  private:
@@ -75,7 +79,7 @@ class BoardShape {
   const Point leftGuideHole(const Machine& machine) const;
   const Point rightGuideHole(const Machine& machine) const;
 
-  const void addDebugPath(std::function<DebugPath()> pathFunc);
+  DebugPathSet&  addDebugPathSet(std::string header);
 
   const void addCoreCenterComment(GCodeWriter& g);
 
@@ -110,7 +114,7 @@ class BoardShape {
 
   MCFixed m_maxCoreX;
 
-  std::vector<DebugPath> m_debugPaths;
+  std::vector<DebugPathSet*> m_debugPathSets;
 };
 
 } // namespace MonkeyCAM

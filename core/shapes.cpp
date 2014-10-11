@@ -22,7 +22,6 @@
 
 #include "shapes.h"
 #include "shape-parts.h"
-#include "svg-writer.h" // @TODO: remove when done with random svg's...
 
 namespace MonkeyCAM {
 
@@ -70,6 +69,12 @@ BoardShape::BoardShape(string name,
   setupInserts();
 }
 
+BoardShape::~BoardShape() {
+  for (auto dps : m_debugPathSets) {
+    delete dps;
+  }
+}
+
 const Point BoardShape::leftGuideHole(const Machine& machine) const {
   return Point(-machine.guideHoleOffset(), 0);
 }
@@ -78,16 +83,17 @@ const Point BoardShape::rightGuideHole(const Machine& machine) const {
   return Point(m_maxCoreX + machine.guideHoleOffset(), 0);
 }
 
-const void BoardShape::addDebugPath(std::function<DebugPath()> pathFunc) {
-  // @todo: only if we're debugging...
-  m_debugPaths.push_back(pathFunc());
+DebugPathSet& BoardShape::addDebugPathSet(std::string header) {
+  auto dps = new DebugPathSet { header };
+  m_debugPathSets.push_back(dps);
+  return *dps;
 }
 
 // Build an overall board shape, which is the true finished shape of
 // the board.
 //
 // Path is counterclockwise, start point at (0,0,0).
-const Path& BoardShape::buildOverallPath() {
+const Path& BoardShape::buildOverallPath(const Machine& machine) {
   if (m_overallPath.size() != 0) return m_overallPath;
   MCFixed noseEndX = 0;
   MCFixed noseTranX = m_noseLength;
@@ -111,6 +117,74 @@ const Path& BoardShape::buildOverallPath() {
   m_overallPath.push_back_path(MirroredPath(ep));
   m_overallPath.push_back_path(MirroredPath(np));
   assert(m_overallPath.size() > 0);
+  DebugPathSet& dps = addDebugPathSet("Overall shape");
+  dps.addPath([&] {
+      return DebugPath {
+        m_overallPath,
+        DebugAnnotationDesc {
+          "Overall shape",
+          "The final shape of the board, including edges."
+        }
+      };
+    });
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Width guides",
+          "Guidelines to mark key widths of the board: nose/tail maximum "
+          "width, waist width, and the true center of the board (shorter "
+          "line).", "blue", true
+        }
+      };
+      MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
+      a.addSvgFormat(
+        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
+        noseTranX.dbl(), (-noseHalfWidth + 1).dbl(),
+        noseTranX.dbl(), (noseHalfWidth - 1).dbl(),
+        eeCenterX.dbl(), (-waistHalfWidth + 1).dbl(),
+        eeCenterX.dbl(), (waistHalfWidth - 1).dbl(),
+        trueCenterX.dbl(), (-waistHalfWidth + 5).dbl(),
+        trueCenterX.dbl(), (waistHalfWidth - 5).dbl(),
+        tailTranX.dbl(), (-tailHalfWidth + 1).dbl(),
+        tailTranX.dbl(), (tailHalfWidth - 1).dbl()
+      );
+      return a;
+    });
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Inserts",
+          "All inserts. The larger circle is the outter rim, the smaller "
+          "circle is the shaft hole.", "blue"
+        }
+      };
+      for (auto& p : m_insertsPath) {
+        a.addSvgCircle(p, machine.insertRimDiameter());
+        a.addSvgCircle(p, machine.insertHoleDiameter());
+        a.addSvgCircle(p, 0.05);
+      }
+      return a;
+    });
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Reference stance and setback",
+          "The center insert group in each pack. By default, these groups are "
+          "centered across the waist of the board, i.e., the center of the "
+          "effective edge, plus the setback.",
+          "green", true
+        }
+      };
+      a.addSvgCircle(Point(eeCenterX - (m_refStance / 2) + m_setback, 0),
+                     0.5, "green");
+      a.addSvgCircle(Point(eeCenterX + (m_refStance / 2) + m_setback, 0),
+                     0.5, "green");
+      a.addSvgFormat(
+        R"(<path d="M%f %f L%f %f"/>)",
+        (eeCenterX + m_setback).dbl(), -4.0,
+        (eeCenterX + m_setback).dbl(), 4.0);
+      return a;
+    });
   return m_overallPath;
 }
 
@@ -236,16 +310,35 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
   auto final = PathUtils::ClipPathsDifference(overhang, spacers);
   assert(final.size() == 1);
   m_corePath = final[0];
+  DebugPathSet& dps = addDebugPathSet("Core");
+  dps.addPath([&] {
+      return DebugPath {
+        m_corePath,
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewall overhang past the "
+          "edges."
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        m_overallPath,
+        DebugAnnotationDesc {
+          "Overall shape",
+            "The final shape of the board, including edges.",
+            "green", true
+        }
+      };
+    });
   return m_corePath;
 }
 
 void BoardShape::setupInserts() {
   auto stanceX = (m_refStance / 2);
-  auto boardLength = m_noseLength + m_effectiveEdge + m_tailLength;
-  auto boardCenterX = boardLength / 2;
-  m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + boardCenterX,
-                                        0));
-  m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + boardCenterX, 0));
+  MCFixed eeCenterX = m_noseLength + m_effectiveEdge / 2;
+  m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + eeCenterX, 0));
+  m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + eeCenterX, 0));
   auto p = m_noseInserts->insertsPath();
   m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   m_insertsPath.push_back(Point(m_noseInserts->maxPoint().X + 4, 0));
@@ -263,7 +356,7 @@ void BoardShape::setupInserts() {
 
 const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
-  auto paths = PathUtils::OffsetPath(buildOverallPath(), -0.2);
+  auto paths = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
   assert(paths.size() == 1);
   auto offsetPaths = PathUtils::OffsetPath(paths[0], tool.diameter / 2);
   assert(offsetPaths.size() == 1);
@@ -385,23 +478,49 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
 // Core edge groove
 
 const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
-  auto overallPath = buildOverallPath();
+  auto overallPath = buildOverallPath(machine);
   auto tool = machine.tool(machine.edgeGrooveTool());
   auto edgeWidth = machine.edgeGrooveEdgeWidth(); // Entire edge, not just tines
   auto grooveWidth = machine.sidewallOverhang() + edgeWidth;
   assert(grooveWidth >= tool.diameter);
 
   // Debugging... true inside and outside groove edges.
-  addDebugPath([&] {
-      return DebugPath { "Edge Groove Inner", "rgb(255,255,0)",
-          PathUtils::OffsetPath(overallPath, -edgeWidth)[0] };
+  auto corePath = buildCorePath(machine);
+  DebugPathSet& dps = addDebugPathSet("Edge Groove Paths");
+  dps.addPath([&] {
+      return DebugPath {
+        corePath,
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "green", true
+        }
+      };
     });
-  addDebugPath([&] {
-      return DebugPath { "Edge Groove Inner", "rgb(255,255,0)",
-          PathUtils::OffsetPath(overallPath, grooveWidth - edgeWidth)[0] };
+  dps.addPath([&] {
+      return DebugPath {
+        PathUtils::OffsetPath(overallPath, -edgeWidth)[0],
+        DebugAnnotationDesc {
+          "Groove outer edge",
+          "The final, outer edge of the groove. This is a bit beyond the edge "
+          "of the overall shape and matches the sidewall extension.",
+          "orange", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        PathUtils::OffsetPath(overallPath,
+                              grooveWidth - edgeWidth)[0],
+        DebugAnnotationDesc {
+          "Groove inner edge",
+          "The final, inner edge of the groove.",
+          "orange", true
+        }
+      };
     });
 
-  // Outter path is exact, inner path is exact. Build others inbetween
+  // Outer path is exact, inner path is exact. Build others inbetween
   // as appropriate.
   auto stepOffset = tool.diameter * machine.edgeGrooveOverlapPercentage();
   auto currentOffset = machine.sidewallOverhang() - (tool.diameter / 2);
@@ -411,8 +530,14 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
     auto paths = PathUtils::OffsetPath(overallPath, currentOffset);
     assert(paths.size() == 1);
     groovePathSets.push_back(paths);
-    addDebugPath([&] {
-        return DebugPath { "Edge Groove cut", "rgb(255,0,255)", paths[0] };
+    dps.addPath([&] {
+        return DebugPath {
+          paths[0],
+          DebugAnnotationDesc {
+            "Edge groove toolpaths",
+            "The toolpaths which will cut the edge groove."
+          }
+        };
       });
     if (currentOffset == endOffset) break;
     currentOffset -= stepOffset;
@@ -441,9 +566,9 @@ void emitInsertBowlRing(GCodeWriter& g, MCFixed prevDia, MCFixed dia,
 }
 
 // Assumes the cutter is at the center of the bowl, at the material top.
-void emitBowl(GCodeWriter& g, MCFixed outterRimDia, MCFixed outterRimDepth) {
+void emitBowl(GCodeWriter& g, MCFixed outerRimDia, MCFixed outerRimDepth) {
   vector<std::pair<MCFixed, MCFixed>> bowl {
-    { outterRimDia, outterRimDepth },
+    { outerRimDia, outerRimDepth },
     { MCFixed::fromInches(0.6928), MCFixed::fromInches(-0.0070) },
     { MCFixed::fromInches(0.6404), MCFixed::fromInches(-0.0065) },
     { MCFixed::fromInches(0.5878), MCFixed::fromInches(-0.0059) },
@@ -463,15 +588,15 @@ void emitBowl(GCodeWriter& g, MCFixed outterRimDia, MCFixed outterRimDepth) {
 
 void emitInsert(GCodeWriter& g, const Machine& machine,
                 MCFixed heightAboveMaterial) {
-  auto outterRimDia = machine.insertRimDiameter();
-  auto outterRimDepth = machine.insertRimDepth();
+  auto outerRimDia = machine.insertRimDiameter();
+  auto outerRimDepth = machine.insertRimDepth();
   auto insertCenterHoleDia = machine.insertHoleDiameter();
   auto insertCenterHoleDepth = -machine.coreBlankThickness();
   g.comment("A single insert");
-  g.commentF("  Outter rim diameter = %s\"",
-    outterRimDia.inchesStr().c_str());
-  g.commentF("  Outter rim depth    = %s\"",
-    outterRimDepth.inchesStr().c_str());
+  g.commentF("  Outer rim diameter = %s\"",
+    outerRimDia.inchesStr().c_str());
+  g.commentF("  Outer rim depth    = %s\"",
+    outerRimDepth.inchesStr().c_str());
   g.commentF("  Shaft diameter      = %s\"",
     insertCenterHoleDia.inchesStr().c_str());
   g.commentF("  Shaft depth         = %s\"",
@@ -481,11 +606,11 @@ void emitInsert(GCodeWriter& g, const Machine& machine,
     g.feedToPoint(g.currentPosition() + Point(0, 0, -heightAboveMaterial));
   }
   auto holeCenter = g.currentPosition();
-  emitBowl(g, outterRimDia, outterRimDepth);
+  emitBowl(g, outerRimDia, outerRimDepth);
   g.feedToPoint(holeCenter);
   g.emitIncrementalHole(insertCenterHoleDia, insertCenterHoleDepth, 0, 3);
   // Run the bowl again to clean it up.
-  emitBowl(g, outterRimDia, outterRimDepth);
+  emitBowl(g, outerRimDia, outerRimDepth);
   g.rapidToPoint(startPosition);
 }
 
@@ -518,23 +643,48 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
 const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                                                  BoardProfile profile) {
   auto tool = machine.tool(machine.topProfileTool());
-  // nb: use the overall path plus the sidewall overhand to limit the
+  // nb: use the overall path plus the sidewall overhang to limit the
   // profiling paths. This ensures the entire sidewall, even outside
   // the final edge, is profiled. It does mean we'll profile too much
   // on the nose and tail, since those are inset by the nose and tail
   // spacers, but that's an acceptable tradeoff for the simplicity of
   // this.
-  auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(),
+  auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(machine),
                                            machine.sidewallOverhang());
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
-  addDebugPath([&] {
-      return DebugPath { "Top profile overall", "rgb(128,0,255)",
-          overallOffset };
+  DebugPathSet& dps = addDebugPathSet("Top Profile Paths");
+  dps.addDescription("<p>These are the paths which apply the thickness profile "
+                     "to the top of the core. They are joined inside-out, with "
+                     "a lead-in of %s\" to the beginning of each island. A "
+                     "%s\" cutter is used with an overlap of %.2f&#37;.</p>",
+                     machine.topProfileLeadinLength().inchesStr().c_str(),
+                     tool.diameter.inchesStr().c_str(),
+                     machine.topProfileOverlapPercentage() * 100.0);
+  dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "green", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        overallOffset,
+        DebugAnnotationDesc {
+          "Outer profile pocket edge",
+          "The outer edge of the pocket formed when machining the thickness "
+          "profile. This is represents the limit of the material removed.",
+          "orange", true
+        }
+      };
     });
   // Offset the profile path to account for the width of the cutter.
   auto profileOffset = ToolOffsetPath(profile.path(), tool.diameter);
-  // Offset the outter path until the offset disappears. nb: the first
+  // Offset the outer path until the offset disappears. nb: the first
   // path must be offset by half the tool diameter to ensure we follow
   // the limiting path correctly.
   double overlap = 0.5;
@@ -547,12 +697,17 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
     for (auto& path : resultPaths) {
       std::reverse(path.begin(), path.end());
       path = ProfiledPath(path, profileOffset);
+      dps.addPath([&] {
+          return DebugPath {
+            path,
+            DebugAnnotationDesc {
+              "Top profile path",
+              "The paths used to profile the core."
+            }
+          };
+        });
     }
     pathSets.push_back(resultPaths);
-    addDebugPath([&] {
-        return DebugPath { "Top profile cut", "rgb(128,0,128)",
-            resultPaths[0] };
-      });
     overlap = machine.topProfileOverlapPercentage(); // Use real overlap % now
   }
   auto rapidHeight = machine.topRapidHeight();;
@@ -669,10 +824,10 @@ void extendLine(Path& p, MCFixed length) {
 }
 
 const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
-  // The outter edge of the edge trench is at the sidewall overhang.
+  // The outer edge of the edge trench is at the sidewall overhang.
   // We need to move the edge of the overall shape to the center of
   // the edge trench so we can offset it evenly on each side.
-  auto& overallPath = buildOverallPath();
+  auto& overallPath = buildOverallPath(machine);
   auto etCenterAdjust = machine.sidewallOverhang() -
     (machine.edgeTrenchWidth() / 2);
   auto etCenterOverallPaths = PathUtils::OffsetPath(overallPath,

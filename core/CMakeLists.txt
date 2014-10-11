@@ -18,6 +18,7 @@ set(MONKEYCAM_CORE_SRCS
     insert-pack.cpp
     machine.cpp
     mcfixed.cpp
+    overview-writer.cpp
     paths.cpp
     point.cpp
     shape-parts.cpp

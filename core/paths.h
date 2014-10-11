@@ -90,18 +90,75 @@ class ProfiledPath : public Path {
 };
 
 //------------------------------------------------------------------------------
-// A path which holds extra information for debugging.
+// A path which holds extra information for debugging, and supporting types.
 
-class DebugPath : public Path {
+class DebugAnnotationDesc {
  public:
-  DebugPath(const std::string name, const std::string color, const Path& path);
+  DebugAnnotationDesc(const std::string name = "",
+                      const std::string desc = "",
+                      const std::string color = "black",
+                      bool dashed = false);
 
   const std::string& name() const { return m_name; }
+  const std::string& desc() const { return m_desc; }
   const std::string& color() const { return m_color; }
+  const bool dashed() const { return m_dashed; }
 
  private:
   const std::string m_name;
+  const std::string m_desc;
   const std::string m_color;
+  const bool m_dashed;
+};
+
+class DebugPath : public Path {
+ public:
+  DebugPath(const Path& path, const DebugAnnotationDesc& desc);
+
+  const DebugAnnotationDesc& desc() const { return m_desc; }
+
+ private:
+  const DebugAnnotationDesc m_desc;
+};
+
+class DebugAnnotation {
+ public:
+  DebugAnnotation(const DebugAnnotationDesc& desc);
+
+  void addSvg(std::string svg) { m_svg += svg; }
+  void addSvgFormat(const char* fmt, ...);
+  void addSvgCircle(Point p, MCFixed diameter, std::string fill="blue");
+
+  const std::string& svg() const { return m_svg; }
+  const DebugAnnotationDesc& desc() const { return m_desc; }
+
+ private:
+  std::string m_svg;
+  const DebugAnnotationDesc m_desc;
+};
+
+class DebugPathSet {
+ public:
+  DebugPathSet(const std::string header);
+
+  void addPath(std::function<DebugPath ()> pathFunc);
+  void addDescription(const char* fmt, ...);
+  void addAnnotation(std::function<DebugAnnotation ()> annotationFunc);
+
+  const std::string& header() const { return m_header; }
+  const std::string& headerLink() const { return m_headerLink; }
+  const std::vector<DebugPath>& paths() const { return m_paths; }
+  const std::vector<std::string>& descriptions() const { return m_descs; }
+  const std::vector<DebugAnnotation>& annotations() const {
+    return m_annotations;
+  }
+
+ private:
+  std::string m_header;
+  std::string m_headerLink;
+  std::vector<DebugPath> m_paths;
+  std::vector<std::string> m_descs;
+  std::vector<DebugAnnotation> m_annotations;
 };
 
 //------------------------------------------------------------------------------

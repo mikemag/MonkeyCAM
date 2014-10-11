@@ -196,14 +196,71 @@ ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
 //------------------------------------------------------------------------------
 // DebugPath
 
-DebugPath::DebugPath(const std::string name, const std::string color,
-                     const Path& path)
-    : m_name(name)
-    , m_color(color)
+DebugPath::DebugPath(const Path& path, const DebugAnnotationDesc& desc)
+    : m_desc(desc)
 {
   push_back_path(path);
 }
 
+DebugAnnotationDesc::DebugAnnotationDesc(const std::string name,
+                                         const std::string desc,
+                                         const std::string color,
+                                         bool dashed)
+    : m_name(name)
+    , m_desc(desc)
+    , m_color(color)
+    , m_dashed(dashed)
+{
+}
+
+DebugAnnotation::DebugAnnotation(const DebugAnnotationDesc& desc)
+    : m_desc(desc)
+{
+}
+
+void DebugAnnotation::addSvgFormat(const char* fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  char buff[1024];
+  vsnprintf(buff, sizeof(buff), fmt, args);
+  m_svg += buff;
+  va_end(args);
+}
+
+void DebugAnnotation::addSvgCircle(Point p, MCFixed diameter,
+                                   std::string fill) {
+  char buff[1024];
+  snprintf(buff, sizeof(buff),
+           R"(<circle cx="%f" cy="%f" r="%f" fill="%s" )"
+           R"(fill-opacity="0.25" stroke-width="0.01" )"
+           R"(/>)",
+           p.X.dbl(), p.Y.dbl(), (diameter / 2).dbl(), fill.c_str());
+  m_svg += buff;
+}
+
+DebugPathSet::DebugPathSet(const std::string header)
+    : m_header(header),
+      m_headerLink(header)
+{
+  std::replace(m_headerLink.begin(), m_headerLink.end(), ' ', '_');
+}
+
+void DebugPathSet::addPath(std::function<DebugPath()> pathFunc) {
+  m_paths.push_back(pathFunc());
+}
+
+void DebugPathSet::addDescription(const char* fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  char buff[1024];
+  vsnprintf(buff, sizeof(buff), fmt, args);
+  m_descs.push_back(buff);
+  va_end(args);
+}
+
+void DebugPathSet::addAnnotation(std::function<DebugAnnotation ()> func) {
+  m_annotations.push_back(func());
+}
 
 //------------------------------------------------------------------------------
 // Utils

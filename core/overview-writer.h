@@ -16,24 +16,31 @@
 
 #include <iostream>
 #include <fstream>
+#include <functional>
+
+#include "paths.h"
 
 namespace MonkeyCAM {
 
-class Path;
-class Point;
-
-class SVGWriter {
+class OverviewWriter {
  public:
-  SVGWriter(std::string filename, int yShift = 5, double scale = 100.0);
-  ~SVGWriter();
-  void addPath(const Path& path, std::string color = "rgb(0,0,0)",
-               std::string desc = "");
-  void addPointMark(const Point& p, std::string color = "rgb(0,0,255)");
+  OverviewWriter(std::string filename, std::string name);
+  ~OverviewWriter();
+
+  void addHeader(const std::string header, const std::string headerLink = "");
+  void addRaw(const char* raw);
+  void addFormatted(const char* fmt, ...);
+
+  void startDrawing(int width, int height);
+  void endDrawing();
+  void addPath(const Path& path, std::string color = "black",
+               bool dashed = false);
+  void addAnnotation(const DebugAnnotation& annotation);
+
+  void addCode(std::function<void(std::ofstream&)> emitter);
 
  private:
   std::ofstream m_outputStream;
-  int m_yShift;
-  double m_scale;
 };
 
 } // namespace MonkeyCAM

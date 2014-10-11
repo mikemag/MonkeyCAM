@@ -236,7 +236,8 @@ standard ski binding patterns.
 "reference stance width": `number`
 
 The width, in centimeters, between the center insert group in each
-pack. By default, these groups are centered at the waist of the board.
+pack. By default, these groups are centered at the waist of the board,
+i.e., the center of the effective edge.
 
 
 #### Stance Setback
@@ -659,7 +660,7 @@ The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/
 
 "insert rim depth": `number`
 
-The depth, in inches, of the outter edge of the insert holes.
+The depth, in inches, of the outer edge of the insert holes.
 
 #### Insert Rim Diameter
 
