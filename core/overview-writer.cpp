@@ -21,6 +21,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <stdarg.h>
 
 namespace MonkeyCAM {
 

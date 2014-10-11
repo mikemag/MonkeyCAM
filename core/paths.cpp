@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <stdarg.h>
 #include <boost/range/adaptor/reversed.hpp>
 #include "../../clipper_ver5.1.6/cpp/clipper.hpp"
 #include "paths.h"
