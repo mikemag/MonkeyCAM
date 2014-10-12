@@ -21,7 +21,6 @@ add_subdirectory(cli)
 
 install(FILES "${PROJECT_BINARY_DIR}/LICENSE" DESTINATION .)
 install(FILES "${PROJECT_BINARY_DIR}/README.md" DESTINATION .)
-install(FILES "${PROJECT_BINARY_DIR}/grid.svg" DESTINATION .)
 install(FILES "${PROJECT_BINARY_DIR}/board-def.json" DESTINATION example)
 install(FILES "${PROJECT_BINARY_DIR}/machine-tool-def.json" DESTINATION example)
 
