@@ -110,8 +110,7 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
   auto tailEnd = loadProfileEnd(config.get_child("profile.tail taper"));
 
   BoardProfile profile { noseThickness, centerThickness, tailThickness,
-      noseEnd, tailEnd, shape.eeLength(), shape.overallLength(),
-      shape.noseLength() };
+      noseEnd, tailEnd, shape };
   return profile;
 }
 
@@ -125,7 +124,8 @@ void usage(const char* program) {
 }
 
 void generateOverview(MonkeyCAM::OverviewWriter& overview,
-                      MonkeyCAM::BoardShape& shape) {
+                      MonkeyCAM::BoardShape& shape,
+                      MonkeyCAM::BoardProfile& profile) {
   overview.addRaw(R"(<div id="disclaimer">)"
                   R"(This data is provided on an "AS IS" BASIS WITHOUT )"
                   "WARRANTIES OR CONDITIONS OF ANY KIND, either express or "
@@ -165,8 +165,16 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
     "fit together, and where they fall on the reference grid. In Chrome: "
     "&#8984+/&#8984- (or Ctrl+/Ctrl- for Windows).</p>");
 
-  overview.addRaw("<h4>Contents</h4><ul>");
+  vector<const MonkeyCAM::DebugPathSet*> sets;
   for (auto pathSet : shape.debugPathSets()) {
+    sets.push_back(pathSet);
+    if (pathSet->header() == "Core shape") {
+      sets.push_back(&profile.debugPathSet());
+    }
+  }
+
+  overview.addRaw("<h4>Contents</h4><ul>");
+  for (auto pathSet : sets) {
     overview.addFormatted("<li><a href=\"#%s\">%s</a></li>",
                           pathSet->headerLink().c_str(),
                           pathSet->header().c_str());
@@ -177,9 +185,9 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
   int dw = std::ceil(shape.overallLength().dbl());
   int dh = std::ceil(shape.maxWidth().dbl());
 
-  for (auto pathSet : shape.debugPathSets()) {
-    overview.addHeader(pathSet->header(), pathSet->headerLink());
-    for (auto& desc : pathSet->descriptions()) {
+  auto renderPathSet = [&](const MonkeyCAM::DebugPathSet& pathSet) {
+    overview.addHeader(pathSet.header(), pathSet.headerLink());
+    for (auto& desc : pathSet.descriptions()) {
       overview.addRaw(desc.c_str());
     }
     overview.addRaw("<dl>");
@@ -195,21 +203,25 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
         seenDescs.insert(desc.name());
       }
     };
-    for (auto& path : pathSet->paths()) {
+    for (auto& path : pathSet.paths()) {
       descFormatter(path.desc());
     }
-    for (auto& a : pathSet->annotations()) {
+    for (auto& a : pathSet.annotations()) {
       descFormatter(a.desc());
     }
     overview.addRaw("</dl>");
     overview.startDrawing(dw, dh);
-    for (auto& path : pathSet->paths()) {
+    for (auto& path : pathSet.paths()) {
       overview.addPath(path, path.desc().color(), path.desc().dashed());
     }
-    for (auto& annotation : pathSet->annotations()) {
+    for (auto& annotation : pathSet.annotations()) {
       overview.addAnnotation(annotation);
     }
     overview.endDrawing();
+  };
+
+  for (auto pathSet : sets) {
+    renderPathSet(*pathSet);
   }
 }
 
@@ -294,7 +306,7 @@ int main(int argc, char *argv[]) {
   printf("Generating HTML overview %s%s\n",
          outdir.c_str(), overviewName.c_str());
   MonkeyCAM::OverviewWriter overview(outdir + overviewName, shape->name());
-  generateOverview(overview, *shape);
+  generateOverview(overview, *shape, profile);
   overview.addHeader("Configuration");
   overview.addRaw("<p>The configuration used to generate this overview is "
                   "echoed here to ensure it can always be regenerated later. "

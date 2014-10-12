@@ -56,7 +56,7 @@ class BoardShape {
   const GCodeWriter generateEdgeTrench(const Machine& machine);
   const GCodeWriter generateInsertHoles(const Machine& machine);
   const GCodeWriter generateTopProfile(const Machine& machine,
-                                       BoardProfile profile);
+                                       BoardProfile& profile);
   const GCodeWriter generateTopCutout(const Machine& machine);
 
   const Path& insertsPath() const { return m_insertsPath; }
@@ -66,6 +66,9 @@ class BoardShape {
       m_effectiveEdge; }
   MCFixed maxWidth() const {
     return std::max(std::max(m_noseWidth, m_waistWidth), m_tailWidth);
+  }
+  MCFixed minWidth() const {
+    return std::min(std::min(m_noseWidth, m_waistWidth), m_tailWidth);
   }
   const std::string name() const { return m_name; }
 

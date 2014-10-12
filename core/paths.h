@@ -128,7 +128,7 @@ class DebugAnnotation {
 
   void addSvg(std::string svg) { m_svg += svg; }
   void addSvgFormat(const char* fmt, ...);
-  void addSvgCircle(Point p, MCFixed diameter, std::string fill="blue");
+  void addSvgCircle(Point p, MCFixed diameter);
 
   const std::string& svg() const { return m_svg; }
   const DebugAnnotationDesc& desc() const { return m_desc; }

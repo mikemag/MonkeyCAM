@@ -21,6 +21,8 @@
 
 namespace MonkeyCAM {
 
+class BoardShape;
+
 //------------------------------------------------------------------------------
 
 class BoardProfile {
@@ -37,8 +39,12 @@ class BoardProfile {
 
   BoardProfile(MCFixed noseThickness, MCFixed centerThickness,
                MCFixed tailThickness, End nose, End tail,
-               MCFixed eeLength, MCFixed overallLength, MCFixed noseLength);
+               BoardShape& shape);
   const Path& path() const { return m_path; }
+
+  DebugPathSet& debugPathSet() {
+    return m_debugPathSet;
+  }
 
  private:
   MCFixed m_noseThickness;
@@ -48,6 +54,7 @@ class BoardProfile {
   End m_tail;
 
   Path m_path;
+  DebugPathSet m_debugPathSet;
 };
 
 } // namespace MonkeyCAM

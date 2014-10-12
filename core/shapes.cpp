@@ -161,7 +161,6 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       for (auto& p : m_insertsPath) {
         a.addSvgCircle(p, machine.insertRimDiameter());
         a.addSvgCircle(p, machine.insertHoleDiameter());
-        a.addSvgCircle(p, 0.05);
       }
       return a;
     });
@@ -175,10 +174,8 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
           "green", true
         }
       };
-      a.addSvgCircle(Point(eeCenterX - (m_refStance / 2) + m_setback, 0),
-                     0.5, "green");
-      a.addSvgCircle(Point(eeCenterX + (m_refStance / 2) + m_setback, 0),
-                     0.5, "green");
+      a.addSvgCircle(Point(eeCenterX - (m_refStance / 2) + m_setback, 0), 0.5);
+      a.addSvgCircle(Point(eeCenterX + (m_refStance / 2) + m_setback, 0), 0.5);
       a.addSvgFormat(
         R"(<path d="M%f %f L%f %f"/>)",
         (eeCenterX + m_setback).dbl(), -4.0,
@@ -311,7 +308,7 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
   auto final = PathUtils::ClipPathsDifference(overhang, spacers);
   assert(final.size() == 1);
   m_corePath = final[0];
-  DebugPathSet& dps = addDebugPathSet("Core");
+  DebugPathSet& dps = addDebugPathSet("Core shape");
   dps.addPath([&] {
       return DebugPath {
         m_corePath,
@@ -469,10 +466,8 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
           "Guide holes placed beyond the ends of the board."
         }
       };
-      a.addSvgCircle(leftGuideHole(machine), holeDia, "black");
-      a.addSvgCircle(leftGuideHole(machine), 0.05, "black");
-      a.addSvgCircle(rightGuideHole(machine), holeDia, "black");
-      a.addSvgCircle(rightGuideHole(machine), 0.05, "black");
+      a.addSvgCircle(leftGuideHole(machine), holeDia);
+      a.addSvgCircle(rightGuideHole(machine), holeDia);
       return a;
     });
   dps.addPath([&] {
@@ -574,8 +569,7 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
   for (auto& p : marks) {
     g.rapidToPoint(p);
     g.feedToPoint(p);
-    a.addSvgCircle(p, p.Z * -2, "red");
-    a.addSvgCircle(p, 0.05, "red");
+    a.addSvgCircle(p, p.Z * -2);
   }
   g.rapidToPoint(marks.back());
   g.spindleOff();
@@ -747,7 +741,7 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
 // thru a final finish pass.
 
 const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
-                                                 BoardProfile profile) {
+                                                 BoardProfile& profile) {
   auto tool = machine.tool(machine.topProfileTool());
   // nb: use the overall path plus the sidewall overhang to limit the
   // profiling paths. This ensures the entire sidewall, even outside
@@ -768,6 +762,16 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                      tool.diameter.inchesStr().c_str(),
                      machine.topProfileOverlapPercentage() * 100.0);
   dps.addPath([&] {
+      return DebugPath {
+        buildCorePath(machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "green", true
+        }
+      };
+    });
+  profile.debugPathSet().addPath([&] {
       return DebugPath {
         buildCorePath(machine),
         DebugAnnotationDesc {

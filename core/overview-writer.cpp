@@ -124,7 +124,7 @@ void OverviewWriter::startDrawing(int width, int height) {
   for (int i = -height / 2; i < height / 2; i++) {
     if (i % 10 == 0) {
       addFormatted(R"(<text x="%d" y="%d" dx="1.5">%d%s</text>)",
-                   -widthExtra / 2, i, i, i == 0 ? "cm" : "");
+                   -widthExtra / 2, -i, i, i == 0 ? "cm" : "");
     }
   }
   addRaw(R"(</g>)");
@@ -155,7 +155,7 @@ void OverviewWriter::addPath(const Path& path, std::string color, bool dashed) {
                "points=\"",
                dash, opacity, color.c_str());
   for (auto const& p : path) {
-    m_outputStream << p.X.dbl() << "," << p.Y.dbl() << " ";
+    m_outputStream << p.X.dbl() << "," << -p.Y.dbl() << " ";
   }
   m_outputStream << "\"/>" << std::endl;
 }

@@ -228,14 +228,19 @@ void DebugAnnotation::addSvgFormat(const char* fmt, ...) {
   va_end(args);
 }
 
-void DebugAnnotation::addSvgCircle(Point p, MCFixed diameter,
-                                   std::string fill) {
+void DebugAnnotation::addSvgCircle(Point p, MCFixed diameter) {
   char buff[1024];
   snprintf(buff, sizeof(buff),
            R"(<circle cx="%f" cy="%f" r="%f" fill="%s" )"
            R"(fill-opacity="0.25" stroke-width="0.01" )"
            R"(/>)",
-           p.X.dbl(), p.Y.dbl(), (diameter / 2).dbl(), fill.c_str());
+           p.X.dbl(), -p.Y.dbl(), (diameter / 2).dbl(), m_desc.color().c_str());
+  m_svg += buff;
+  snprintf(buff, sizeof(buff),
+           R"(<circle cx="%f" cy="%f" r="0.05" fill="%s" )"
+           R"(fill-opacity="0.25" stroke-width="0.01" )"
+           R"(/>)",
+           p.X.dbl(), -p.Y.dbl(), m_desc.color().c_str());
   m_svg += buff;
 }
 
