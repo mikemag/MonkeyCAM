@@ -13,6 +13,8 @@ design of skis and snowboards only. The
 portion is slightly more general, but again is specialized to ski and
 snowboard manufacture.
 
+Here is an overview of what MonkeyCAM generates: https://rawgit.com/mikemag/MonkeyCAM/master/Sample-output/Sample-snowboard-overview.html
+
 MonkeyCAM is published on Github at https://github.com/mikemag/MonkeyCAM
 
 More information about ski and snowboard construction can be found at
@@ -42,13 +44,16 @@ receive to my code is from me and not from my employer (Facebook).
 
 ## Current Release
 
-See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases) for the current release, which includes release notes and links to download binaries.
+See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
+for the current release, which includes release notes and links to
+download binaries.
 
 ## Features and Current Status
 
-MonkeyCAM is currently a command-line program only. The program takes configuration files to
-describe the ski or snowboard shape via a small set of parameters and
-generates the following G-code programs:
+MonkeyCAM is currently a command-line program only. The program takes
+configuration files to describe the ski or snowboard shape via a small
+set of parameters and generates the following G-code programs plus a
+HTML overview of the board:
 
 * Base cutout
 * Core:
@@ -68,21 +73,20 @@ program also loads in Mach 3 and simulates correctly. The programs not
 involving holes load in ShopBot's controller and simulate correctly,
 but the ones with holes do not work for ShopBot right now.
 
-There is no UI, and all configuration and results are in files.
-
-You can see a sample set of programs here: [MonkeyCAM Visualization
-Example](http://www.happymonkeysnowboards.com/MonkeyCAM/path-viewer.html)
+There is no interactive user interface. Configuration is done via two
+text files, and all results are either G-Code programs, or the HTML
+overview which can be easily used to refine the board shape.
 
 ## Future Work
 
-MonkeyCAM v4.0 is a work in-progress. It is an incomplete (~50% so
-far) port of MonkeyCAM, developed by [Mike
-Magruder](https://github.com/mikemag) for [Happy Monkey Snowboards,
-Inc.](http://www.happymonkeysnowboards.com/) from 2003 to 2012. The
-valuable parts of the MonkeyCAM v3 backend (shape and G-code
-generation) will be ported to this version over the next many
-months. The old UI will be discarded. The plan includes, roughly in
-order:
+MonkeyCAM v4.0 is a work in-progress. It is a port of MonkeyCAM v1-v3,
+developed by [Mike Magruder](https://github.com/mikemag) for [Happy
+Monkey Snowboards, Inc.](http://www.happymonkeysnowboards.com/) from
+2003 to 2012. The valuable parts of the MonkeyCAM v3 backend (shape
+and G-code generation) have been almost completely ported. The old UI
+has been discarded.
+
+My plan for work includes, roughly in order:
 
 * Target more G-code controllers with different formats and requirements.
 * More options for effective edge, nose, and tail. (MonkeyCAM v3, for
@@ -90,35 +94,46 @@ order:
 * Port the code to soften the transition between edge and
   nose/tail. (You can work around this with a sandblock and two min of
   your time for now.)
-* Port the MonkeyCAM design UI to a web-based UI built on HTML 5, and
-enable local execution.
-  * The UI will include easy controls for inputting the shape
+* Read the overall board shape from other CAD programs (DXF at least).
+* Mold design and program to cut molds.
+* Rouging passes for the core profile.
+* Output the overall shape, insert locations, etc. to PDF/DXF for
+  printing or use in other CAD programs.
+* Host MonkeyCAM on servers in something like AWS or Google Apps;
+  serve the UI while running the engine on the server, provide local
+  storage for board configurations.
+* Adapt for other kinds of 'boards': kite boards, skate boards, etc.
+
+My plan does not currently include any further significant UI work. I
+find the HTML overview generated as of v4.0.3 more than adequate to
+iterate on design and understand what the parts will look like. I will
+continue to refine the overview, of course. I hope others find it
+equally easy to use.
+
+If anyone is interested in building an interactive UI for MonkeyCAM
+please contact me and I will be happy to help with logistics and
+integrating the current engine with your UI. Some potential ideas to
+consider:
+
+* Create an interactive web-based UI built on HTML 5, and
+  enable local execution.
+  * The UI should include easy controls for inputting the shape
     parameters, plus live visualization of the overall shape, profile,
-    insert placement, etc. It also includes specifying the machining
-    parameters. Right now I'm thinking about a combination of React and
-    three.js.
-* Port the MonkeyCAM G-code validation UI, built on the same framework
+    insert placement, etc. It also should include specifying the machining
+    parameters.
+* Cretae a G-code validation UI, built on the same framework
   as the design UI.
   * This includes import of the G-code programs output from MonkeyCAM,
     as well as pretty much any G-code program, visualization of the
     tool path, overlay of multiple programs together for validation,
     and stepping through G-code programs to better understand how the
     cutter will move.
-* Host MonkeyCAM on servers in something like AWS or Google Apps;
-  serve the UI while running the engine on the server, provide local
-  storage for board configurations.
-* Read the overall board shape from other CAD programs (DXF at least).
-* Output the overall shape, insert locations, etc. to PDF/DXF for
-  printing or use in other CAD programs.
-* Mold design and program to cut molds.
-* Rouging passes for the core profile.
-* Adapt for other kinds of 'boards': kite boards, skate boards, etc.
 
-Why not just open source MonkeyCAM v3? Honestly, the code for my
-personal version of MonkeyCAM has grown rather organically over almost
-10 years and three major revisions. It is a huge mess of C#, WinForms,
-and Managed DirectX, and I'd really prefer no one but me ever sees
-that code again. :)
+Why not just open source MonkeyCAM v3 and its UI? Honestly, the code
+for older versions of MonkeyCAM had grown rather organically over
+almost 10 years and three major revisions. It is a huge mess of C#,
+WinForms, and Managed DirectX, and I'd really prefer no one but me
+ever sees that code again. :)
 
 ## Dependencies
 
