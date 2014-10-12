@@ -58,9 +58,9 @@
     },
     "tail taper":
     {
-      "taper start": 0.45,
-      "start handle": 0.70,
-      "end handle": 0.80,
+      "taper start": 0.51,
+      "start handle": 0.68,
+      "end handle": 0.85,
       "taper end": 1.00
     }
   }

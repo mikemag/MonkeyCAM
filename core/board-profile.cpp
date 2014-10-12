@@ -62,6 +62,19 @@ BoardProfile::BoardProfile(MCFixed noseThickness, MCFixed centerThickness,
   Path ep = m_path;
   std::transform(ep.begin(), ep.end(), ep.begin(),
                  [&](const Point& p) { return Point(p.X, p.Y * 5); });
+  m_debugPathSet.addDescription(
+    "<p>The thickness profile is shown below, as viewed from the side. It is "
+    "formed with flat sections at the nose, center, and tail joined by a "
+    "Bezier curve between each. The transition points are defined as a "
+    "percentage of the distance from the center of the effective edge to the "
+    "nose or tail. Starting from the center and moving towards the nose, the "
+    "profile will be flat until reaching the taper start point. The Bezier "
+    "will provide a smooth transition (pulled by the start handle and end "
+    "handle) to the taper end point, where the minimum thickness is reached. "
+    "The core remains flat all the way to the end of the nose.</p>");
+  m_debugPathSet.addDescription(
+    "<p>Note that these percentages can by any valid value between 0%% and "
+    "100%%, but they should be increasing values. </p>");
   m_debugPathSet.addPath([&] {
       return DebugPath {
         ep,

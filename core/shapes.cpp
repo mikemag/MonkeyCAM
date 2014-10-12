@@ -118,12 +118,39 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
   m_overallPath.push_back_path(MirroredPath(np));
   assert(m_overallPath.size() > 0);
   DebugPathSet& dps = addDebugPathSet("Overall shape");
+  dps.addDescription(
+    "<p>The overall shape of the board is the final, finished outline of the "
+    "ski or snowboard. None of the generated G-Code programs actually cuts "
+    "this shape, though the base shape with the edges amounts to the same "
+    "thing. It is shown with inserts and other guide lines to present a fairly "
+    "complete picture of the final board.</p>");
+  dps.addDescription(
+    "<ul>"
+    "<li>Total length: %scm</li>"
+    "<li>Nose / effective edge / tail length: %scm / %scm / %scm</li>"
+    "<li>Nose / waist / tail width: %scm / %scm / %scm</li>"
+    "<li>Taper: %scm</li>"
+    "<li>Sidecut radius / depth: %scm / %scm</li>"
+    "<li>Reference stance width: %scm</li>"
+    "<li>Setback: %scm</li>"
+    "<li>Board area: %.3fcm<sup>2</sup></li>"
+    "</ul>",
+    overallLength().str().c_str(),
+    m_noseLength.str().c_str(), m_effectiveEdge.str().c_str(),
+      m_tailLength.str().c_str(),
+    m_noseWidth.str().c_str(), m_waistWidth.str().c_str(),
+      m_tailWidth.str().c_str(),
+    m_taper.str().c_str(),
+    m_sidecutRadius.str().c_str(), m_sidecutDepth.str().c_str(),
+    m_refStance.str().c_str(),
+    m_setback.str().c_str(),
+    PathUtils::Area(m_overallPath)
+  );
   dps.addPath([&] {
       return DebugPath {
         m_overallPath,
         DebugAnnotationDesc {
-          "Overall shape",
-          "The final shape of the board, including edges."
+          "Overall shape"
         }
       };
     });
@@ -309,6 +336,13 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
   assert(final.size() == 1);
   m_corePath = final[0];
   DebugPathSet& dps = addDebugPathSet("Core shape");
+  dps.addDescription(
+    "<p>This is the final shape of the core with sidewalls and extra room "
+    "(%scm) for nose and tail spacer material. The sidewalls overhang the "
+    "true edge of the board by %scm.</p>",
+    m_spacerWidth.str().c_str(),
+    machine.sidewallOverhang().str().c_str()
+  );
   dps.addPath([&] {
       return DebugPath {
         m_corePath,
@@ -588,6 +622,19 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
   auto grooveWidth = machine.sidewallOverhang() + edgeWidth;
   assert(grooveWidth >= tool.diameter);
   DebugPathSet& dps = addDebugPathSet("Edge Groove");
+  dps.addDescription(
+    "<p>The edge groove creates a rabbet along the perimeter of the core, "
+    "leaving space for the edge material so the core still sits flat on the "
+    "base material. It is created by machining a shallow trench %scm wide into "
+    "the base of the core which matches precisely the edge of the core when it "
+    "is finally cut out. Because of the sidewall overhang this ends up being "
+    "slightly wider than the final rabbet width. The rabbet width should also "
+    "be a bit wider than the exact edge material width to leave a little play "
+    "when aligning the core to the base.</p>",
+    grooveWidth.str().c_str());
+  dps.addDescription(
+    "<p>Since the width of the rabbet is typically larger than the cutter "
+    "used, multiple machining passes are required.</p>");
   dps.addPath([&] {
       return DebugPath {
         buildCorePath(machine),
@@ -841,6 +888,12 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
   const Machine& machine)
 {
   DebugPathSet& dps = addDebugPathSet("Nose Tail Spacers");
+  dps.addDescription(
+    "<p>Nose and tail spacers are thin sections of PTEX which act as sidewalls "
+    "along the nose and tail to protect the core. They are typically a bit "
+    "wider than normal sidewalls to act as a bit more of a 'bumper' against "
+    "impact. The spacers are cut wider and longer than necessary to ensure "
+    "they overlap the edges well, and for simplicity.</p>");
   auto tool = machine.tool(machine.baseCutoutTool());
   auto nosePath = m_noseSpacerPath;
   auto tailPath = m_tailSpacerPath;
@@ -1032,7 +1085,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   auto etUpperCenter = etCenterPath;
 
   // Extend each center line to clear the core. NB: add twice the
-  // cutter diameter to leave room for the rounded corners on both
+  // cutter radius to leave room for the rounded corners on both
   // ends.
   //
   // @TODO: older versions of MonkeyCAM used to compute the
@@ -1041,9 +1094,9 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   // and I should adjust this to do the same one day.
   auto tool = machine.tool(machine.coreCutoutTool());
   extendLine(etUpperCenter, machine.edgeTrenchExtension() +
-             tool.diameter * 2);
+             tool.diameter);
   extendLine(etLowerCenter, machine.edgeTrenchExtension() +
-             tool.diameter * 2);
+             tool.diameter);
 
   // Form the trench paths by offseting the two centerlines.
   auto trenches =
@@ -1059,12 +1112,21 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   assert(ps.size() == 1);
   auto t2 = ps[0];
 
+  dps.addDescription(
+    "<p>The edge trenches provide space in which to place a different type "
+    "of wood along the effective edge, as well as sidewall material. The outer "
+    "edge of the trenches matches the edge of the core precisely, including "
+    "the sidewall overhang. The trench is %scm wide and extends %scm past the "
+    "ends of the effective edge.</p>",
+    machine.edgeTrenchWidth().str().c_str(),
+    (machine.edgeTrenchExtension() + tool.diameter).str().c_str()
+  );
   dps.addPath([&] {
       return DebugPath {
         t1,
         DebugAnnotationDesc {
           "Edge Trench Path",
-          "The path used to cut the edge trench"
+          "The path used to cut the edge trench."
         }
       };
     });
@@ -1073,7 +1135,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
         t2,
         DebugAnnotationDesc {
           "Edge Trench Path",
-          "The path used to cut the edge trench"
+          "The path used to cut the edge trench."
         }
       };
     });
@@ -1082,7 +1144,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
         trenches[0],
         DebugAnnotationDesc {
           "Edge Trench",
-          "The final shapre of the edge trench",
+          "The final shapre of the edge trench.",
           "blue", true
         }
       };
@@ -1092,7 +1154,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
         trenches[1],
         DebugAnnotationDesc {
           "Edge Trench",
-          "The final shapre of the edge trench",
+          "The final shapre of the edge trench.",
           "blue", true
         }
       };
