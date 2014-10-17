@@ -47,6 +47,7 @@ class GCodeWriter {
   GCodeWriter(std::string filename, Tool const& tool, ZeroZ zeroHeight,
               XYOrigin origin, int normalSpeed,
               MCFixed rapidHeight);
+  GCodeWriter();
 
   void spindleOn();
   void spindleOff();

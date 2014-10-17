@@ -191,7 +191,8 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       }
       return a;
     });
-  dps.addAnnotation([&] {
+  if (m_refStance > 0.0) {
+    dps.addAnnotation([&] {
       auto a = DebugAnnotation {
         DebugAnnotationDesc {
           "Reference stance and setback",
@@ -209,6 +210,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
         (eeCenterX + m_setback).dbl(), 4.0);
       return a;
     });
+  }
   return m_overallPath;
 }
 
@@ -301,24 +303,28 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
     std::swap(noseSpacerPath, tailSpacerPath);
   }
   // @TODO: make these control points a bit more configurable.
-  roundSpacerEnds(noseSpacerPath,
-                  noseSpacerPath.begin(), noseSpacerPath.end(),
-                  Point(m_noseLength, -noseSpacerY), m_noseLength - 4,
-                  4, -4);
-  roundSpacerEnds(noseSpacerPath,
-                  noseSpacerPath.rbegin(), noseSpacerPath.rend(),
-                  Point(m_noseLength, noseSpacerY), m_noseLength - 4,
-                  -4, -4);
-  std::reverse(noseSpacerPath.begin(), noseSpacerPath.end());
-  roundSpacerEnds(tailSpacerPath,
-                  tailSpacerPath.rbegin(), tailSpacerPath.rend(),
-                  Point(tailSpacerX1, -tailSpacerY), tailSpacerX1 + 4,
-                  4, -4);
-  std::reverse(tailSpacerPath.begin(), tailSpacerPath.end());
-  roundSpacerEnds(tailSpacerPath,
-                  tailSpacerPath.begin(), tailSpacerPath.end(),
-                  Point(tailSpacerX1, tailSpacerY), tailSpacerX1 + 4,
-                  -4, -4);
+  if (m_noseLength > m_spacerWidth + 4) {
+    roundSpacerEnds(noseSpacerPath,
+                    noseSpacerPath.begin(), noseSpacerPath.end(),
+                    Point(m_noseLength, -noseSpacerY), m_noseLength - 4,
+                    4, -4);
+    roundSpacerEnds(noseSpacerPath,
+                    noseSpacerPath.rbegin(), noseSpacerPath.rend(),
+                    Point(m_noseLength, noseSpacerY), m_noseLength - 4,
+                    -4, -4);
+    std::reverse(noseSpacerPath.begin(), noseSpacerPath.end());
+  }
+  if (m_tailLength > m_spacerWidth + 4) {
+    roundSpacerEnds(tailSpacerPath,
+                    tailSpacerPath.rbegin(), tailSpacerPath.rend(),
+                    Point(tailSpacerX1, -tailSpacerY), tailSpacerX1 + 4,
+                    4, -4);
+    std::reverse(tailSpacerPath.begin(), tailSpacerPath.end());
+    roundSpacerEnds(tailSpacerPath,
+                    tailSpacerPath.begin(), tailSpacerPath.end(),
+                    Point(tailSpacerX1, tailSpacerY), tailSpacerX1 + 4,
+                    -4, -4);
+  }
 
   // 4.5. The nose and tail spacer paths we have now are what we'll
   // need when generating cut programs later, so hang onto them.
@@ -398,14 +404,18 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
 void BoardShape::setupInserts() {
   auto stanceX = (m_refStance / 2);
   MCFixed eeCenterX = m_noseLength + m_effectiveEdge / 2;
-  m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + eeCenterX, 0));
-  m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + eeCenterX, 0));
-  auto p = m_noseInserts->insertsPath();
-  m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
-  m_insertsPath.push_back(Point(m_noseInserts->maxPoint().X + 4, 0));
-  m_insertsPath.push_back(Point(m_tailInserts->minPoint().X - 4, 0));
-  p = m_tailInserts->insertsPath();
-  m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+  if (m_noseInserts) {
+    m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + eeCenterX, 0));
+    auto p = m_noseInserts->insertsPath();
+    m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+    m_insertsPath.push_back(Point(m_noseInserts->maxPoint().X + 4, 0)); // Pin
+  }
+  if (m_tailInserts) {
+    m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + eeCenterX, 0));
+    m_insertsPath.push_back(Point(m_tailInserts->minPoint().X - 4, 0)); // Pin
+    auto p = m_tailInserts->insertsPath();
+    m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -762,6 +772,9 @@ void emitInsert(GCodeWriter& g, const Machine& machine,
 }
 
 const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
+  if (m_insertsPath.size() == 0) {
+    return GCodeWriter();
+  }
   auto tool = machine.tool(machine.insertHolesTool());
   auto rapidHeight = machine.bottomRapidHeight();
   GCodeWriter g(m_name + "-core-insert-holes.nc", tool,

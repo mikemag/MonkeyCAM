@@ -48,6 +48,10 @@ GCodeWriter::GCodeWriter(string filename, Tool const& tool,
   startBlock();
 }
 
+// Empty writer which can be used as a placeholder for 'nothing'.
+GCodeWriter::GCodeWriter() {
+}
+
 // Simple word-wrapped comments
 void GCodeWriter::headerComment(string s, int indent) {
   commentWrapped(m_headerComments, s, indent);
@@ -406,6 +410,9 @@ void GCodeWriter::close() {
 }
 
 void GCodeWriter::write(string directory) const {
+  if (m_lines.size() == 0) {
+    return;
+  }
   printf("%s\n", m_filename.c_str());
   std::ofstream o;
   o.open(directory + m_filename);

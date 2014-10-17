@@ -20,6 +20,7 @@
 #include <cassert>
 #include <vector>
 #include <set>
+#include <boost/optional/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <sys/stat.h>
@@ -79,13 +80,22 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto nose = loadEndPart(config.get_child("board.nose shape"));
   auto edge = loadEdgePart(config.get_child("board.edge shape"));
   auto tail = loadEndPart(config.get_child("board.tail shape"));
-
-  auto refStance = config.get<double>("board.reference stance width");
-  auto setback = config.get<double>("board.stance setback");
-  auto nosePack = loadInserts(config.get_child("board.nose insert pack"));
-  auto tailPack = loadInserts(config.get_child("board.tail insert pack"));
-
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
+
+  auto refStance = config.get_optional<double>("board.reference stance width")
+    .get_value_or(0.0);
+  auto setback = config.get_optional<double>("board.stance setback")
+    .get_value_or(0.0);
+  auto npc = config.get_child_optional("board.nose insert pack");
+  std::unique_ptr<InsertPack> nosePack;
+  if (npc) {
+    nosePack = loadInserts(npc.get());
+  }
+  std::unique_ptr<InsertPack> tailPack;
+  auto tpc = config.get_child_optional("board.tail insert pack");
+  if (tpc) {
+    tailPack = loadInserts(tpc.get());
+  }
 
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,

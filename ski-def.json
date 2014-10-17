@@ -1,0 +1,49 @@
+{
+  "board":
+  {
+    "name": "Sample-ski",
+    "nose length": 11,
+    "effective edge length": 161,
+    "tail length": 6.5,
+    "sidecut radius": 2250,
+    "waist width": 9.3,
+    "taper": 1.4,
+    "nose shape":
+    {
+      "type": "Basic Bezier",
+      "end handle": 0.50,
+      "transition handle": 0.75
+    },
+    "edge shape":
+    {
+      "type": "Basic Arc"
+    },
+    "tail shape":
+    {
+      "type": "Basic Bezier",
+      "end handle": 0.50,
+      "transition handle": 0.75
+    },
+    "nose and tail spacer width": 2
+  },
+  "profile":
+  {
+    "nose thickness": 0.2,
+    "center thickness": 0.79,
+    "tail thickness": 0.2,
+    "nose taper":
+    {
+      "taper start": 0.45,
+      "start handle": 0.70,
+      "end handle": 0.80,
+      "taper end": 1.00
+    },
+    "tail taper":
+    {
+      "taper start": 0.51,
+      "start handle": 0.68,
+      "end handle": 0.85,
+      "taper end": 1.00
+    }
+  }
+}
