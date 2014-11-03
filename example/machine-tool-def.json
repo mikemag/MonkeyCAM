@@ -39,6 +39,10 @@
     "top profile deep speed": 50,
     "top profile overlap percentage": 0.50,
     "top profile lead-in length": 4.0,
+    "top profile roughing": false,
+    "top profile roughing max cut depth": 0.200,
+    "top profile roughing offset": 0.020,
+    "top profile roughing fuzz": 0.020,
 
     "core cutout tool": 1,
 

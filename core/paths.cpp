@@ -47,15 +47,11 @@ MirroredPath::MirroredPath(const Path& path) {
 // large enough flat zones, but is untested for anything
 // else. Adjacent flat zones and valleys will cause loops.
 ToolOffsetPath::ToolOffsetPath(const Path& path, MCFixed toolDiameter) {
-  // NB: assumes the start and ends are flat, and the flat span is
-  // longer than the diameter of the tool.
-  assert(path.size() > 4);
-  assert(path[0].Y == path[1].Y);
-  assert(path[path.size() - 2].Y == path[path.size() - 1].Y);
+  assert(path.size() > 1);
   push_back(path.front());
   MCFixed prevOffset = 0;
   bool lastPointMoved = false;
-  for (unsigned int i = 1; i < path.size() - 1; i++) {
+  for (unsigned int i = 1; i < path.size(); i++) {
     auto p1 = path[i - 1];
     auto p2 = path[i];
     // Which way does the line segment go?
@@ -71,14 +67,13 @@ ToolOffsetPath::ToolOffsetPath(const Path& path, MCFixed toolDiameter) {
     // the end of the segment in a different direction, then we need
     // to insert a new start point for the new line segment.
     if (lastPointMoved && (offset != 0) && (offset != prevOffset)) {
-      push_back(p1 + Point(offset, 0));
+      push_back(p1 + Point(offset * 2, 0));
     }
     // Offset the end point.
     push_back(p2 + Point(offset, 0));
-    lastPointMoved = offset == 0 ? false : true;
+    lastPointMoved = offset != 0;
     prevOffset = offset;
   }
-  push_back(path.back());
 }
 
 //------------------------------------------------------------------------------
@@ -297,7 +292,7 @@ ClipperLib::Polygon pathToPolygon(const Path& path, PathClosure c = Closed) {
   return poly;
 }
 
-Path polygonToPath(const ClipperLib::Polygon& poly) {
+Path polygonToPath(const ClipperLib::Polygon& poly, PathClosure c = Closed) {
   Path path;
   for (const auto& p : poly) {
     path.emplace_back(Point(MCFixed::fromPreScaled(p.X),
@@ -305,7 +300,9 @@ Path polygonToPath(const ClipperLib::Polygon& poly) {
   }
   auto smallest = std::min_element(path.begin(), path.end());
   std::rotate(path.begin(), smallest, path.end());
-  path.emplace_back(path[0]); // Poly is open, so close it now
+  if (c == Closed) {
+    path.emplace_back(path[0]); // Poly is open, so close it now
+  }
   return path;
 }
 
@@ -330,6 +327,20 @@ std::vector<Path> OffsetPath(const Path& path, MCFixed offset) {
   return resultPaths;
 }
 
+Path OffsetOpenPath(const Path& path, MCFixed offset) {
+  std::vector<Path> resultPaths;
+  ClipperLib::Polygons origPolys;
+  origPolys.emplace_back(pathToPolygon(path, Open));
+  ClipperLib::Polygons resultPolys;
+  ClipperLib::OffsetPolygons(origPolys, resultPolys, offset.scaledInt(),
+                             ClipperLib::jtSquare, 0, true);
+  assert(resultPolys.size() == 1);
+  auto r = polygonToPath(resultPolys[0], Open);
+  r.erase(r.begin());
+  r.erase(r.begin());
+  return r;
+}
+
 // Use Clipper to offset a set of open paths, i.e., lines. There is no
 // assumption about the direction of the lines. The input lines may
 // have duplicate points.
@@ -351,6 +362,26 @@ std::vector<Path> OffsetLines(const std::vector<Path>& paths, MCFixed offset) {
   return resultPaths;
 }
 
+
+// Use Clipper to constrain one set of paths with another.
+std::vector<Path> ClipPathsIntersect(const std::vector<Path>& subjects,
+                                     const std::vector<Path>& clips) {
+  std::vector<Path> resultPaths;
+  ClipperLib::Clipper c;
+  ClipperLib::Polygons clip;
+  ClipperLib::Polygons subject;
+  ClipperLib::Polygons solution;
+  for (auto& p : subjects) subject.emplace_back(pathToPolygon(p));
+  for (auto& p : clips) clip.emplace_back(pathToPolygon(p));
+  c.AddPolygons(subject, ClipperLib::ptSubject);
+  c.AddPolygons(clip, ClipperLib::ptClip);
+  c.Execute(ClipperLib::ctIntersection, solution,
+            ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+  for (const auto& poly : solution) {
+    resultPaths.emplace_back(polygonToPath(poly));
+  }
+  return resultPaths;
+}
 
 // Use Clipper to subtract one set of paths from another.
 std::vector<Path> ClipPathsDifference(const std::vector<Path>& subjects,

@@ -168,7 +168,10 @@ class DebugPathSet {
 namespace PathUtils {
 
 std::vector<Path> OffsetPath(const Path& path, MCFixed offset);
+Path OffsetOpenPath(const Path& path, MCFixed offset);
 std::vector<Path> OffsetLines(const std::vector<Path>& paths, MCFixed offset);
+std::vector<Path> ClipPathsIntersect(const std::vector<Path>& subjects,
+                                     const std::vector<Path>& clips);
 std::vector<Path> ClipPathsDifference(const std::vector<Path>& subjects,
                                       const std::vector<Path>& clips);
 double Area(const Path& path);

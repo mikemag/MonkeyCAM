@@ -18,6 +18,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <cassert>
 #include <cmath>
+#include <stack>
 #include <utility>
 
 #include "shapes.h"
@@ -794,12 +795,6 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
 //------------------------------------------------------------------------------
 // Core top profile
 
-// @TODO: add a decent roughing pass for the nose and tail regions.
-
-// @TODO: consider an option to make a roughing pass for the whole
-// thing. I.e., cut all of it 0.020" above the final part, then speed
-// thru a final finish pass.
-
 const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                                                  BoardProfile& profile) {
   auto tool = machine.tool(machine.topProfileTool());
@@ -811,6 +806,8 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   // this.
   auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(machine),
                                            machine.sidewallOverhang());
+  // nb: the roughing support is pretty experimental right now!!
+  bool roughing = machine.topProfileRoughing();
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
   DebugPathSet& dps = addDebugPathSet("Top Profile");
@@ -821,64 +818,219 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                      machine.topProfileLeadinLength().inchesStr().c_str(),
                      tool.diameter.inchesStr().c_str(),
                      machine.topProfileOverlapPercentage() * 100.0);
+  if (roughing) {
+    dps.addDescription("<p>Roughing paths are included, which limit the depth "
+                       "of cut to reduce cutter load. They are overlapped with "
+                       "the final thickness profile here.</p>");
+  }
   dps.addPath([&] {
-      return DebugPath {
-        buildCorePath(machine),
-        DebugAnnotationDesc {
-          "Core shape",
-          "The final shape of the core, including sidewalls with overhang.",
-          "green", true
-        }
-      };
-    });
+    return DebugPath {
+      buildCorePath(machine),
+      DebugAnnotationDesc {
+        "Core shape",
+        "The final shape of the core, including sidewalls with overhang.",
+        "green", true
+      }
+    };
+  });
   profile.debugPathSet().addPath([&] {
+    return DebugPath {
+      buildCorePath(machine),
+      DebugAnnotationDesc {
+        "Core shape",
+        "The final shape of the core, including sidewalls with overhang.",
+        "green", true
+      }
+    };
+  });
+  dps.addPath([&] {
+    return DebugPath {
+      overallOffset,
+      DebugAnnotationDesc {
+        "Outer profile pocket edge",
+        "The outer edge of the pocket formed when machining the thickness "
+        "profile. This is represents the limit of the material removed.",
+        "orange", true
+      }
+    };
+  });
+
+  auto exp = [](const Path& p) { // Exaggerate a path in Y
+    Path ep = p;
+    std::transform(ep.begin(), ep.end(), ep.begin(),
+                   [](const Point& p) { return Point(p.X, p.Y * 10); });
+    return ep;
+  };
+  struct PathRange {
+    MCFixed depth;
+    Path::const_iterator begin;
+    Path::const_iterator end;
+  };
+  typedef vector<PathRange> PathRanges;
+  auto boxFromRange = [&](const PathRange& range) -> Path {
+    auto x1 = (*range.begin).X;
+    if (x1 == profile.path().begin()->X) {
+      x1 -= 1;
+    }
+    auto x2 = (*(range.end - 1)).X;
+    if (x2 == (profile.path().end() - 1)->X) {
+      x2 += 1;
+    }
+    auto y = (maxWidth() / 2) + 1;
+    Path p;
+    p.push_back({x1, -y});
+    p.push_back({x2, -y});
+    p.push_back({x2, y});
+    p.push_back({x1, y});
+    p.push_back({x1, -y});
+    return p;
+  };
+
+  vector<Path> roughingProfilePaths;
+  vector<Path> roughingBoxes;
+
+  if (roughing) {
+    DebugPathSet& rdps = addDebugPathSet("Top Profile Roughing");
+    rdps.addDescription("<p>Roughing passes for the core top profile. This "
+                        "shows the depth for each roughing pass. All profile "
+                        "paths are exaggerated by 10x.</p>");
+    rdps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        exp(profile.path()),
         DebugAnnotationDesc {
-          "Core shape",
-          "The final shape of the core, including sidewalls with overhang.",
-          "green", true
-        }
+          "Final Profile",
+          "The final profile path, exaggeragted 10x.",
+          "red", true }
       };
     });
-  dps.addPath([&] {
+    rdps.addPath([&] {
       return DebugPath {
         overallOffset,
         DebugAnnotationDesc {
-          "Outer profile pocket edge",
-          "The outer edge of the pocket formed when machining the thickness "
-          "profile. This is represents the limit of the material removed.",
-          "orange", true
-        }
+          "Offset overall", "Limit of material removed by top profiling.",
+          "blue", true }
       };
     });
-  // Offset the profile path to account for the width of the cutter.
-  auto profileOffset = ToolOffsetPath(profile.path(), tool.diameter);
-  // Offset the outer path until the offset disappears. nb: the first
-  // path must be offset by half the tool diameter to ensure we follow
-  // the limiting path correctly.
-  double overlap = 0.5;
-  vector<vector<Path>> pathSets;
-  for (int i = 1; i < 100; i++) { // Artifical upper limit
-    auto resultPaths = PathUtils::OffsetPath(overallOffset,
-                                             -tool.diameter * overlap * i);
-    if (resultPaths.empty()) break; // All done!
-    // Deform each path with the profile.
-    for (auto& path : resultPaths) {
-      std::reverse(path.begin(), path.end());
-      path = ProfiledPath(path, profileOffset);
-      dps.addPath([&] {
+
+    MCFixed roughingOffset = machine.topProfileRoughingOffset();
+    Path roughProf = PathUtils::OffsetOpenPath(profile.path(), roughingOffset);
+    std::reverse(roughProf.begin(), roughProf.end()); // Keep it left-to-right
+
+    auto roughLevel = [](const PathRange& range,
+                         MCFixed upperLimit) -> PathRanges {
+      PathRanges newRanges;
+      bool rangeStarted = false;
+      PathRange npr;
+      npr.depth = upperLimit;
+      for (auto i = range.begin; i != range.end; ++i) {
+        if (i->Y < upperLimit) {
+          if (!rangeStarted) {
+            rangeStarted = true;
+            npr.begin = i;
+          }
+        } else {
+          if (rangeStarted) {
+            rangeStarted = false;
+            npr.end = i;
+            newRanges.push_back(npr);
+          }
+        }
+      }
+      if (rangeStarted) {
+        npr.end = range.end;
+        newRanges.push_back(npr);
+      }
+      return newRanges;
+    };
+
+    // Build roughing profile paths and bounding boxes we can use to
+    // clip the overall path later.
+    std::stack<PathRange> rangeStack;
+    rangeStack.push({ machine.coreBlankThickness(),
+          roughProf.begin(), roughProf.end() });
+    while (rangeStack.size() > 0) {
+      auto r = rangeStack.top(); rangeStack.pop();
+      auto newUpperLimit = r.depth - machine.topProfileRoughingMaxCutDepth();
+      auto minPoint = std::min_element(r.begin, r.end,
+                                       [](const Point& p1, const Point& p2) {
+                                         return p1.Y < p2.Y;
+                                       });
+      if (newUpperLimit - minPoint->Y < machine.topProfileRoughingFuzz()) {
+        newUpperLimit = minPoint->Y;
+      }
+      // Pull out the portion of the profile path within the range,
+      // limiting its depth tothe new upper limit.
+      Path rp;
+      std::for_each(r.begin, r.end,
+                    [&](const Point& p) {
+                      rp.push_back({p.X, std::max(p.Y, newUpperLimit)});
+                    });
+      roughingProfilePaths.push_back(rp);
+      auto roughingBox = boxFromRange(r);
+      roughingBoxes.push_back(roughingBox);
+      auto ep = exp(rp);
+      rdps.addPath([&] {
+        return DebugPath {
+          ep,
+          DebugAnnotationDesc { "Roughing Profile",
+            "Each rouging profile. These show the depth of cut for each "
+            "roughing pass, and are used to select and deform portions of the "
+            "final profiling paths.", "purple", true }
+        };
+      });
+      // Find new ranges below the path we just formed.
+      for (auto r : roughLevel(r, newUpperLimit)) {
+        rangeStack.push(r);
+      }
+    }
+  }
+  // Finally, add on the real profile path and a box to contain it.
+  roughingProfilePaths.push_back(profile.path());
+  roughingBoxes.push_back(
+    boxFromRange({ 0, profile.path().begin(), profile.path().end() }));
+
+  vector<vector<vector<Path>>> cutGroups;
+  for (int i = 0; i < roughingProfilePaths.size(); i++) {
+    vector<vector<Path>> pathSets;
+    auto& roughingProfile = roughingProfilePaths[i];
+    auto& roughingBox = roughingBoxes[i];
+    // Offset the profile path to account for the width of the cutter.
+    auto profileOffset = ToolOffsetPath(roughingProfile, tool.diameter);
+    // Offset the outer path until the offset disappears. nb: the first
+    // path must be offset by half the tool diameter to ensure we follow
+    // the limiting path correctly.
+    double overlap = 0.5;
+    for (int i = 1; i < 100; i++) { // Artifical upper limit
+      auto resultPaths = PathUtils::OffsetPath(overallOffset,
+                                               -tool.diameter * overlap * i);
+      if (resultPaths.empty()) break; // All done!
+      // Deform each path with the profile.
+      vector<Path> deformedResults;
+      for (auto& path : resultPaths) {
+        Path& p = path;
+        if (roughing) {
+          auto cp = PathUtils::ClipPathsIntersect({path}, {roughingBox});
+          if (cp.size() == 0) continue; // A bit on the other end, outside the box
+          assert(cp.size() == 1);
+          p = cp[0];
+          std::reverse(p.begin(), p.end());
+        }
+        auto dp = ProfiledPath(p, profileOffset);
+        deformedResults.push_back(dp);
+        dps.addPath([&] {
           return DebugPath {
-            path,
+            dp,
             DebugAnnotationDesc {
               "Top profile path",
-              "The paths used to profile the core."
+              "The paths used to profile the core.", "red", true
             }
           };
         });
+      }
+      pathSets.push_back(deformedResults);
+      overlap = machine.topProfileOverlapPercentage(); // Use real overlap % now
     }
-    pathSets.push_back(resultPaths);
-    overlap = machine.topProfileOverlapPercentage(); // Use real overlap % now
+    cutGroups.push_back(pathSets);
   }
   auto rapidHeight = machine.topRapidHeight();;
   GCodeWriter g(m_name + "-top-profile.nc", tool,
@@ -886,9 +1038,11 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
                 machine.topProfileDeepSpeed(), rapidHeight);
   addCoreCenterComment(g);
   g.spindleOn();
-  g.emitPathSets(pathSets, true, rapidHeight,
-                 machine.topProfileLeadinLength(),
-                 machine.topProfileTransitionSpeed());
+  for (auto& pathSets : cutGroups) {
+    g.emitPathSets(pathSets, true, rapidHeight,
+                   machine.topProfileLeadinLength(),
+                   machine.topProfileTransitionSpeed());
+  }
   g.spindleOff();
   g.close();
   return g;
