@@ -683,10 +683,13 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
   auto stepOffset = tool.diameter * machine.edgeGrooveOverlapPercentage();
   auto currentOffset = machine.sidewallOverhang() - (tool.diameter / 2);
   auto endOffset = -machine.edgeGrooveEdgeWidth() + (tool.diameter / 2);
+  auto grooveDepth = machine.edgeGrooveDepth();
   vector<vector<Path>> groovePathSets;
   while (true) {
     auto paths = PathUtils::OffsetPath(overallPath, currentOffset);
     assert(paths.size() == 1);
+    std::transform(paths[0].begin(), paths[0].end(), paths[0].begin(),
+                   [&](const Point& p) { return Point(p.X, p.Y, grooveDepth); });
     groovePathSets.push_back(paths);
     dps.addPath([&] {
         return DebugPath {
@@ -807,7 +810,11 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(machine),
                                            machine.sidewallOverhang());
   // nb: the roughing support is pretty experimental right now!!
+#if ROUGHING
   bool roughing = machine.topProfileRoughing();
+#else
+  bool roughing = false; // @TODO: roughing is a work in-progress. Don't use it.
+#endif
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
   DebugPathSet& dps = addDebugPathSet("Top Profile");
@@ -1013,8 +1020,8 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
           if (cp.size() == 0) continue; // A bit on the other end, outside the box
           assert(cp.size() == 1);
           p = cp[0];
-          std::reverse(p.begin(), p.end());
         }
+        std::reverse(p.begin(), p.end());
         auto dp = ProfiledPath(p, profileOffset);
         deformedResults.push_back(dp);
         dps.addPath([&] {
