@@ -1282,9 +1282,11 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   auto ps = PathUtils::OffsetPath(trenches[0], -tool.diameter / 2);
   assert(ps.size() == 1);
   auto t1 = ps[0];
+  std::reverse(t1.begin(), t1.end());
   ps = PathUtils::OffsetPath(trenches[1], -tool.diameter / 2);
   assert(ps.size() == 1);
   auto t2 = ps[0];
+  std::reverse(t2.begin(), t2.end());
 
   dps.addDescription(
     "<p>The edge trenches provide space in which to place a different type "
@@ -1423,7 +1425,8 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   addCoreCenterComment(g);
   g.rapidToPoint(profPath[0]);
   g.spindleOn();
-  g.emitSpiralPath(profPath, machine.coreBlankThickness(), 3);
+  g.emitSpiralPath(profPath, machine.coreBlankThickness(),
+                   machine.coreCutoutPasses());
   g.rapidToPoint(profPath[0]);
   g.spindleOff();
   g.close();

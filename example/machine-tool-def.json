@@ -3,29 +3,29 @@
   "machine":
   {
     "rapid speed": 100,
-    "normal speed": 70,
+    "normal speed": 80,
 
-    "bottom rapid height": 0.100,
+    "bottom rapid height": 0.200,
     "top rapid height": 0.600,
 
     "core blank thickness": 0.420,
 
     "base cutout tool": 2,
-    "base rapid height": 0.100,
+    "base rapid height": 0.250,
     "base cut thru height": -0.010,
 
     "guide hole tool": 1,
     "guide hole depth": -0.600,
-    "guide hole diameter": 0.505,
+    "guide hole diameter": 0.503,
     "guide hole offset": 0.5,
 
     "alignment mark tool": 3,
     "alignment mark offset": 0.5,
-    "alignment mark depth": -0.025,
+    "alignment mark depth": -0.020,
     "alignment mark deep depth": -0.150,
 
     "edge groove tool": 1,
-    "edge groove depth": -0.025,
+    "edge groove depth": -0.030,
     "edge groove edge width": 0.354,
     "edge groove overlap percentage": 1.0,
 
@@ -45,13 +45,14 @@
     "top profile roughing fuzz": 0.020,
 
     "core cutout tool": 1,
+    "core cutout passes": 2,
 
     "spacer end overhang": 1,
     "spacer side overhang": 0.5,
 
     "sidewall overhang": 0.118,
 
-    "edge trench width": 1.2874,
+    "edge trench width": 1.2894,
     "edge trench extension": 3,
 
     "tools":

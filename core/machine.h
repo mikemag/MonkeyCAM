@@ -92,6 +92,7 @@ class Machine {
   MPI(topProfileRoughingOffset, "top profile roughing offset")
   MPI(topProfileRoughingFuzz, "top profile roughing fuzz")
   MPT(coreCutoutTool, int, "core cutout tool")
+  MPT(coreCutoutPasses, int, "core cutout passes")
   MPI(spacerEndOverhang, "spacer end overhang")
   MPI(spacerSideOverhang, "spacer side overhang")
   MPI(sidewallOverhang, "sidewall overhang")

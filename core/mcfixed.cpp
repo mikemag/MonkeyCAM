@@ -26,8 +26,8 @@ std::ostream& operator << (std::ostream& outs, const MCFixed& mcf) {
 }
 
 std::string MCFixed::str() const {
-  int64_t a = abs(m_data / ScalingFactor);
-  int64_t b = abs(m_data % ScalingFactor);
+  int64_t a = std::abs(m_data / ScalingFactor);
+  int64_t b = std::abs(m_data % ScalingFactor);
   const char* minus = "";
   if ((m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
@@ -37,8 +37,8 @@ std::string MCFixed::str() const {
 
 std::string MCFixed::inchesStr() const {
   MCFixed x = *this / 2.54;
-  int64_t a = abs(x.m_data / ScalingFactor);
-  int64_t b = abs(x.m_data % ScalingFactor);
+  int64_t a = std::abs(x.m_data / ScalingFactor);
+  int64_t b = std::abs(x.m_data % ScalingFactor);
   const char* minus = "";
   if ((x.m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
