@@ -155,3 +155,6 @@ construction or CAM and you're interested in helping out on MonkeyCAM
 then let's chat. Open up an issue with what you want to work on and
 we'll work out the details there, or fork the repo, make some changes
 and put up a pull request!
+
+* [Design Overview](https://github.com/mikemag/MonkeyCAM/wiki/Design-Overview): details on the internal design of MonkeyCAM and how it creates shapes and G-Code programs.
+* [Current issues and enhancements](https://github.com/mikemag/MonkeyCAM/issues)
