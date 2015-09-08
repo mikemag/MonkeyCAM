@@ -424,15 +424,4 @@ void GCodeWriter::write(string directory) const {
   o.close();
 }
 
-void GCodeWriter::writeJS(std::string name, std::ofstream& stream) const {
-  stream << "gcodeFiles['" << name << "']=[";
-  stream << "'" << m_filename << "',";
-  for (const auto& l : m_headerComments) {
-    stream << "'" << l << "',";
-  }
-  stream << "'',";
-  for (const auto& l : m_lines) stream << "'" << l << "',";
-  stream << "''];" << std::endl;
-}
-
 } // namespace MonkeyCAM
