@@ -1,5 +1,4 @@
 {
-  // All measurements for the machine and tools are in inches.
   "machine":
   {
     "rapid speed": 100,
