@@ -15,7 +15,7 @@
  */
 
 #include "mcfixed.h"
-
+#include <cmath>
 #include <stdlib.h>
 #include <stdio.h>
 
