@@ -41,8 +41,7 @@ BoardShape::BoardShape(string name,
                        MCFixed refStance, MCFixed setback,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
-                       MCFixed spacerWidth, MCFixed noseEdgeExt,
-                       MCFixed tailEdgeExt)
+                       MCFixed spacerWidth)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -58,8 +57,6 @@ BoardShape::BoardShape(string name,
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
     , m_spacerWidth(spacerWidth)
-    , m_noseEdgeExt(noseEdgeExt)
-    , m_tailEdgeExt(tailEdgeExt)
     , m_maxCoreX(0)
 {
   // Nose and tail width come from the sidecut depth...
@@ -989,9 +986,9 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
         };
       });
       // Find new ranges below the path we just formed.
-//      for (auto r : roughLevel(r, newUpperLimit)) {
-//        rangeStack.push(r);
-//      }
+      for (auto r : roughLevel(r, newUpperLimit)) {
+        rangeStack.push(r);
+      }
     }
   }
   // Finally, add on the real profile path and a box to contain it.

@@ -42,7 +42,7 @@ class BoardShape {
              MCFixed refStance, MCFixed setback,
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
-             MCFixed spacerWidth, MCFixed noseEdgeExt, MCFixed tailEdgeExt);
+             MCFixed spacerWidth);
   ~BoardShape();
   const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
@@ -109,9 +109,6 @@ class BoardShape {
   Path m_insertsPath;
 
   MCFixed m_spacerWidth;
-  
-  MCFixed m_noseEdgeExt;
-  MCFixed m_tailEdgeExt;
 
   Path m_overallPath;
   Path m_corePath;
