@@ -24,10 +24,9 @@
       "end handle": 0.50,
       "transition handle": 0.75
     },
-    "nose and tail spacer width": 2
-    "nose edge extension": 4
+    "nose and tail spacer width": 2,
+    "nose edge extension": 4,
     "tail edge extension": 2
-    }
   },
   "profile":
   {

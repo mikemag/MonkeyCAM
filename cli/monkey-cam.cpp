@@ -97,10 +97,10 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
     tailPack = loadInserts(tpc.get());
   }
 
-  auto noseEdgeExt = config.get_optional<double>("nose edge extension")
-    .get_value_or(-1.0);
-  auto tailEdgeExt = config.get_optional<double>("tail edge extension")
-    .get_value_or(-1.0);
+  auto noseEdgeExt = config.get_optional<double>("board.nose edge extension")
+    .get_value_or(999.0);
+  auto tailEdgeExt = config.get_optional<double>("board.tail edge extension")
+    .get_value_or(999.0);
 
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
