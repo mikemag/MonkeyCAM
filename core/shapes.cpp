@@ -440,7 +440,7 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto fullWrapPath = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
   assert(fullWrapPath.size() == 1);
   
-  // 2. Form square outlining limit of metal edges (whole board if no partial edges)
+  // 2. Form box outlining limit of metal edges (whole board if no partial edges)
   MCFixed noseEdgeX = 0;
   if (m_noseEdgeExt != 999.0) {
     noseEdgeX += (m_noseLength - m_noseEdgeExt);
@@ -449,21 +449,21 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   if (m_tailEdgeExt != 999.0) {
     tailEdgeX -= (m_tailLength - m_tailEdgeExt);
   }
-  Path edgeLimitSquare;
-  edgeLimitSquare.push_back(Point(noseEdgeX, -(m_noseWidth/2 + 1)));
-  edgeLimitSquare.push_back(Point(tailEdgeX, -(m_tailWidth/2 + 1)));
-  edgeLimitSquare.push_back(Point(tailEdgeX, (m_tailWidth/2 + 1)));
-  edgeLimitSquare.push_back(Point(noseEdgeX, (m_noseWidth/2 + 1)));
-  edgeLimitSquare.push_back(Point(noseEdgeX, -(m_noseWidth/2 + 1)));
+  MCFixed boxHalfWidth = std::max(std::max(m_noseWidth, m_waistWidth), m_tailWidth)/2 + 1;
+  Path edgeLimitBox;
+  edgeLimitBox.push_back(Point(noseEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, -boxHalfWidth));
   
   // 3. Clip square
-  auto clippedEdgeSquare = PathUtils::ClipPathsDifference(
-    vector<Path> {edgeLimitSquare} , fullWrapPath);
-  assert(clippedEdgeSquare.size() == 2);
+  auto clippedEdgeBox = PathUtils::ClipPathsDifference(
+    vector<Path> {edgeLimitBox} , fullWrapPath);
   
   // 4. Use clipped square to clip base cutout shape
   auto paths = PathUtils::ClipPathsDifference(
-    vector<Path> {m_overallPath} , clippedEdgeSquare);
+    vector<Path> {m_overallPath} , clippedEdgeBox);
   assert(paths.size() == 1);
   auto trueBasePath = paths[0];
 
