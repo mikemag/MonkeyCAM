@@ -97,10 +97,15 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
     tailPack = loadInserts(tpc.get());
   }
 
+  auto noseEdgeExt = config.get_optional<double>("board.nose edge extension")
+    .get_value_or(999.0);
+  auto tailEdgeExt = config.get_optional<double>("board.tail edge extension")
+    .get_value_or(999.0);
+
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback,
-        nosePack, tailPack, spacerWidth } };
+        nosePack, tailPack, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {

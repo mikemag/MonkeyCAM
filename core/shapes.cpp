@@ -41,7 +41,8 @@ BoardShape::BoardShape(string name,
                        MCFixed refStance, MCFixed setback,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
-                       MCFixed spacerWidth)
+                       MCFixed spacerWidth, MCFixed noseEdgeExt,
+                       MCFixed tailEdgeExt)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -57,6 +58,8 @@ BoardShape::BoardShape(string name,
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
     , m_spacerWidth(spacerWidth)
+    , m_noseEdgeExt(noseEdgeExt)
+    , m_tailEdgeExt(tailEdgeExt)
     , m_maxCoreX(0)
 {
   // Nose and tail width come from the sidecut depth...
@@ -135,6 +138,8 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     "<li>Reference stance width: %scm</li>"
     "<li>Setback: %scm</li>"
     "<li>Board area: %.3fcm<sup>2</sup></li>"
+    "<li>Extension of metal edge towards nose (999 = full wrap): %scm</li>"
+    "<li>Extension of metal edge towards tail (999 = full wrap): %scm</li>"
     "</ul>",
     overallLength().str().c_str(),
     m_noseLength.str().c_str(), m_effectiveEdge.str().c_str(),
@@ -145,7 +150,9 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     m_sidecutRadius.str().c_str(), m_sidecutDepth.str().c_str(),
     m_refStance.str().c_str(),
     m_setback.str().c_str(),
-    PathUtils::Area(m_overallPath)
+    PathUtils::Area(m_overallPath),
+    m_noseEdgeExt.str().c_str(),
+    m_tailEdgeExt.str().c_str()
   );
   dps.addPath([&] {
       return DebugPath {
@@ -428,12 +435,43 @@ void BoardShape::setupInserts() {
 
 const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
-  auto paths = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
+
+  // 1. Get path assuming full wrap of metal edge
+  auto fullWrapPath = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
+  assert(fullWrapPath.size() == 1);
+
+  // 2. Form box outlining limit of metal edges (whole board if no partial edges)
+  MCFixed noseEdgeX = 0;
+  if (m_noseEdgeExt != 999.0) {
+    noseEdgeX += (m_noseLength - m_noseEdgeExt);
+  }
+  MCFixed tailEdgeX = m_noseLength + m_effectiveEdge + m_tailLength;
+  if (m_tailEdgeExt != 999.0) {
+    tailEdgeX -= (m_tailLength - m_tailEdgeExt);
+  }
+  MCFixed boxHalfWidth = std::max(std::max(m_noseWidth, m_waistWidth), m_tailWidth)/2 + 1;
+  Path edgeLimitBox;
+  edgeLimitBox.push_back(Point(noseEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, -boxHalfWidth));
+
+  // 3. Clip square
+  auto clippedEdgeBox = PathUtils::ClipPathsDifference(
+    vector<Path> {edgeLimitBox} , fullWrapPath);
+
+  // 4. Use clipped square to clip base cutout shape
+  auto paths = PathUtils::ClipPathsDifference(
+    vector<Path> {m_overallPath} , clippedEdgeBox);
   assert(paths.size() == 1);
   auto trueBasePath = paths[0];
+
+  // 5. Offset to get tool path
   auto offsetPaths = PathUtils::OffsetPath(trueBasePath, tool.diameter / 2);
   assert(offsetPaths.size() == 1);
   auto op = offsetPaths[0];
+
   DebugPathSet& dps = addDebugPathSet("Base Cutout");
   dps.addPath([&] {
       return DebugPath {
