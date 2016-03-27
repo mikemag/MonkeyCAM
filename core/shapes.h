@@ -20,6 +20,7 @@
 #include <cassert>
 #include <string>
 #include <memory>
+#include <boost/optional/optional.hpp>
 
 #include "board-profile.h"
 #include "gcode-writer.h"
@@ -39,10 +40,13 @@ class BoardShape {
              std::unique_ptr<ShapeEndPart>& nosePart,
              std::unique_ptr<ShapeEdgePart>& edgePart,
              std::unique_ptr<ShapeEndPart>& tailPart,
-             MCFixed refStance, MCFixed setback,
+             boost::optional<MCFixed> refStance,
+             boost::optional<MCFixed> setback,
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
-             MCFixed spacerWidth, MCFixed noseEdgeExt, MCFixed tailEdgeExt);
+             MCFixed spacerWidth,
+             boost::optional<MCFixed> noseEdgeExt,
+             boost::optional<MCFixed> tailEdgeExt);
   ~BoardShape();
   const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
@@ -102,16 +106,16 @@ class BoardShape {
   std::unique_ptr<ShapeEdgePart> m_edgePart;
   std::unique_ptr<ShapeEndPart> m_tailPart;
 
-  MCFixed m_setback;
-  MCFixed m_refStance;
+  boost::optional<MCFixed> m_setback;
+  boost::optional<MCFixed> m_refStance;
   std::unique_ptr<InsertPack> m_noseInserts;
   std::unique_ptr<InsertPack> m_tailInserts;
   Path m_insertsPath;
 
   MCFixed m_spacerWidth;
-  
-  MCFixed m_noseEdgeExt;
-  MCFixed m_tailEdgeExt;
+
+  boost::optional<MCFixed> m_noseEdgeExt;
+  boost::optional<MCFixed> m_tailEdgeExt;
 
   Path m_overallPath;
   Path m_corePath;
