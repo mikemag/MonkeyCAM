@@ -38,10 +38,13 @@ BoardShape::BoardShape(string name,
                        std::unique_ptr<ShapeEndPart>& nosePart,
                        std::unique_ptr<ShapeEdgePart>& edgePart,
                        std::unique_ptr<ShapeEndPart>& tailPart,
-                       MCFixed refStance, MCFixed setback,
+                       boost::optional<MCFixed> refStance,
+                       boost::optional<MCFixed> setback,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
-                       MCFixed spacerWidth)
+                       MCFixed spacerWidth,
+                       boost::optional<MCFixed> noseEdgeExt,
+                       boost::optional<MCFixed> tailEdgeExt)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -132,9 +135,11 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     "<li>Nose / waist / tail width: %scm / %scm / %scm</li>"
     "<li>Taper: %scm</li>"
     "<li>Sidecut radius / depth: %scm / %scm</li>"
-    "<li>Reference stance width: %scm</li>"
-    "<li>Setback: %scm</li>"
+    "<li>Reference stance width: %s</li>"
+    "<li>Setback: %s</li>"
     "<li>Board area: %.3fcm<sup>2</sup></li>"
+    "<li>Extension of metal edge towards nose: %s</li>"
+    "<li>Extension of metal edge towards tail: %s</li>"
     "</ul>",
     overallLength().str().c_str(),
     m_noseLength.str().c_str(), m_effectiveEdge.str().c_str(),
@@ -143,9 +148,11 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       m_tailWidth.str().c_str(),
     m_taper.str().c_str(),
     m_sidecutRadius.str().c_str(), m_sidecutDepth.str().c_str(),
-    m_refStance.str().c_str(),
-    m_setback.str().c_str(),
-    PathUtils::Area(m_overallPath)
+    MCFixed::strWithSuffix(m_refStance).c_str(),
+    MCFixed::strWithSuffix(m_setback).c_str(),
+    PathUtils::Area(m_overallPath),
+    MCFixed::strWithSuffix(m_noseEdgeExt).c_str(),
+    MCFixed::strWithSuffix(m_tailEdgeExt).c_str()
   );
   dps.addPath([&] {
       return DebugPath {
@@ -192,7 +199,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       }
       return a;
     });
-  if (m_refStance > 0.0) {
+  if (m_refStance) {
     dps.addAnnotation([&] {
       auto a = DebugAnnotation {
         DebugAnnotationDesc {
@@ -203,12 +210,16 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
           "green", true
         }
       };
-      a.addSvgCircle(Point(eeCenterX - (m_refStance / 2) + m_setback, 0), 0.5);
-      a.addSvgCircle(Point(eeCenterX + (m_refStance / 2) + m_setback, 0), 0.5);
+      MCFixed setback = 0.0;
+      if (m_setback) {
+        setback = *m_setback;
+      }
+      a.addSvgCircle(Point(eeCenterX - (*m_refStance / 2) + setback, 0), 0.5);
+      a.addSvgCircle(Point(eeCenterX + (*m_refStance / 2) + setback, 0), 0.5);
       a.addSvgFormat(
         R"(<path d="M%f %f L%f %f"/>)",
-        (eeCenterX + m_setback).dbl(), -4.0,
-        (eeCenterX + m_setback).dbl(), 4.0);
+        (eeCenterX + setback).dbl(), -4.0,
+        (eeCenterX + setback).dbl(), 4.0);
       return a;
     });
   }
@@ -403,16 +414,23 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
 }
 
 void BoardShape::setupInserts() {
-  auto stanceX = (m_refStance / 2);
+  MCFixed stanceX = 0.0;
+  if (m_refStance) {
+    stanceX = *m_refStance / 2;
+  }
   MCFixed eeCenterX = m_noseLength + m_effectiveEdge / 2;
+  MCFixed setback = 0.0;
+  if (m_setback) {
+    setback = *m_setback;
+  }
   if (m_noseInserts) {
-    m_noseInserts->moveIntoPosition(Point(-stanceX + m_setback + eeCenterX, 0));
+    m_noseInserts->moveIntoPosition(Point(-stanceX + setback + eeCenterX, 0));
     auto p = m_noseInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
     m_insertsPath.push_back(Point(m_noseInserts->maxPoint().X + 4, 0)); // Pin
   }
   if (m_tailInserts) {
-    m_tailInserts->moveIntoPosition(Point(stanceX + m_setback + eeCenterX, 0));
+    m_tailInserts->moveIntoPosition(Point(stanceX + setback + eeCenterX, 0));
     m_insertsPath.push_back(Point(m_tailInserts->minPoint().X - 4, 0)); // Pin
     auto p = m_tailInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
@@ -428,12 +446,44 @@ void BoardShape::setupInserts() {
 
 const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
-  auto paths = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
+
+  // 1. Get path assuming full wrap of metal edge
+  auto fullWrapPath = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
+  assert(fullWrapPath.size() == 1);
+
+  // 2. Form box outlining limit of metal edges (whole board if no partial edges)
+  MCFixed noseEdgeX = 0;
+  if (m_noseEdgeExt) {
+    noseEdgeX += (m_noseLength - *m_noseEdgeExt);
+  }
+  MCFixed tailEdgeX = m_noseLength + m_effectiveEdge + m_tailLength;
+  if (m_tailEdgeExt) {
+    tailEdgeX -= (m_tailLength - *m_tailEdgeExt);
+  }
+  MCFixed boxHalfWidth = std::max(std::max(m_noseWidth, m_waistWidth),
+                                  m_tailWidth) / 2 + 1;
+  Path edgeLimitBox;
+  edgeLimitBox.push_back(Point(noseEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, -boxHalfWidth));
+
+  // 3. Clip square
+  auto clippedEdgeBox = PathUtils::ClipPathsDifference(
+    vector<Path> {edgeLimitBox} , fullWrapPath);
+
+  // 4. Use clipped square to clip base cutout shape
+  auto paths = PathUtils::ClipPathsDifference(
+    vector<Path> {m_overallPath} , clippedEdgeBox);
   assert(paths.size() == 1);
   auto trueBasePath = paths[0];
+
+  // 5. Offset to get tool path
   auto offsetPaths = PathUtils::OffsetPath(trueBasePath, tool.diameter / 2);
   assert(offsetPaths.size() == 1);
   auto op = offsetPaths[0];
+
   DebugPathSet& dps = addDebugPathSet("Base Cutout");
   dps.addPath([&] {
       return DebugPath {
@@ -986,8 +1036,8 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
         };
       });
       // Find new ranges below the path we just formed.
-      for (auto r : roughLevel(r, newUpperLimit)) {
-        rangeStack.push(r);
+      for (auto r2 : roughLevel(r, newUpperLimit)) {
+        rangeStack.push(r2);
       }
     }
   }

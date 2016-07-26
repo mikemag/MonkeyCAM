@@ -154,6 +154,11 @@ The “base cutout” program cuts a base out of PTEX in a single pass
 which is exactly 2mm narrower all the way around than the final board
 shape. This is for full-wrap edges.
 
+For partial-wrap edges the nose, or tail, or both, are the final board
+shape beyond the point where the edges end. These end points are
+specified by the `nose edge extension` and `tail edge extension`
+parameters.
+
 This program uses a straight cutter, typically 0.250”, and cuts all
 the way thru the base material.
 

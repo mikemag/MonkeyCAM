@@ -82,10 +82,10 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto tail = loadEndPart(config.get_child("board.tail shape"));
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
 
-  auto refStance = config.get_optional<double>("board.reference stance width")
-    .get_value_or(0.0);
-  auto setback = config.get_optional<double>("board.stance setback")
-    .get_value_or(0.0);
+  boost::optional<MCFixed> refStance(
+    config.get_optional<double>("board.reference stance width"));
+  boost::optional<MCFixed> setback(
+    config.get_optional<double>("board.stance setback"));
   auto npc = config.get_child_optional("board.nose insert pack");
   std::unique_ptr<InsertPack> nosePack;
   if (npc) {
@@ -96,6 +96,11 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   if (tpc) {
     tailPack = loadInserts(tpc.get());
   }
+
+  boost::optional<MCFixed> noseEdgeExt(
+    config.get_optional<double>("board.nose edge extension"));
+  boost::optional<MCFixed> tailEdgeExt(
+    config.get_optional<double>("board.tail edge extension"));
 
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
