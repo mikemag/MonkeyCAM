@@ -40,13 +40,13 @@ const Path& BasicBezier::generate(Point endPoint, Point transitionPoint) {
 }
 
 const Path& FlatBezier::generate(Point endPoint, Point transitionPoint) {
-  MCFixed flatEndY = endPoint.Y + m_flatWidth / 2;
+  MCFixed flatEndY = m_flatWidth / -2; // WHY DO I HAVE TO MAKE THIS NEGATIVE TO GET IT TO WORK???
   if (endPoint.X < transitionPoint.X) {
     Path ep;
     ep.push_back(endPoint);
     m_path = BezierPath(Point(endPoint.X, flatEndY),
-                        Point(endPoint.X, (transitionPoint.Y - flatEndY) *
-                              m_endHandle),
+                        Point(endPoint.X, flatEndY + 
+                              (transitionPoint.Y - flatEndY) * m_endHandle),
                         Point(transitionPoint.X -
                               ((transitionPoint.X - endPoint.X) *
                                m_transitionHandle), transitionPoint.Y),
@@ -58,8 +58,8 @@ const Path& FlatBezier::generate(Point endPoint, Point transitionPoint) {
                         Point(transitionPoint.X +
                               ((endPoint.X - transitionPoint.X) *
                                m_transitionHandle), transitionPoint.Y),
-                        Point(endPoint.X, (transitionPoint.Y - flatEndY) *
-                              m_endHandle),
+                        Point(endPoint.X, flatEndY + 
+                              (transitionPoint.Y - flatEndY) * m_endHandle),
                         Point(endPoint.X, flatEndY));
     m_path.push_back(endPoint);
   }
