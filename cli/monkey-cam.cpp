@@ -105,7 +105,7 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback,
-        nosePack, tailPack, spacerWidth } };
+        nosePack, tailPack, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
