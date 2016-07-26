@@ -10,7 +10,8 @@
     "taper": 1.4,
     "nose shape":
     {
-      "type": "Basic Bezier",
+      "type": "Flat",
+      "flat width": 2.0,
       "end handle": 0.50,
       "transition handle": 0.75
     },
@@ -20,7 +21,8 @@
     },
     "tail shape":
     {
-      "type": "Basic Bezier",
+      "type": "Flat",
+      "flat width": 2.0,
       "end handle": 0.50,
       "transition handle": 0.75
     },

@@ -42,11 +42,26 @@ namespace MonkeyCAM {
 // @TODO: load more parts
 std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
   auto type = config.get<std::string>("type");
-  auto endHandle = config.get<double>("end handle");
-  auto transitionHandle = config.get<double>("transition handle");
-  assert(type == "Basic Bezier");
-  return std::unique_ptr<ShapeEndPart> {
-    new BasicBezier { endHandle, transitionHandle } };
+assert(type == "Basic Bezier" || type == "Flat");
+  if(type == "Basic Bezier")
+  {
+    auto endHandle = config.get<double>("end handle");
+    auto transitionHandle = config.get<double>("transition handle");
+
+    
+    return std::unique_ptr<ShapeEndPart> {
+      new BasicBezier { endHandle, transitionHandle } };
+  }
+  else if(type == "Flat")
+  {
+    auto flatWidth = config.get<double>("flat width");
+    auto endHandle = config.get<double>("end handle");
+    auto transitionHandle = config.get<double>("transition handle");
+    
+    return std::unique_ptr<ShapeEndPart> {
+      new FlatBezier {flatWidth, endHandle, transitionHandle } };
+  }
+
 }
 
 // @TODO: load more parts
