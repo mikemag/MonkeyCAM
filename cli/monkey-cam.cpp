@@ -47,7 +47,6 @@ std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
     auto endHandle = config.get<double>("end handle");
     auto transitionHandle = config.get<double>("transition handle");
 
-    
     return std::unique_ptr<ShapeEndPart> {
       new BasicBezier { endHandle, transitionHandle } };
   }
@@ -55,10 +54,11 @@ std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
     auto flatWidth = config.get<double>("flat width");
     auto endHandle = config.get<double>("end handle");
     auto transitionHandle = config.get<double>("transition handle");
-    
+
     return std::unique_ptr<ShapeEndPart> {
       new FlatBezier {flatWidth, endHandle, transitionHandle } };
   }
+  __builtin_unreachable();
 }
 
 // @TODO: load more parts
