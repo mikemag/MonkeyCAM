@@ -40,8 +40,13 @@ const Path& BasicBezier::generate(Point endPoint, Point transitionPoint) {
 }
 
 const Path& FlatBezier::generate(Point endPoint, Point transitionPoint) {
-  MCFixed flatEndY = m_flatWidth / -2; // WHY DO I HAVE TO MAKE THIS NEGATIVE TO GET IT TO WORK???
-  if (endPoint.X < transitionPoint.X) {
+  MCFixed flatEndY = - m_flatWidth / 2; 
+  // Note: flatEndY is negative because the 'bottom' half of the board is drawn 
+  //       first (i.e. in negative Y-space)
+  BOOST_ASSERT_MSG(flatEndY >= transitionPoint.Y, 
+                   "Error in generating \"Flat\" end: \"flat width\" is wider than nose/tail width");
+  if (endPoint.X < transitionPoint.X) { 
+    // Nose
     Path ep;
     ep.push_back(endPoint);
     m_path = BezierPath(Point(endPoint.X, flatEndY),
@@ -54,6 +59,7 @@ const Path& FlatBezier::generate(Point endPoint, Point transitionPoint) {
     ep.push_back_path(m_path);
     m_path = ep;
   } else {
+    // Tail
     m_path = BezierPath(transitionPoint,
                         Point(transitionPoint.X +
                               ((endPoint.X - transitionPoint.X) *
