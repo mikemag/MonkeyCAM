@@ -46,6 +46,21 @@ class BasicBezier : public ShapeEndPart {
   double m_transitionHandle;
 };
 
+class FlatBezier : public ShapeEndPart {
+ public:
+  FlatBezier(double flatWidth, double endHandle, double transitionHandle)
+      : m_flatWidth(flatWidth)
+      , m_endHandle(endHandle)
+      , m_transitionHandle(transitionHandle)
+    {}
+
+  const Path& generate(Point endPoint, Point transitionPoint);
+
+ private:
+  double m_flatWidth;
+  double m_endHandle;
+  double m_transitionHandle;
+};
 //------------------------------------------------------------------------------
 // Edge parts
 
