@@ -145,10 +145,11 @@ of the nose.
 }
 ```
 
-The `type` may currently be only `"Basic Bezier"`, though other
-options will be available in the future. This specifies a classic
+The `type` may be `"Basic Bezier"` or `"Flat"`, other
+options will be available in the future. `"Basic Bezier"` specifies a classic
 Bezier curve with two control points for one half of the nose shape,
-and this curve is mirrored to get the other half. The control points
+and this curve is mirrored to get the other half. `"Flat"` is similar 
+but includes an additional flat section of specified width at the tip. The control points
 are constrained to ensure that the Bezier curves join properly at the
 nose and to the effective edge.
 

@@ -60,6 +60,8 @@ BoardShape::BoardShape(string name,
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
     , m_spacerWidth(spacerWidth)
+    , m_noseEdgeExt(noseEdgeExt)
+    , m_tailEdgeExt(tailEdgeExt)
     , m_maxCoreX(0)
 {
   // Nose and tail width come from the sidecut depth...
