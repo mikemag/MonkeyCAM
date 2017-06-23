@@ -264,6 +264,7 @@ int main(int argc, char *argv[]) {
 
   string boardDef = "";
   string machineDef = "";
+  string bindingDef = "";
   string outdir = "";
   for (int i = 1; i < argc; ++i) {
     if ((string(argv[i]) == "--board") && (i + 1 < argc)) {
@@ -313,6 +314,8 @@ int main(int argc, char *argv[]) {
   read_json(machineDef, machineConfig);
   boost::property_tree::ptree boardConfig;
   read_json(boardDef, boardConfig);
+  boost::property_tree::ptree bindingConfig;
+  read_json(bindingDef, bindingConfig);
 
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
