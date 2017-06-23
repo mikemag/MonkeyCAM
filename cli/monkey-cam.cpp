@@ -42,11 +42,23 @@ namespace MonkeyCAM {
 // @TODO: load more parts
 std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
   auto type = config.get<std::string>("type");
-  auto endHandle = config.get<double>("end handle");
-  auto transitionHandle = config.get<double>("transition handle");
-  assert(type == "Basic Bezier");
-  return std::unique_ptr<ShapeEndPart> {
-    new BasicBezier { endHandle, transitionHandle } };
+  assert(type == "Basic Bezier" || type == "Flat");
+  if (type == "Basic Bezier") {
+    auto endHandle = config.get<double>("end handle");
+    auto transitionHandle = config.get<double>("transition handle");
+
+    return std::unique_ptr<ShapeEndPart> {
+      new BasicBezier { endHandle, transitionHandle } };
+  }
+  else if (type == "Flat") {
+    auto flatWidth = config.get<double>("flat width");
+    auto endHandle = config.get<double>("end handle");
+    auto transitionHandle = config.get<double>("transition handle");
+
+    return std::unique_ptr<ShapeEndPart> {
+      new FlatBezier {flatWidth, endHandle, transitionHandle } };
+  }
+  __builtin_unreachable();
 }
 
 // @TODO: load more parts
@@ -82,10 +94,10 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto tail = loadEndPart(config.get_child("board.tail shape"));
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
 
-  auto refStance = config.get_optional<double>("board.reference stance width")
-    .get_value_or(0.0);
-  auto setback = config.get_optional<double>("board.stance setback")
-    .get_value_or(0.0);
+  boost::optional<MCFixed> refStance(
+    config.get_optional<double>("board.reference stance width"));
+  boost::optional<MCFixed> setback(
+    config.get_optional<double>("board.stance setback"));
   auto npc = config.get_child_optional("board.nose insert pack");
   std::unique_ptr<InsertPack> nosePack;
   if (npc) {
@@ -97,10 +109,15 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
     tailPack = loadInserts(tpc.get());
   }
 
+  boost::optional<MCFixed> noseEdgeExt(
+    config.get_optional<double>("board.nose edge extension"));
+  boost::optional<MCFixed> tailEdgeExt(
+    config.get_optional<double>("board.tail edge extension"));
+
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback,
-        nosePack, tailPack, spacerWidth } };
+        nosePack, tailPack, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {

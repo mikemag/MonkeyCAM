@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include <boost/optional/optional.hpp>
 
 namespace MonkeyCAM {
 
@@ -48,6 +49,12 @@ struct MCFixed {
   }
   std::string str() const;
   std::string inchesStr() const;
+  static std::string strWithSuffix(const boost::optional<MCFixed>& mcf) {
+    if (mcf) {
+      return (*mcf).str() + "cm";
+    }
+    return "None";
+  }
 
   MCFixed operator+ (const MCFixed& mcf) const {
     return MCFixed(m_data + mcf.m_data);

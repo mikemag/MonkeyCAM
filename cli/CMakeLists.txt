@@ -5,8 +5,8 @@ if(UNIX)
   include_directories(/opt/local/include) # For boost
   set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
 elseif(MINGW)
-  include_directories(../../boost_1_55_0)
-  set(CMAKE_CXX_FLAGS "-g -Werror -std=c++11") # NB Boost warnings with GCC
+  include_directories(../../boost_1_61_0)
+  set(CMAKE_CXX_FLAGS "-g -Werror -std=gnu++11") # NB Boost warnings with GCC
 endif(UNIX)
 
 link_directories(${MonkeyCAM_BINARY_DIR}/util)

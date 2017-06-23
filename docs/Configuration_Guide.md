@@ -145,10 +145,11 @@ of the nose.
 }
 ```
 
-The `type` may currently be only `"Basic Bezier"`, though other
-options will be available in the future. This specifies a classic
+The `type` may be `"Basic Bezier"` or `"Flat"`, other
+options will be available in the future. `"Basic Bezier"` specifies a classic
 Bezier curve with two control points for one half of the nose shape,
-and this curve is mirrored to get the other half. The control points
+and this curve is mirrored to get the other half. `"Flat"` is similar 
+but includes an additional flat section of specified width at the tip. The control points
 are constrained to ensure that the Bezier curves join properly at the
 nose and to the effective edge.
 
@@ -235,6 +236,8 @@ standard ski binding patterns.
 #### Reference Stance Width
 "reference stance width": `number`
 
+*Optional. Omit for skis or other boards with no inserts.*
+
 The width, in centimeters, between the center insert group in each
 pack. By default, these groups are centered at the waist of the board,
 i.e., the center of the effective edge.
@@ -243,13 +246,18 @@ i.e., the center of the effective edge.
 #### Stance Setback
 "stance setback": `number`
 
+*Optional. Omit for skis or other boards with no inserts.*
+
 The setback, in centimeters, which defines how much the reference
 stance is shifted away from the waist towards the tail. A value of `0`
 keeps the reference stance centered over the waist. A positive value
-shifts the reference stance towards the tail.
+shifts the reference stance towards the tail. Optional. If omitted a
+value of `0` is assumed.
 
 
 #### Nose Insert Pack
+
+*Optional. Omit for skis or other boards with no inserts.*
 
 The nose insert pack specifies the number and relative location of the
 groups of inserts closest to the nose of the board. The "reference
@@ -334,6 +342,8 @@ one more group towards the tail, which adds just two more inserts.
 
 #### Tail Insert Pack
 
+*Optional. Omit for skis or other boards with no inserts.*
+
 The tail insert pack specifies the number and relative location of the
 groups of inserts closest to the tail of the board. The "reference
 group" is the only required group of inserts and is implicitly
@@ -359,6 +369,24 @@ See the Nose Insert Pack; the tail is the same.
 Specifies the width, in centimeters, of the nose and tail spacer. The
 core at the nose and tail, starting at the ends of the effective edge,
 will be inset by this amount.
+
+
+#### Nose Edge Extension
+"nose edge extension": `number`
+
+Specifies the length, in centimeters, of the edge past the end of the
+effective edge towards the nose of the board. Optional. If omitted the
+edge wraps around the entire nose of the board. If `0.0`, the edge
+ends right at the end of the effective edge.
+
+
+#### Tail Edge Extension
+"tail edge extension": `number`
+
+Specifies the length, in centimeters, of the edge past the end of the
+effective edge towards the tail of the board. Optional. If omitted the
+edge wraps around the entire tail of the board. If `0.0`, the edge
+ends right at the end of the effective edge.
 
 
 ### Profile Section
