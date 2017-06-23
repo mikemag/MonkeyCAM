@@ -128,7 +128,7 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
 
 
 void usage(const char* program) {
-  printf("\nUsage: %s --board brd.json --machine mach.json "
+  printf("\nUsage: %s --board brd.json --machine mach.json --binding bnd.json "
          "[--outdir <existing dir>]\n\n",
          program);
 }
@@ -253,6 +253,8 @@ int main(int argc, char *argv[]) {
       boardDef = string(argv[++i]);
     } else if ((string(argv[i]) == "--machine") && (i + 1 < argc)) {
       machineDef = string(argv[++i]);
+    } else if ((string(argv[i]) == "--binding") && (i + 1 < argc)) {
+      bindingDef = string(argv[++i]);
     } else if ((string(argv[i]) == "--outdir") && (i + 1 < argc)) {
       outdir = string(argv[++i]);
     }
@@ -267,6 +269,7 @@ int main(int argc, char *argv[]) {
     usage(argv[0]);
     return 1;
   }
+  // REG_TODO ADD SOMETHING HERE TO DEAL WITH SITUATION WHEN BINDING DEF IS NOT SUPPLIED?
   if (outdir == "") {
     outdir = ".";
   }
@@ -287,6 +290,7 @@ int main(int argc, char *argv[]) {
 #endif
   printf("Using board '%s', machine '%s'\n",
          boardDef.c_str(), machineDef.c_str());
+  // REG_TODO Modify this to output binding def as well - need it to be optional though...
 
   boost::property_tree::ptree machineConfig;
   read_json(machineDef, machineConfig);

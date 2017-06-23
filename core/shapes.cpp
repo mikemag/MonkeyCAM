@@ -747,6 +747,7 @@ void emitBowl(GCodeWriter& g, MCFixed outerRimDia, MCFixed outerRimDepth) {
   g.setAbsolute();
 }
 
+// REG_TODO review emitInsert and generateInsertHoles
 void emitInsert(GCodeWriter& g, const Machine& machine,
                 MCFixed heightAboveMaterial) {
   auto outerRimDia = machine.insertRimDiameter();
