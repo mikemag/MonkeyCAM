@@ -305,17 +305,23 @@ int main(int argc, char *argv[]) {
     outdir += '\\';
   }
 #endif
-  printf("Using board '%s', machine '%s', binding '%s'\n",
-         boardDef.c_str(), machineDef.c_str(), bindingDef.c_str());
-  // REG_TODO Modify this to output binding def as well - need it to be optional though...
+  if (bindingDef == "") {
+    printf("Using board '%s', machine '%s'\n",
+           boardDef.c_str(), machineDef.c_str(), bindingDef.c_str());
+  } else {
+    printf("Using board '%s', machine '%s', binding '%s'\n",
+           boardDef.c_str(), machineDef.c_str(), bindingDef.c_str());
+  }
 
   boost::property_tree::ptree machineConfig;
   read_json(machineDef, machineConfig);
   boost::property_tree::ptree boardConfig;
   read_json(boardDef, boardConfig);
-  boost::property_tree::ptree bindingConfig;
-  read_json(bindingDef, bindingConfig);
-
+  if (bindingDef != "") {
+    boost::property_tree::ptree bindingConfig;
+    read_json(bindingDef, bindingConfig);
+  }
+  
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
   auto shape = MonkeyCAM::loadBoard(boardConfig);
