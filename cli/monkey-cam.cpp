@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
   string boardDef = "";
   string machineDef = "";
   string bindingDef = "";
-  double bindingDist;
+  double bindingDist = 0;
   string outdir = "";
   for (int i = 1; i < argc; ++i) {
     if ((string(argv[i]) == "--board") && (i + 1 < argc)) {
@@ -312,14 +312,14 @@ int main(int argc, char *argv[]) {
     outdir += '\\';
   }
 #endif
-  if (bindingDef == "") {
-    printf("Using board '%s', machine '%s'\n",
-           boardDef.c_str(), machineDef.c_str(), bindingDef.c_str());
-  } else {
-    printf("Using board '%s', machine '%s', binding '%s'\n",
-           boardDef.c_str(), machineDef.c_str(), bindingDef.c_str());
+  printf("Using:\n  board: '%s'\n  machine: '%s'\n",
+         boardDef.c_str(), machineDef.c_str());
+  if (bindingDef != "") {
+    printf("  binding '%s'\n", bindingDef.c_str());
   }
-
+  if (bindingDist > 0)
+    printf("  binding distance (board stance or ski boot length) = %.2f mm\n",
+           bindingDist);
   boost::property_tree::ptree machineConfig;
   read_json(machineDef, machineConfig);
   boost::property_tree::ptree boardConfig;
