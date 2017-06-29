@@ -141,12 +141,16 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
   return profile;
 }
 
+//std::unique_ptr<BindingHoles> loadBinding(boost::property_tree::ptree& config) {
+//}
+
 } // namespace MonkeyCAM
 
 
 void usage(const char* program) {
   printf("\nUsage: %s --board brd.json --machine mach.json "
-         "[--binding bnd.json] [--outdir <existing dir>]\n\n",
+         "[--binding bnd.json] [--bindingdist <dist in mm>] "
+         "[--outdir <existing dir>]\n\n",
          program);
 }
 
@@ -265,6 +269,7 @@ int main(int argc, char *argv[]) {
   string boardDef = "";
   string machineDef = "";
   string bindingDef = "";
+  double bindingDist;
   string outdir = "";
   for (int i = 1; i < argc; ++i) {
     if ((string(argv[i]) == "--board") && (i + 1 < argc)) {
@@ -273,6 +278,8 @@ int main(int argc, char *argv[]) {
       machineDef = string(argv[++i]);
     } else if ((string(argv[i]) == "--binding") && (i + 1 < argc)) {
       bindingDef = string(argv[++i]);
+    } else if ((string(argv[i]) == "--bindingdist") && (i + 1 < argc)) {
+      bindingDist = std::atof(argv[++i]);
     } else if ((string(argv[i]) == "--outdir") && (i + 1 < argc)) {
       outdir = string(argv[++i]);
     }
@@ -317,9 +324,9 @@ int main(int argc, char *argv[]) {
   read_json(machineDef, machineConfig);
   boost::property_tree::ptree boardConfig;
   read_json(boardDef, boardConfig);
+  boost::property_tree::ptree bindingConfig;
   if (bindingDef != "") {
-    boost::property_tree::ptree bindingConfig;
-    read_json(bindingDef, bindingConfig);
+      read_json(bindingDef, bindingConfig);
   }
   
   printf("Building board shapes...\n");
@@ -364,6 +371,14 @@ int main(int argc, char *argv[]) {
   overview.addCode([&](std::ofstream& s) {
       write_json(s, machineConfig);
     });
+  if (bindingDef != "") {
+    overview.addFormatted(
+      R"(<p><a href="%s">Binding configuration</a> file "%s":</p>)",
+      configLink, bindingDef.c_str());
+    overview.addCode([&](std::ofstream& s) {
+      write_json(s, bindingConfig);
+    });
+  }
 
   printf("Done.\n");
   return 0;

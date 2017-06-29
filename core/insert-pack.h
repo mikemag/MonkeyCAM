@@ -60,6 +60,13 @@ class SnowboardInsertPack : public InsertPack {
   int m_countTail;
 };
 
+class SkiInsertPack : public InsertPack {
+  public:
+   SkiInsertPack(int countToe, int countHeel);
+  private:
+   void addInsertGroup(MCFixed bindingSeperation);
+};
+
 } // namespace MonkeyCAM
 
 #endif // incl_insert_pack_H_
