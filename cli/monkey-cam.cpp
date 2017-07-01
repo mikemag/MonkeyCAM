@@ -23,6 +23,7 @@
 #include <boost/optional/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 #include <sys/stat.h>
 
 #include "machine.h"
@@ -81,7 +82,23 @@ std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
         hSpacing, vSpacing } };
 }
 
-std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
+std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
+  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("toe")) {
+    auto toeInsertX = points.second.get<double>("x");
+    auto toeInsertY = points.second.get<double>("y");
+  } 
+  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("heel")) {
+    auto heelInsertX = points.second.get<double>("x");
+    auto heelInsertY = points.second.get<double>("y");
+  }
+  //auto frontInsertsX = config.get<double>("binding.toe");
+  //auto backInserts = config.get<double>("binding.heel");
+  //return std::unique_ptr<InsertPack> {
+  //  new SkiInsertPack {name} };
+}
+
+std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
+                                      boost::property_tree::ptree& bndconfig) {
   auto name = config.get<std::string>("board.name");
   auto noseLength = config.get<double>("board.nose length");
   auto eeLength = config.get<double>("board.effective edge length");
@@ -93,7 +110,7 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto edge = loadEdgePart(config.get_child("board.edge shape"));
   auto tail = loadEndPart(config.get_child("board.tail shape"));
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
-
+  
   boost::optional<MCFixed> refStance(
     config.get_optional<double>("board.reference stance width"));
   boost::optional<MCFixed> setback(
@@ -107,6 +124,12 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config) {
   auto tpc = config.get_child_optional("board.tail insert pack");
   if (tpc) {
     tailPack = loadInserts(tpc.get());
+  }
+  
+  std::unique_ptr<InsertPack> toeInserts;
+  auto sip = bndconfig.get_child_optional("binding");
+  if (sip) {
+    toeInserts = loadSkiInsert(sip.get());
   }
 
   boost::optional<MCFixed> noseEdgeExt(
@@ -331,7 +354,7 @@ int main(int argc, char *argv[]) {
   
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
-  auto shape = MonkeyCAM::loadBoard(boardConfig);
+  auto shape = MonkeyCAM::loadBoard(boardConfig, bindingConfig);
   auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());

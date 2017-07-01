@@ -62,9 +62,11 @@ class SnowboardInsertPack : public InsertPack {
 
 class SkiInsertPack : public InsertPack {
   public:
-   SkiInsertPack(int countToe, int countHeel);
+   SkiInsertPack(std::string name);
+   const std::string name() const { return m_name; }
   private:
    void addInsertGroup(MCFixed bindingSeperation);
+   std::string m_name;
 };
 
 } // namespace MonkeyCAM
