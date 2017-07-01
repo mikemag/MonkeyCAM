@@ -64,4 +64,26 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
   m_insertsPath.push_back(Point(stanceX + x, -y));
 }
 
+//------------------------------------------------------------------------------
+// Ski insert pack
+
+SkiInsertPack::SkiInsertPack(double insertX, double insertY)
+    : m_insertX(insertX)
+    , m_insertY(insertY)
+{
+  
+  m_insertsPath.push_back(Point(10, 10));
+
+  std::sort(m_insertsPath.begin(), m_insertsPath.end());
+  auto newEnd = std::unique(m_insertsPath.begin(), m_insertsPath.end());
+  m_insertsPath.resize(std::distance(m_insertsPath.begin(), newEnd));
+}
+
+void SkiInsertPack::addInsertGroup() {
+  m_insertsPath.push_back(Point(20, 5));
+  m_insertsPath.push_back(Point(20, -5));
+  m_insertsPath.push_back(Point(30, 5));
+  m_insertsPath.push_back(Point(30, -5));
+}
+
 }

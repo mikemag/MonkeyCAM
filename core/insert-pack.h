@@ -60,13 +60,16 @@ class SnowboardInsertPack : public InsertPack {
   int m_countTail;
 };
 
+// Ski binding inserts.
 class SkiInsertPack : public InsertPack {
   public:
-   SkiInsertPack(std::string name);
-   const std::string name() const { return m_name; }
+   SkiInsertPack(double insertX, double insertY);
+   //const std::string name() const { return m_bindingName; }
   private:
-   void addInsertGroup(MCFixed bindingSeperation);
-   std::string m_name;
+   void addInsertGroup();
+   MCFixed m_insertX;
+   MCFixed m_insertY;
+   //std::string m_bindingName;
 };
 
 } // namespace MonkeyCAM

@@ -83,18 +83,17 @@ std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
 }
 
 std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
-  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("toe")) {
-    auto toeInsertX = points.second.get<double>("x");
-    auto toeInsertY = points.second.get<double>("y");
-  } 
-  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("heel")) {
-    auto heelInsertX = points.second.get<double>("x");
-    auto heelInsertY = points.second.get<double>("y");
-  }
-  //auto frontInsertsX = config.get<double>("binding.toe");
-  //auto backInserts = config.get<double>("binding.heel");
-  //return std::unique_ptr<InsertPack> {
-  //  new SkiInsertPack {name} };
+  //auto bindingName = config.get<std::string>("name");
+  //BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("toe")) {
+  //  auto toeInsertX = points.second.get<double>("x");
+  //  auto toeInsertY = points.second.get<double>("y");
+  //} 
+  
+  auto insertX = config.get<double>(".x");
+  auto insertY = config.get<double>(".y");
+
+  return std::unique_ptr<InsertPack> {
+    new SkiInsertPack { insertX, insertY } };
 }
 
 std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
@@ -127,9 +126,14 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   }
   
   std::unique_ptr<InsertPack> toeInserts;
-  auto sip = bndconfig.get_child_optional("binding");
-  if (sip) {
-    toeInserts = loadSkiInsert(sip.get());
+  auto bndt = bndconfig.get_child_optional("binding.toe");
+  if (bndt) {
+    toeInserts = loadSkiInsert(bndt.get());
+  }
+  std::unique_ptr<InsertPack> heelInserts;
+  auto bndh = bndconfig.get_child_optional("binding.heel");
+  if (bndh) {
+    heelInserts = loadSkiInsert(bndh.get());
   }
 
   boost::optional<MCFixed> noseEdgeExt(
@@ -140,7 +144,7 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback,
-        nosePack, tailPack, spacerWidth, noseEdgeExt, tailEdgeExt } };
+        nosePack, tailPack, toeInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
