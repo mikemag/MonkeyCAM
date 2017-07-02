@@ -86,8 +86,11 @@ std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
   vector<double> insertX;
   vector<double> insertY;
   BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config) {
-    insertX.push_back(points.second.get<double>("x") /10);
+    insertX.push_back(points.second.get<double>("x") /-10); 
     insertY.push_back(points.second.get<double>("y") /10);
+    // note:
+    //    minus sign to flip X sign convention as MonkeyCam is positive towards tail
+    //    divide by 10 to convert from mm to cm (MonkeyCam works in cm)
   } 
   
   return std::unique_ptr<InsertPack> {
