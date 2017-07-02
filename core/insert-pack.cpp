@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <vector>
 
 #include "insert-pack.h"
 
@@ -67,12 +68,13 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
 //------------------------------------------------------------------------------
 // Ski insert pack
 
-SkiInsertPack::SkiInsertPack(double insertX, double insertY)
-    : m_insertX(insertX)
-    , m_insertY(insertY)
+SkiInsertPack::SkiInsertPack(const std::vector<double>& insertX, 
+                             const std::vector<double>& insertY)
+    //: m_insertX(insertX[])
+    //, m_insertY(insertY[])
 {
   
-  m_insertsPath.push_back(Point(10, 10));
+  m_insertsPath.push_back(Point(10, 0));
 
   std::sort(m_insertsPath.begin(), m_insertsPath.end());
   auto newEnd = std::unique(m_insertsPath.begin(), m_insertsPath.end());

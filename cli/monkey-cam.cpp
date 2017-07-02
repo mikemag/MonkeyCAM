@@ -83,15 +83,16 @@ std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
 }
 
 std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
-  //auto bindingName = config.get<std::string>("name");
-  //BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config.get_child("toe")) {
-  //  auto toeInsertX = points.second.get<double>("x");
-  //  auto toeInsertY = points.second.get<double>("y");
-  //} 
+  vector<double> insertX;// = {1,2,3,4};
+  vector<double> insertY;// = {1,2,3,4};
+  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config) {
+    insertX.push_back(points.second.get<double>("x"));
+    insertY.push_back(points.second.get<double>("y"));
+  } 
   
-  auto insertX = config.get<double>(".x");
-  auto insertY = config.get<double>(".y");
-
+  //auto insertX = config.get<double>(".x");
+  //auto insertY = config.get<double>(".y");
+  printf("loadSkiInsert: X: %1.1f Y: %1.1f.\n", insertX[0], insertY[0]);  
   return std::unique_ptr<InsertPack> {
     new SkiInsertPack { insertX, insertY } };
 }
@@ -126,12 +127,12 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   }
   
   std::unique_ptr<InsertPack> toeInserts;
-  auto bndt = bndconfig.get_child_optional("binding.toe");
+  auto bndt = bndconfig.get_child_optional("binding.toe.");
   if (bndt) {
     toeInserts = loadSkiInsert(bndt.get());
   }
   std::unique_ptr<InsertPack> heelInserts;
-  auto bndh = bndconfig.get_child_optional("binding.heel");
+  auto bndh = bndconfig.get_child_optional("binding.heel.");
   if (bndh) {
     heelInserts = loadSkiInsert(bndh.get());
   }
