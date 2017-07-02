@@ -40,9 +40,11 @@ BoardShape::BoardShape(string name,
                        std::unique_ptr<ShapeEndPart>& tailPart,
                        boost::optional<MCFixed> refStance,
                        boost::optional<MCFixed> setback,
+                       MCFixed bindingDist,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
                        std::unique_ptr<InsertPack>& toeInserts,
+                       std::unique_ptr<InsertPack>& heelInserts,
                        MCFixed spacerWidth,
                        boost::optional<MCFixed> noseEdgeExt,
                        boost::optional<MCFixed> tailEdgeExt)
@@ -58,9 +60,11 @@ BoardShape::BoardShape(string name,
     , m_tailPart(std::move(tailPart))
     , m_setback(setback)
     , m_refStance(refStance)
+    , m_bindingDist(bindingDist)
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
     , m_toeInserts(std::move(toeInserts))
+    , m_heelInserts(std::move(heelInserts))
     , m_spacerWidth(spacerWidth)
     , m_noseEdgeExt(noseEdgeExt)
     , m_tailEdgeExt(tailEdgeExt)
@@ -141,6 +145,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     "<li>Sidecut radius / depth: %scm / %scm</li>"
     "<li>Reference stance width: %s</li>"
     "<li>Setback: %s</li>"
+    "<li>Binding distance (ski boot length or snowboard stance width): %s</li>"
     "<li>Board area: %.3fcm<sup>2</sup></li>"
     "<li>Extension of metal edge towards nose: %s</li>"
     "<li>Extension of metal edge towards tail: %s</li>"
@@ -154,6 +159,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     m_sidecutRadius.str().c_str(), m_sidecutDepth.str().c_str(),
     MCFixed::strWithSuffix(m_refStance).c_str(),
     MCFixed::strWithSuffix(m_setback).c_str(),
+    MCFixed::strWithSuffix(m_bindingDist).c_str(),
     PathUtils::Area(m_overallPath),
     MCFixed::strWithSuffix(m_noseEdgeExt).c_str(),
     MCFixed::strWithSuffix(m_tailEdgeExt).c_str()
@@ -220,6 +226,30 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       }
       a.addSvgCircle(Point(eeCenterX - (*m_refStance / 2) + setback, 0), 0.5);
       a.addSvgCircle(Point(eeCenterX + (*m_refStance / 2) + setback, 0), 0.5);
+      a.addSvgFormat(
+        R"(<path d="M%f %f L%f %f"/>)",
+        (eeCenterX + setback).dbl(), -4.0,
+        (eeCenterX + setback).dbl(), 4.0);
+      return a;
+    });
+  }
+  if (m_bindingDist > 0.0) {
+    dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "Binding distance (ski boot length or snowboard stance width) and setback",
+          "Binding insert groups. By default, these groups are centered "
+          "across the waist of the board, i.e., the center of the "
+          "effective edge, plus the setback.",
+          "green", true
+        }
+      };
+      MCFixed setback = 0.0;
+      if (m_setback) {
+        setback = *m_setback;
+      }
+      a.addSvgCircle(Point(eeCenterX - (m_bindingDist / 2) + setback, 0), 0.5);
+      a.addSvgCircle(Point(eeCenterX + (m_bindingDist / 2) + setback, 0), 0.5);
       a.addSvgFormat(
         R"(<path d="M%f %f L%f %f"/>)",
         (eeCenterX + setback).dbl(), -4.0,
@@ -419,7 +449,9 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
 
 void BoardShape::setupInserts() {
   MCFixed stanceX = 0.0;
-  if (m_refStance) {
+  if (m_bindingDist > 0.0) {
+    stanceX = m_bindingDist / 2;
+  } else if (m_refStance) {
     stanceX = *m_refStance / 2;
   }
   MCFixed eeCenterX = m_noseLength + m_effectiveEdge / 2;
@@ -440,9 +472,15 @@ void BoardShape::setupInserts() {
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
   if (m_toeInserts) {
-    m_toeInserts->moveIntoPosition(Point(stanceX + setback + eeCenterX, 0));
+    m_toeInserts->moveIntoPosition(Point(-stanceX + setback + eeCenterX, 0));
     m_insertsPath.push_back(Point(m_toeInserts->minPoint().X - 4, 0)); // Pin
     auto p = m_toeInserts->insertsPath();
+    m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+  }
+  if (m_heelInserts) {
+    m_heelInserts->moveIntoPosition(Point(stanceX + setback + eeCenterX, 0));
+    m_insertsPath.push_back(Point(m_heelInserts->minPoint().X - 4, 0)); // Pin
+    auto p = m_heelInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
 }

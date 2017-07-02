@@ -83,22 +83,20 @@ std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
 }
 
 std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
-  vector<double> insertX;// = {1,2,3,4};
-  vector<double> insertY;// = {1,2,3,4};
+  vector<double> insertX;
+  vector<double> insertY;
   BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config) {
-    insertX.push_back(points.second.get<double>("x"));
-    insertY.push_back(points.second.get<double>("y"));
+    insertX.push_back(points.second.get<double>("x") /10);
+    insertY.push_back(points.second.get<double>("y") /10);
   } 
   
-  //auto insertX = config.get<double>(".x");
-  //auto insertY = config.get<double>(".y");
-  printf("loadSkiInsert: X: %1.1f Y: %1.1f.\n", insertX[0], insertY[0]);  
   return std::unique_ptr<InsertPack> {
-    new SkiInsertPack { insertX, insertY } };
+  new SkiInsertPack { insertX, insertY } };
 }
 
 std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
-                                      boost::property_tree::ptree& bndconfig) {
+                                      boost::property_tree::ptree& bndconfig,
+                                      double bindingDist) {
   auto name = config.get<std::string>("board.name");
   auto noseLength = config.get<double>("board.nose length");
   auto eeLength = config.get<double>("board.effective edge length");
@@ -144,8 +142,8 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
 
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
-        waistWidth, taper, nose, edge, tail, refStance, setback,
-        nosePack, tailPack, toeInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
+        waistWidth, taper, nose, edge, tail, refStance, setback, bindingDist,
+        nosePack, tailPack, toeInserts, heelInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
@@ -177,7 +175,7 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
 
 void usage(const char* program) {
   printf("\nUsage: %s --board brd.json --machine mach.json "
-         "[--binding bnd.json] [--bindingdist <dist in mm>] "
+         "[--binding bnd.json] [--bindingdist <dist in cm>] "
          "[--outdir <existing dir>]\n\n",
          program);
 }
@@ -346,7 +344,7 @@ int main(int argc, char *argv[]) {
     printf("  binding '%s'\n", bindingDef.c_str());
   }
   if (bindingDist > 0)
-    printf("  binding distance (board stance or ski boot length) = %.2f mm\n",
+    printf("  binding distance (board stance or ski boot length) = %.2f cm\n",
            bindingDist);
   boost::property_tree::ptree machineConfig;
   read_json(machineDef, machineConfig);
@@ -359,7 +357,7 @@ int main(int argc, char *argv[]) {
   
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
-  auto shape = MonkeyCAM::loadBoard(boardConfig, bindingConfig);
+  auto shape = MonkeyCAM::loadBoard(boardConfig, bindingConfig, bindingDist);
   auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
