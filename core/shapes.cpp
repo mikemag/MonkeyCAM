@@ -44,6 +44,7 @@ BoardShape::BoardShape(string name,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
                        std::unique_ptr<InsertPack>& toeInserts,
+                       std::unique_ptr<InsertPack>& centerInserts,
                        std::unique_ptr<InsertPack>& heelInserts,
                        MCFixed spacerWidth,
                        boost::optional<MCFixed> noseEdgeExt,
@@ -64,6 +65,7 @@ BoardShape::BoardShape(string name,
     , m_noseInserts(std::move(nosePack))
     , m_tailInserts(std::move(tailPack))
     , m_toeInserts(std::move(toeInserts))
+    , m_centerInserts(std::move(centerInserts))
     , m_heelInserts(std::move(heelInserts))
     , m_spacerWidth(spacerWidth)
     , m_noseEdgeExt(noseEdgeExt)
@@ -474,6 +476,11 @@ void BoardShape::setupInserts() {
   if (m_toeInserts) {
     m_toeInserts->moveIntoPosition(Point(-stanceX + setback + eeCenterX, 0));
     auto p = m_toeInserts->insertsPath();
+    m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+  }
+  if (m_centerInserts) {
+    m_centerInserts->moveIntoPosition(Point(setback + eeCenterX, 0));
+    auto p = m_centerInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
   if (m_heelInserts) {

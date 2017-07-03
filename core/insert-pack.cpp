@@ -66,7 +66,7 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
 }
 
 //------------------------------------------------------------------------------
-// Ski insert pack
+// Ski insert pack (also used for any generic binding pattern)
 
 SkiInsertPack::SkiInsertPack(const std::vector<double>& insertX, 
                              const std::vector<double>& insertY)

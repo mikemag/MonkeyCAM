@@ -116,8 +116,10 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
     config.get_optional<double>("board.reference stance width"));
   boost::optional<MCFixed> setback(
     config.get_optional<double>("board.stance setback"));
-  auto npc = config.get_child_optional("board.nose insert pack");
+    
+  //Inserts from board def file (retained for backwards compatibility)
   std::unique_ptr<InsertPack> nosePack;
+  auto npc = config.get_child_optional("board.nose insert pack");
   if (npc) {
     nosePack = loadInserts(npc.get());
   }
@@ -127,10 +129,26 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
     tailPack = loadInserts(tpc.get());
   }
   
+  //Inserts from binding def file
+  std::unique_ptr<InsertPack> noseInserts;
+  auto bndn = bndconfig.get_child_optional("binding.nose insert pack");
+  if (bndn) {
+    nosePack = loadInserts(bndn.get());
+  }
+  std::unique_ptr<InsertPack> tailInserts;
+  auto bndtail = bndconfig.get_child_optional("binding.tail insert pack");
+  if (bndtail) {
+    tailPack = loadInserts(bndtail.get());
+  }
   std::unique_ptr<InsertPack> toeInserts;
   auto bndt = bndconfig.get_child_optional("binding.toe.");
   if (bndt) {
     toeInserts = loadSkiInsert(bndt.get());
+  }
+  std::unique_ptr<InsertPack> centerInserts;
+  auto bndc = bndconfig.get_child_optional("binding.center.");
+  if (bndc) {
+    centerInserts = loadSkiInsert(bndc.get());
   }
   std::unique_ptr<InsertPack> heelInserts;
   auto bndh = bndconfig.get_child_optional("binding.heel.");
@@ -146,7 +164,7 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback, bindingDist,
-        nosePack, tailPack, toeInserts, heelInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
+        nosePack, tailPack, toeInserts, centerInserts, heelInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
 BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {

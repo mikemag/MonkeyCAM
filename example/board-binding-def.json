@@ -1,0 +1,21 @@
+{
+  "binding":
+  {
+    "nose insert pack":
+    {
+      "count nose": 1,
+      "count tail": 1,
+      "offset": 4,
+      "horizontal spacing": 4,
+      "vertical spacing": 4
+    },
+    "tail insert pack":
+    {
+      "count nose": 1,
+      "count tail": 1,
+      "offset": 4,
+      "horizontal spacing": 4,
+      "vertical spacing": 4
+    }
+  }
+}
