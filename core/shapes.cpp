@@ -473,13 +473,11 @@ void BoardShape::setupInserts() {
   }
   if (m_toeInserts) {
     m_toeInserts->moveIntoPosition(Point(-stanceX + setback + eeCenterX, 0));
-    m_insertsPath.push_back(Point(m_toeInserts->minPoint().X - 4, 0)); // Pin
     auto p = m_toeInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
   if (m_heelInserts) {
     m_heelInserts->moveIntoPosition(Point(stanceX + setback + eeCenterX, 0));
-    m_insertsPath.push_back(Point(m_heelInserts->minPoint().X - 4, 0)); // Pin
     auto p = m_heelInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
