@@ -34,20 +34,19 @@ together to create the parts necessary to build a ski or
 snowboard. This includes the core, base material, and nose/tail filler
 material.
 
-See the [MonkeyCAM v4.0 G-Code Program Guide](
-https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md)
+See the [MonkeyCAM v4.0 G-Code Program Guide](G-Code_Program_Guide.md)
 for more details.
 
 ## Configuration Files
 
-MonkeyCAM uses two configuration files, one to describe the board and
-one to describe the details of how to machine the board. The board
-definition file describes the shape of the board, the thickness and
-taper of the core, placement of inserts, etc. The machine and tool
-definition file describes machining parameters used by various
-programs (rapid and various cutting heights and depths, raw material
-thicknesses, etc.) and parameters of each tool used.
+MonkeyCAM uses three configuration files, one to describe the board/ski, one to 
+describe the binding inserts (optional, no inserts if ommitted), and one to 
+describe the details of how to machine the board. The board
+definition file describes the shape of the board, and the thickness and
+taper of the core. The binding definition file describes the placement of 
+inserts. The machine and tool definition file describes machining parameters 
+used by various programs (rapid and various cutting heights and depths, raw 
+material thicknesses, etc.) and parameters of each tool used.
 
-See the [MonkeyCAM v4.0 Configuration Guide](
-https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md)
+See the [MonkeyCAM v4.0 Configuration Guide](Configuration_Guide.md)
 for more details.

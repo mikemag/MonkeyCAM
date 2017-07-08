@@ -1,16 +1,15 @@
 # MonkeyCAM v4.0 Configuration Guide
 
-MonkeyCAM uses two configuration files, one to describe the board and
-one to describe the details of how to machine the board. The board
-definition file describes the shape of the board, the thickness and
-taper of the core, placement of inserts, etc. The machine and tool
-definition file describes machining parameters used by various
-programs (rapid and various cutting heights and depths, raw material
-thicknesses, etc.) and parameters of each tool used.
+MonkeyCAM uses three configuration files, one to describe the board/ski, one to 
+describe the binding inserts (optional, no inserts if ommitted), and one to 
+describe the details of how to machine the board. The board
+definition file describes the shape of the board, and the thickness and
+taper of the core. The binding definition file describes the placement of 
+inserts. The machine and tool definition file describes machining parameters 
+used by various programs (rapid and various cutting heights and depths, raw 
+material thicknesses, etc.) and parameters of each tool used.
 
-See the [MonkeyCAM v4.0 User’s Guide](
-https://github.com/mikemag/MonkeyCAM/blob/master/docs/Users_Guide.md)
-for an overview.
+See the [MonkeyCAM v4.0 User’s Guide](Users_Guide.md) for an overview.
 
 ## File Format
 
@@ -214,6 +213,120 @@ See the specification for the Nose Shape for details; the tail is the
 same.
 
 
+#### Nose and Tail Spacer Width
+"nose and tail spacer width": `number`
+
+Specifies the width, in centimeters, of the nose and tail spacer. The
+core at the nose and tail, starting at the ends of the effective edge,
+will be inset by this amount.
+
+
+#### Nose Edge Extension
+"nose edge extension": `number`
+
+Specifies the length, in centimeters, of the edge past the end of the
+effective edge towards the nose of the board. Optional. If omitted the
+edge wraps around the entire nose of the board. If `0.0`, the edge
+ends right at the end of the effective edge.
+
+
+#### Tail Edge Extension
+"tail edge extension": `number`
+
+Specifies the length, in centimeters, of the edge past the end of the
+effective edge towards the tail of the board. Optional. If omitted the
+edge wraps around the entire tail of the board. If `0.0`, the edge
+ends right at the end of the effective edge.
+
+
+### Profile Section
+
+The profile specifies the thickness of the core from nose to
+tail. Currently, MonkeyCAM generates profiles which are constant
+thickness throughout the nose and tail, and are a constant thickness
+throughout the bulk of the center of the board. The transition from
+the thickest portion at the center to the thinner nose and tail is
+defined with Bezier curves for a smooth and highly customizable
+transition.
+
+
+#### Nose Thickness
+"nose thickness": `number`
+
+The thickness, in centimeters, of the nose. The entire nose right up
+to the effective edge will be this thickness.
+
+
+#### Center Thickness
+"center thickness": `number`
+
+The thickness, in centimeters, of the center of the board. How much of
+the center is this thickness is determined by the nose and tail taper
+parameters.
+
+
+#### Tail Thickness
+"tail thickness": `number`
+
+The thickness, in centimeters, of the tail. The entire tail right up
+to the effective edge will be this thickness.
+
+
+#### Nose Taper
+
+The nose taper defines how the profile transitions from the larger
+center thickness to the thinner nose thickness. A Bezier is used to
+generate a smooth transition. To understand these parameters, first
+consider the distance from the center of the effective edge to the
+start of the nose. This is one half the effective edge length. The
+taper is defined using percentages of this distance, starting from the
+center of the effective edge.
+
+```
+"nose taper":
+{
+    "taper start": percentage,
+    "start handle": percentage,
+    "end handle": percentage,
+    "taper end": percentage
+}
+```
+
+`taper start` specifies, as a percentage of half the effective edge
+length, the distance from the center of the effective edge towards the
+nose where the taper will begin.
+
+`taper end` specifies, as a percentage of half the effective edge
+length, the distance from the center of the effective edge towards the
+nose where the taper will end.
+
+`start handle` and `end handle` specify the location of two Bezier
+control points. These are also percentages of half the effective edge
+length. The further a handle is from the start or end, the more it
+pulls on the curve and makes the start or end of the transition more
+gradual. If the handles are very close to the start and end the
+transition will be sharper.
+
+
+#### Tail Taper
+
+The tail taper is the same as the nose taper, simply directed towards
+the tail from the center of the effective edge.
+
+```
+"tail taper":
+{
+    "taper start": percentage,
+    "start handle": percentage,
+    "end handle": percentage,
+    "taper end": percentage
+}
+```
+
+
+## Binding definition
+
+
 ### Inserts
 
 Inserts are collected into "packs" which consist of "groups" of four
@@ -227,10 +340,6 @@ various classic packs. The most classic pack of eight inserts has
 three groups.
 
 There are two packs, one for the nose and one for the tail.
-
-Currently the only way to place inserts is for snowboards. In the
-future I'll add other ways, specifically for splitboards and various
-standard ski binding patterns.
 
 
 #### Reference Stance Width
@@ -361,117 +470,6 @@ defined. Additional groups are specified with the other parameters.
 ```
 
 See the Nose Insert Pack; the tail is the same.
-
-
-#### Nose and Tail Spacer Width
-"nose and tail spacer width": `number`
-
-Specifies the width, in centimeters, of the nose and tail spacer. The
-core at the nose and tail, starting at the ends of the effective edge,
-will be inset by this amount.
-
-
-#### Nose Edge Extension
-"nose edge extension": `number`
-
-Specifies the length, in centimeters, of the edge past the end of the
-effective edge towards the nose of the board. Optional. If omitted the
-edge wraps around the entire nose of the board. If `0.0`, the edge
-ends right at the end of the effective edge.
-
-
-#### Tail Edge Extension
-"tail edge extension": `number`
-
-Specifies the length, in centimeters, of the edge past the end of the
-effective edge towards the tail of the board. Optional. If omitted the
-edge wraps around the entire tail of the board. If `0.0`, the edge
-ends right at the end of the effective edge.
-
-
-### Profile Section
-
-The profile specifies the thickness of the core from nose to
-tail. Currently, MonkeyCAM generates profiles which are constant
-thickness throughout the nose and tail, and are a constant thickness
-throughout the bulk of the center of the board. The transition from
-the thickest portion at the center to the thinner nose and tail is
-defined with Bezier curves for a smooth and highly customizable
-transition.
-
-
-#### Nose Thickness
-"nose thickness": `number`
-
-The thickness, in centimeters, of the nose. The entire nose right up
-to the effective edge will be this thickness.
-
-
-#### Center Thickness
-"center thickness": `number`
-
-The thickness, in centimeters, of the center of the board. How much of
-the center is this thickness is determined by the nose and tail taper
-parameters.
-
-
-#### Tail Thickness
-"tail thickness": `number`
-
-The thickness, in centimeters, of the tail. The entire tail right up
-to the effective edge will be this thickness.
-
-
-#### Nose Taper
-
-The nose taper defines how the profile transitions from the larger
-center thickness to the thinner nose thickness. A Bezier is used to
-generate a smooth transition. To understand these parameters, first
-consider the distance from the center of the effective edge to the
-start of the nose. This is one half the effective edge length. The
-taper is defined using percentages of this distance, starting from the
-center of the effective edge.
-
-```
-"nose taper":
-{
-    "taper start": percentage,
-    "start handle": percentage,
-    "end handle": percentage,
-    "taper end": percentage
-}
-```
-
-`taper start` specifies, as a percentage of half the effective edge
-length, the distance from the center of the effective edge towards the
-nose where the taper will begin.
-
-`taper end` specifies, as a percentage of half the effective edge
-length, the distance from the center of the effective edge towards the
-nose where the taper will end.
-
-`start handle` and `end handle` specify the location of two Bezier
-control points. These are also percentages of half the effective edge
-length. The further a handle is from the start or end, the more it
-pulls on the curve and makes the start or end of the transition more
-gradual. If the handles are very close to the start and end the
-transition will be sharper.
-
-
-#### Tail Taper
-
-The tail taper is the same as the nose taper, simply directed towards
-the tail from the center of the effective edge.
-
-```
-"tail taper":
-{
-    "taper start": percentage,
-    "start handle": percentage,
-    "end handle": percentage,
-    "taper end": percentage
-}
-```
 
 
 ## Machine and Tool definition
