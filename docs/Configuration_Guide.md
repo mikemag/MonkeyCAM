@@ -212,6 +212,17 @@ of the tail.
 See the specification for the Nose Shape for details; the tail is the
 same.
 
+#### Stance Setback
+"stance setback": `number`
+
+*Optional.*
+
+The setback, in centimeters, which defines how much the reference
+stance of a board, or boot center of a ski, is shifted away from the 
+center of the effective edge towards the tail. A value of `0` keeps the 
+reference stance centered over the center of the effective edge. A positive 
+value shifts the reference stance towards the tail. Optional. If omitted a
+value of `0` is assumed.
 
 #### Nose and Tail Spacer Width
 "nose and tail spacer width": `number`
@@ -323,13 +334,57 @@ the tail from the center of the effective edge.
 }
 ```
 
+#### Reference Stance Width
+"reference stance width": `number`
+
+*Optional. Replaced by '--binding-distance' keyword on command line but 
+retained for backwards compatibility. To be removed in future version.*
+
+The width, in centimeters, between the center insert group in each
+pack. By default, these groups are centered at the waist of the board,
+i.e., the center of the effective edge.
+
+#### Nose Insert Pack
+
+*Optional. Moved to Binding definition file ([See below](#nose-insert-pack-1)). 
+Functionality is currently retained in board definition file for backwards 
+compatibility. To be removed in future version.*
+
+
+#### Tail Insert Pack
+
+*Optional. Moved to Binding definition file ([See below](#tail-insert-pack-1)). 
+Functionality is currently retained in board definition file for backwards 
+compatibility. To be removed in future version.*
+
 
 ## Binding definition
 
+*Optional. The whole binding definition file is optional. 
+Omit for skis or boards with no inserts.*
 
-### Inserts
+The binding definition configuration file contains a single section
+which describes parameters relating to binding insert positioning.
 
-Inserts are collected into "packs" which consist of "groups" of four
+```
+{
+    “binding”:
+    {
+        parameters
+    }
+}
+```
+
+
+#### Binding Name
+"binding name": `string`
+
+The name of the binding or insert pattern specification.
+
+
+### Snowboard insert packs
+
+Inserts "packs" consist of "groups" of four
 inserts in a standard 4x4 pattern, with each group staggered from the
 other by a given amount. Packs are defined by how many groups they
 have, and their spacing. Typically some inserts from one group overlap
@@ -340,28 +395,6 @@ various classic packs. The most classic pack of eight inserts has
 three groups.
 
 There are two packs, one for the nose and one for the tail.
-
-
-#### Reference Stance Width
-"reference stance width": `number`
-
-*Optional. Omit for skis or other boards with no inserts.*
-
-The width, in centimeters, between the center insert group in each
-pack. By default, these groups are centered at the waist of the board,
-i.e., the center of the effective edge.
-
-
-#### Stance Setback
-"stance setback": `number`
-
-*Optional. Omit for skis or other boards with no inserts.*
-
-The setback, in centimeters, which defines how much the reference
-stance is shifted away from the waist towards the tail. A value of `0`
-keeps the reference stance centered over the waist. A positive value
-shifts the reference stance towards the tail. Optional. If omitted a
-value of `0` is assumed.
 
 
 #### Nose Insert Pack
@@ -472,6 +505,87 @@ defined. Additional groups are specified with the other parameters.
 See the Nose Insert Pack; the tail is the same.
 
 
+### Ski binding inserts
+
+Inserts for skis can be specified at three locations: Toe, Center or Heel.
+These keywords could also be used to make user defined insert patterns for 
+any other purpose on skis or boards (e.g. splitboard inserts?).
+
+Ski binding insert functionality uses a JSON `array` to specify the position 
+of the center of each insert. The positions are defined as offsets from 
+a reference point (either the boot toe, center, or heel). Offsets are 
+specified in cm along the ski towards the tail (x) or across the ski to the
+left (y).
+
+A JSON `array` consists of a series of comma seperated rows, each enclosed 
+in curly brackets `{row}`, and the whole array enclosed in square brackets 
+`[.....]`. For all the ski binding definition arrays each row contains 
+comma seperated "x" and "y" parameters specifying the coordinates of an 
+individual insert `"x": number, "y": number`.
+
+
+#### Toe
+"toe": 
+\[
+  {"x": `number`,   "y": `number`},
+  {"x": `number`,   "y": `number`},
+  ...
+  {"x": `number`,   "y": `number`}
+\]
+
+*Optional.*
+
+Toe inserts are specified with position relative to the center of the 
+boot toe. For tech/pin ski touring bindings toe inserts are specified 
+relative to the center of the pin centerline. Note that for frame bindings 
+with a fixed length (i.e. the distance from the front screw holes to the 
+back screw holes is fixed as the binding is all one piece) then all of the 
+binding inserts will be specified relative to the toe (and hence should
+be part of the "toe" section of the binding definition file).
+
+
+#### Center
+"center": 
+\[
+  {"x": `number`,   "y": `number`},
+  ...
+\]
+
+*Optional.*
+
+Center inserts are specified relative to the boot/stance center.
+
+
+#### Heel
+"heel": 
+\[
+  {"x": `number`,   "y": `number`},
+  ...
+\]
+
+*Optional.*
+
+Heel inserts are relative to the center of the boot heel.
+
+
+#### Example
+```
+    "toe":
+    [
+      {"x": -2.5,   "y": 2.0},
+      {"x": -2.5,   "y": -2.0}, 
+      {"x": 2.0,   "y": -2.0}, 
+      {"x": 2.0,   "y": 2.0} 
+    ],
+    "heel":
+    [
+      {"x": -1.5,   "y": 1.8},
+      {"x": -1.5,   "y": -1.8}, 
+      {"x": 3.75,   "y": -1.8}, 
+      {"x": 3.75,   "y": 1.8}
+    ]
+```
+
 ## Machine and Tool definition
 
 The machine and tool configuration file contains a single section
@@ -548,13 +662,13 @@ otherwise could be, but they will still work.
 
 ### Base Cutout Parameters
 
-Each of these effects the [Base Cutout program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#base-cutout).
+Each of these effects the [Base Cutout program](G-Code_Program_Guide.md#base-cutout).
 
 #### Base Cutout Tool
 
 "base cutout tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the base.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the base.
 
 #### Base Rapid Height
 
@@ -577,12 +691,12 @@ base material, i.e., `-0.010` or so.
 
 ### Guide Holes Parameters
 
-Each of these effects the [Guide Holes program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#guide-holes).
+Each of these effects the [Guide Holes program](G-Code_Program_Guide.md#guide-holes).
 
 #### Guide Hole Tool
 "guide hole tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the guide holes in the core blank.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the guide holes in the core blank.
 
 #### Guide Hole Depth
 
@@ -610,13 +724,13 @@ The offset, in inches, of the guide holes from the ends of the core.
 
 ### Alignment Marks Parameters
 
-Each of these effects the [Alignment Marks program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#alignment-marks).
+Each of these effects the [Alignment Marks program](G-Code_Program_Guide.md#alignment-marks).
 
 #### Alignment Mark Tool
 
 "alignment mark tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the alignment marks on the bottom of the core.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the alignment marks on the bottom of the core.
 
 #### Alignment Mark Offset
 
@@ -642,13 +756,13 @@ of a horrible mistake.
 
 ### Edge Groove Parameters
 
-Each of these effects the [Edge Groove program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#edge-groove).
+Each of these effects the [Edge Groove program](G-Code_Program_Guide.md#edge-groove).
 
 #### Edge Groove Tool
 
 "edge groove tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the edge groove.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the edge groove.
 
 #### Edge Groove Depth
 
@@ -674,13 +788,13 @@ cutting pass will overlap with the prior pass.
 
 ### Insert Holes Parameters
 
-Each of these effects the [Insert Holes program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#insert-holes).
+Each of these effects the [Insert Holes program](G-Code_Program_Guide.md#insert-holes).
 
 #### Insert Tool
 
 "insert tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut the insert holes.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the insert holes.
 
 #### Insert Rim Depth
 
@@ -702,13 +816,13 @@ The diameter, in inches, of the barrel of the inserts.
 
 ### Top Profile Parameters
 
-Each of these effects the [Top Profile program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#top-profile).
+Each of these effects the [Top Profile program](G-Code_Program_Guide.md#top-profile).
 
 #### Top Profile Tool
 
 "top profile tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to profile the core.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to profile the core.
 
 #### Top Profile Transition Speed
 
@@ -743,13 +857,13 @@ appropriate for thicker core blanks, or larger cutters.
 
 ### Top Cutout Parameters
 
-Each of these effects the [Top Cutout program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#top-cutout).
+Each of these effects the [Top Cutout program](G-Code_Program_Guide.md#top-cutout).
 
 #### Core Cutout Tool
 
 "core cutout tool": `tool number`
 
-The tool, defined in the [`tools` section](https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md#tools), which will be used to cut out the core.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut out the core.
 
 #### Sidewall Overhang
 
@@ -759,7 +873,7 @@ The amount, in inches, of sidewall which will remain past the edges, outside the
 
 ### Nose Tail Spacers Parameters
 
-Each of these effects the [Nose Tail Spacers program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#nose-tail-spacers).
+Each of these effects the [Nose Tail Spacers program](G-Code_Program_Guide.md#nose-tail-spacers).
 
 #### Spacer End Overhang
 
@@ -777,7 +891,7 @@ past the sides of the final board shape.
 
 ### Edge Trench Parameters
 
-Each of these effects the [Edge Trench program](https://github.com/mikemag/MonkeyCAM/blob/master/docs/G-Code_Program_Guide.md#edge-trench).
+Each of these effects the [Edge Trench program](G-Code_Program_Guide.md#edge-trench).
 
 #### Edge Trench Width
 

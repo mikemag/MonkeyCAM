@@ -109,12 +109,12 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   auto tail = loadEndPart(config.get_child("board.tail shape"));
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
   
-  boost::optional<MCFixed> refStance(
-    config.get_optional<double>("board.reference stance width"));
   boost::optional<MCFixed> setback(
     config.get_optional<double>("board.stance setback"));
     
-  //Inserts from board def file (retained for backwards compatibility)
+  //Inserts in board def file (retained for backwards compatibility)
+  boost::optional<MCFixed> refStance(
+    config.get_optional<double>("board.reference stance width"));
   std::unique_ptr<InsertPack> nosePack;
   auto npc = config.get_child_optional("board.nose insert pack");
   if (npc) {

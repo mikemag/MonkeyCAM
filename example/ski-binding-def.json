@@ -1,7 +1,7 @@
 {
   "binding":
   {
-    "name": "G3-Ion",
+    "binding name": "G3-Ion",
     "toe":
     [
       {"x": -2.5,   "y": 2.0},
