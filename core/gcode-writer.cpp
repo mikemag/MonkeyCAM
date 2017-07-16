@@ -116,7 +116,7 @@ void GCodeWriter::commentWrapped(GCodeLines& lines, string s, int indent) {
 void GCodeWriter::comment(GCodeLines& lines, const char* s) {
   char buff[81];
   assert(!strchr(s, '(') && !strchr(s, ')'));
-  snprintf(buff, sizeof(buff), "( %-76s )", s);
+  snprintf(buff, sizeof(buff), "( %-76.76s )", s);
   lines.push_back(string(buff));
 }
 
