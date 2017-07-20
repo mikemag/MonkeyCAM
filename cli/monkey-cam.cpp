@@ -382,19 +382,30 @@ int main(int argc, char *argv[]) {
   // Force the overall and core shapes to generate first, so they are
   // first in the overview.
   shape->buildCorePath(machine);
+  fflush(stdout);
   shape->generateTopProfile(machine, profile).write(outdir);
+  fflush(stdout);
   shape->generateEdgeTrench(machine).write(outdir);
+  fflush(stdout);
   shape->generateCoreEdgeGroove(machine).write(outdir);
+  fflush(stdout);
   shape->generateNoseTailSpacerCutout(machine).write(outdir);
+  fflush(stdout);
   shape->generateGuideHoles(machine).write(outdir);
+  fflush(stdout);
   shape->generateCoreAlignmentMarks(machine).write(outdir);
+  fflush(stdout);
   shape->generateBaseCutout(machine).write(outdir);
+  fflush(stdout);
   shape->generateInsertHoles(machine).write(outdir);
+  fflush(stdout);
   shape->generateTopCutout(machine).write(outdir);
+  fflush(stdout);
 
   string overviewName = shape->name() + "-overview.html";
   printf("Generating HTML overview %s%s\n",
          outdir.c_str(), overviewName.c_str());
+  fflush(stdout);
   MonkeyCAM::OverviewWriter overview(outdir + overviewName, shape->name());
   generateOverview(overview, *shape, profile);
   overview.addHeader("Configuration");

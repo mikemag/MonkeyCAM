@@ -39,7 +39,7 @@ OverviewWriter::OverviewWriter(std::string filename, std::string name)
     R"(#generated {font-style:italic;font-size:80%;})"
     R"(#disclaimer {margin:0px;border:1px solid rgb(200,0,0);)"
     R"(background-color:rgba(255,0,0,0.1);padding:0.5em;font-size:80%;})"
-    R"(#pathname {font-weight:bold;)"
+    R"(#pathname {font-weight:bold;})"
     "</style>" << std::endl;
 }
 
