@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Michael M. Magruder (https://github.com/mikemag)
+ * Copyright 2013-2017 Michael M. Magruder (https://github.com/mikemag)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,7 +298,7 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
 }
 
 int main(int argc, char *argv[]) {
-  printf("MonkeyCAM v%d.%d.%d, Copyright (C) 2013-2014 Michael M. Magruder\n",
+  printf("MonkeyCAM v%d.%d.%d, Copyright (C) 2013-2017 Michael M. Magruder\n",
          MonkeyCAM_VERSION_MAJOR,
          MonkeyCAM_VERSION_MINOR,
          MonkeyCAM_VERSION_PATCH);
