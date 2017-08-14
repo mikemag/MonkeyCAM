@@ -25,6 +25,7 @@
       "end handle": 0.50,
       "transition handle": 0.75
     },
+    "stance setback": 6,
     "nose and tail spacer width": 2,
     "tail edge extension": 2
   },

@@ -42,8 +42,12 @@ class BoardShape {
              std::unique_ptr<ShapeEndPart>& tailPart,
              boost::optional<MCFixed> refStance,
              boost::optional<MCFixed> setback,
+             MCFixed bindingDist,
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
+             std::unique_ptr<InsertPack>& toeInserts,
+             std::unique_ptr<InsertPack>& centerInserts,
+             std::unique_ptr<InsertPack>& heelInserts,
              MCFixed spacerWidth,
              boost::optional<MCFixed> noseEdgeExt,
              boost::optional<MCFixed> tailEdgeExt);
@@ -108,8 +112,12 @@ class BoardShape {
 
   boost::optional<MCFixed> m_setback;
   boost::optional<MCFixed> m_refStance;
+  MCFixed m_bindingDist;
   std::unique_ptr<InsertPack> m_noseInserts;
   std::unique_ptr<InsertPack> m_tailInserts;
+  std::unique_ptr<InsertPack> m_toeInserts;
+  std::unique_ptr<InsertPack> m_centerInserts;
+  std::unique_ptr<InsertPack> m_heelInserts;
   Path m_insertsPath;
 
   MCFixed m_spacerWidth;

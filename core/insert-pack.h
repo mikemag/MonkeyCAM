@@ -17,6 +17,8 @@
 #ifndef incl_insert_pack_H_
 #define incl_insert_pack_H_
 
+#include <vector>
+
 #include "paths.h"
 
 namespace MonkeyCAM {
@@ -58,6 +60,19 @@ class SnowboardInsertPack : public InsertPack {
   MCFixed m_vSpacing;
   int m_countNose;
   int m_countTail;
+};
+
+// Ski binding inserts.
+class SkiInsertPack : public InsertPack {
+  public:
+   SkiInsertPack(const std::vector<double>& insertX, 
+                 const std::vector<double>& insertY);
+   //const std::string name() const { return m_bindingName; }
+  private:
+   void addInsertGroup();
+   //MCFixed m_insertX[4];
+   //MCFixed m_insertY[4];
+   //std::string m_bindingName;
 };
 
 } // namespace MonkeyCAM

@@ -15,6 +15,7 @@
  */
 
 #include <algorithm>
+#include <vector>
 
 #include "insert-pack.h"
 
@@ -62,6 +63,25 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
   m_insertsPath.push_back(Point(stanceX - x, -y));
   m_insertsPath.push_back(Point(stanceX + x, y));
   m_insertsPath.push_back(Point(stanceX + x, -y));
+}
+
+//------------------------------------------------------------------------------
+// Ski insert pack (also used for any generic binding pattern)
+
+SkiInsertPack::SkiInsertPack(const std::vector<double>& insertX, 
+                             const std::vector<double>& insertY)
+    //: m_insertX(insertX[])
+    //, m_insertY(insertY[])
+{
+ for (unsigned it = 0; it != insertX.size(); it++) {
+    m_insertsPath.push_back(Point(insertX[it], insertY[it]));
+  } 
+  
+  
+
+  std::sort(m_insertsPath.begin(), m_insertsPath.end());
+  auto newEnd = std::unique(m_insertsPath.begin(), m_insertsPath.end());
+  m_insertsPath.resize(std::distance(m_insertsPath.begin(), newEnd));
 }
 
 }
