@@ -64,15 +64,11 @@ class SnowboardInsertPack : public InsertPack {
 
 // Ski binding inserts.
 class SkiInsertPack : public InsertPack {
-  public:
-   SkiInsertPack(const std::vector<double>& insertX, 
-                 const std::vector<double>& insertY);
-   //const std::string name() const { return m_bindingName; }
-  private:
-   void addInsertGroup();
-   //MCFixed m_insertX[4];
-   //MCFixed m_insertY[4];
-   //std::string m_bindingName;
+ public:
+  SkiInsertPack(const std::vector<double>& insertX,
+                const std::vector<double>& insertY);
+ private:
+  void addInsertGroup();
 };
 
 } // namespace MonkeyCAM

@@ -86,10 +86,10 @@ std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
   vector<double> insertX;
   vector<double> insertY;
   BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config) {
-    insertX.push_back(points.second.get<double>("x")); 
+    insertX.push_back(points.second.get<double>("x"));
     insertY.push_back(points.second.get<double>("y"));
-  } 
-  
+  }
+
   return std::unique_ptr<InsertPack> {
   new SkiInsertPack { insertX, insertY } };
 }
@@ -108,11 +108,11 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   auto edge = loadEdgePart(config.get_child("board.edge shape"));
   auto tail = loadEndPart(config.get_child("board.tail shape"));
   auto spacerWidth = config.get<double>("board.nose and tail spacer width");
-  
+
   boost::optional<MCFixed> setback(
     config.get_optional<double>("board.stance setback"));
-    
-  //Inserts in board def file (retained for backwards compatibility)
+
+  // Inserts in board def file (retained for backwards compatibility)
   boost::optional<MCFixed> refStance(
     config.get_optional<double>("board.reference stance width"));
   std::unique_ptr<InsertPack> nosePack;
@@ -125,8 +125,8 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
   if (tpc) {
     tailPack = loadInserts(tpc.get());
   }
-  
-  //Inserts from binding def file
+
+  // Inserts from binding def file
   std::unique_ptr<InsertPack> noseInserts;
   auto bndn = bndconfig.get_child_optional("binding.nose insert pack");
   if (bndn) {
@@ -184,9 +184,6 @@ BoardProfile loadProfile(boost::property_tree::ptree& config,
       noseEnd, tailEnd, shape };
   return profile;
 }
-
-//std::unique_ptr<BindingHoles> loadBinding(boost::property_tree::ptree& config) {
-//}
 
 } // namespace MonkeyCAM
 
@@ -372,7 +369,7 @@ int main(int argc, char *argv[]) {
   if (bindingDef != "") {
       read_json(bindingDef, bindingConfig);
   }
-  
+
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
   auto shape = MonkeyCAM::loadBoard(boardConfig, bindingConfig, bindingDist);
