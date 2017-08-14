@@ -36,12 +36,6 @@ for details.
 
 The G-code programs **generated** by MonkeyCAM are license-free.
 
-### Disclaimer
-
-I am providing code in this repository to you under an open source
-license. Because this is my personal repository, the license you
-receive to my code is from me and not from my employer (Facebook).
-
 ## Current Release
 
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
