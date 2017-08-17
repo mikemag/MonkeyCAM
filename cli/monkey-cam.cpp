@@ -21,9 +21,6 @@
 #include <vector>
 #include <set>
 #include <boost/optional/optional.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
 #include <sys/stat.h>
 
 #include "machine.h"
@@ -34,27 +31,39 @@
 #include "overview-writer.h"
 #include "MonkeyCAMConfig.h"
 
+#include "json.hpp"
+using json = nlohmann::json;
+
 using std::string;
 using std::vector;
 using std::set;
 
 namespace MonkeyCAM {
 
+template<class T>
+boost::optional<T> jsonGetOptional(const json& obj, const std::string& key) {
+  try {
+    return boost::optional<T>(obj.at(key).get<T>());
+  } catch (json::out_of_range& e) {
+    return boost::optional<T>();
+  }
+}
+
 // @TODO: load more parts
-std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
-  auto type = config.get<std::string>("type");
+std::unique_ptr<ShapeEndPart> loadEndPart(const json& config) {
+  std::string type = config.at("type");
   assert(type == "Basic Bezier" || type == "Flat");
   if (type == "Basic Bezier") {
-    auto endHandle = config.get<double>("end handle");
-    auto transitionHandle = config.get<double>("transition handle");
+    double endHandle = config.at("end handle");
+    double transitionHandle = config.at("transition handle");
 
     return std::unique_ptr<ShapeEndPart> {
       new BasicBezier { endHandle, transitionHandle } };
   }
   else if (type == "Flat") {
-    auto flatWidth = config.get<double>("flat width");
-    auto endHandle = config.get<double>("end handle");
-    auto transitionHandle = config.get<double>("transition handle");
+    double flatWidth = config.at("flat width");
+    double endHandle = config.at("end handle");
+    double transitionHandle = config.at("transition handle");
 
     return std::unique_ptr<ShapeEndPart> {
       new FlatBezier {flatWidth, endHandle, transitionHandle } };
@@ -63,100 +72,99 @@ std::unique_ptr<ShapeEndPart> loadEndPart(boost::property_tree::ptree& config) {
 }
 
 // @TODO: load more parts
-std::unique_ptr<ShapeEdgePart> loadEdgePart(
-  boost::property_tree::ptree& config)
+std::unique_ptr<ShapeEdgePart> loadEdgePart(const json& config)
 {
-  auto type = config.get<std::string>("type");
+  std::string type = config.at("type");
   assert(type == "Basic Arc");
   return std::unique_ptr<ShapeEdgePart> { new BasicArc };
 }
 
-std::unique_ptr<InsertPack> loadInserts(boost::property_tree::ptree& config) {
-  auto countNose = config.get<int>("count nose");
-  auto countTail = config.get<int>("count tail");
-  auto offset = config.get<double>("offset", 4);
-  auto hSpacing = config.get<double>("horizontal spacing", 4);
-  auto vSpacing = config.get<double>("vertical spacing", 4);
+std::unique_ptr<InsertPack> loadInserts(const json& config) {
+  int countNose = config.at("count nose");
+  int countTail = config.at("count tail");
+  auto offset = config.value("offset", 4.0);
+  auto hSpacing = config.value("horizontal spacing", 4.0);
+  auto vSpacing = config.value("vertical spacing", 4.0);
   return std::unique_ptr<InsertPack> {
     new SnowboardInsertPack { countNose, countTail, offset,
         hSpacing, vSpacing } };
 }
 
-std::unique_ptr<InsertPack> loadSkiInsert(boost::property_tree::ptree& config) {
+std::unique_ptr<InsertPack> loadSkiInsert(const json& config) {
   vector<double> insertX;
   vector<double> insertY;
-  BOOST_FOREACH (boost::property_tree::ptree::value_type& points, config) {
-    insertX.push_back(points.second.get<double>("x"));
-    insertY.push_back(points.second.get<double>("y"));
+  for (const auto& point : config) {
+    insertX.push_back(point.at("x").get<double>());
+    insertY.push_back(point.at("y").get<double>());
   }
 
   return std::unique_ptr<InsertPack> {
   new SkiInsertPack { insertX, insertY } };
 }
 
-std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
-                                      boost::property_tree::ptree& bndconfig,
+std::unique_ptr<BoardShape> loadBoard(const json& config,
+                                      const json& bindingConfig,
                                       double bindingDist) {
-  auto name = config.get<std::string>("board.name");
-  auto noseLength = config.get<double>("board.nose length");
-  auto eeLength = config.get<double>("board.effective edge length");
-  auto tailLength = config.get<double>("board.tail length");
-  auto sidecutRadius = config.get<double>("board.sidecut radius");
-  auto waistWidth = config.get<double>("board.waist width");
-  auto taper = config.get<double>("board.taper");
-  auto nose = loadEndPart(config.get_child("board.nose shape"));
-  auto edge = loadEdgePart(config.get_child("board.edge shape"));
-  auto tail = loadEndPart(config.get_child("board.tail shape"));
-  auto spacerWidth = config.get<double>("board.nose and tail spacer width");
+  auto board = config.at("board");
+  std::string name = board.at("name");
+  double noseLength = board.at("nose length");
+  double eeLength = board.at("effective edge length");
+  double tailLength = board.at("tail length");
+  double sidecutRadius = board.at("sidecut radius");
+  double waistWidth = board.at("waist width");
+  double taper = board.at("taper");
+  auto nose = loadEndPart(board.at("nose shape"));
+  auto edge = loadEdgePart(board.at("edge shape"));
+  auto tail = loadEndPart(board.at("tail shape"));
+  double spacerWidth = board.at("nose and tail spacer width");
 
   boost::optional<MCFixed> setback(
-    config.get_optional<double>("board.stance setback"));
+    jsonGetOptional<double>(board, "stance setback"));
 
   // Inserts in board def file (retained for backwards compatibility)
   boost::optional<MCFixed> refStance(
-    config.get_optional<double>("board.reference stance width"));
+    jsonGetOptional<double>(board, "reference stance width"));
   std::unique_ptr<InsertPack> nosePack;
-  auto npc = config.get_child_optional("board.nose insert pack");
+  auto npc = jsonGetOptional<json>(board, "nose insert pack");
   if (npc) {
-    nosePack = loadInserts(npc.get());
+    nosePack = loadInserts(*npc);
   }
   std::unique_ptr<InsertPack> tailPack;
-  auto tpc = config.get_child_optional("board.tail insert pack");
+  auto tpc = jsonGetOptional<json>(board, "tail insert pack");
   if (tpc) {
-    tailPack = loadInserts(tpc.get());
+    tailPack = loadInserts(*tpc);
   }
 
   // Inserts from binding def file
-  std::unique_ptr<InsertPack> noseInserts;
-  auto bndn = bndconfig.get_child_optional("binding.nose insert pack");
+  auto binding = bindingConfig.at("binding");
+  auto bndn = jsonGetOptional<json>(binding, "nose insert pack");
   if (bndn) {
-    nosePack = loadInserts(bndn.get());
+    nosePack = loadInserts(*bndn);
   }
-  std::unique_ptr<InsertPack> tailInserts;
-  auto bndtail = bndconfig.get_child_optional("binding.tail insert pack");
+  auto bndtail = jsonGetOptional<json>(binding, "tail insert pack");
   if (bndtail) {
-    tailPack = loadInserts(bndtail.get());
+    tailPack = loadInserts(*bndtail);
   }
   std::unique_ptr<InsertPack> toeInserts;
-  auto bndt = bndconfig.get_child_optional("binding.toe.");
+  auto bndt = jsonGetOptional<json>(binding, "toe");
   if (bndt) {
-    toeInserts = loadSkiInsert(bndt.get());
+    toeInserts = loadSkiInsert(*bndt);
   }
   std::unique_ptr<InsertPack> centerInserts;
-  auto bndc = bndconfig.get_child_optional("binding.center.");
+  auto bndc = jsonGetOptional<json>(binding, "center");
   if (bndc) {
-    centerInserts = loadSkiInsert(bndc.get());
+    centerInserts = loadSkiInsert(*bndc);
   }
   std::unique_ptr<InsertPack> heelInserts;
-  auto bndh = bndconfig.get_child_optional("binding.heel.");
+  auto bndh = jsonGetOptional<json>(binding, "heel");
   if (bndh) {
-    heelInserts = loadSkiInsert(bndh.get());
+    heelInserts = loadSkiInsert(*bndh);
   }
 
   boost::optional<MCFixed> noseEdgeExt(
-    config.get_optional<double>("board.nose edge extension"));
+    jsonGetOptional<double>(board, "nose edge extension"));
   boost::optional<MCFixed> tailEdgeExt(
-    config.get_optional<double>("board.tail edge extension"));
+    jsonGetOptional<double>(board, "tail edge extension"));
 
   return std::unique_ptr<BoardShape> {
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
@@ -164,21 +172,21 @@ std::unique_ptr<BoardShape> loadBoard(boost::property_tree::ptree& config,
         nosePack, tailPack, toeInserts, centerInserts, heelInserts, spacerWidth, noseEdgeExt, tailEdgeExt } };
 }
 
-BoardProfile::End loadProfileEnd(boost::property_tree::ptree& config) {
-  auto taperStart = config.get<double>("taper start");
-  auto pullStart = config.get<double>("start handle");
-  auto pullEnd = config.get<double>("end handle");
-  auto taperEnd = config.get<double>("taper end");
+BoardProfile::End loadProfileEnd(const json& config) {
+  double taperStart = config.at("taper start");
+  double pullStart = config.at("start handle");
+  double pullEnd = config.at("end handle");
+  double taperEnd = config.at("taper end");
   return BoardProfile::End { taperStart, pullStart, pullEnd, taperEnd };
 }
 
-BoardProfile loadProfile(boost::property_tree::ptree& config,
-                         BoardShape& shape) {
-  auto noseThickness = config.get<double>("profile.nose thickness");
-  auto centerThickness = config.get<double>("profile.center thickness");
-  auto tailThickness = config.get<double>("profile.tail thickness");
-  auto noseEnd = loadProfileEnd(config.get_child("profile.nose taper"));
-  auto tailEnd = loadProfileEnd(config.get_child("profile.tail taper"));
+BoardProfile loadProfile(const json& config, BoardShape& shape) {
+  auto p = config.at("profile");
+  double noseThickness = p.at("nose thickness");
+  double centerThickness = p.at("center thickness");
+  double tailThickness = p.at("tail thickness");
+  auto noseEnd = loadProfileEnd(p.at("nose taper"));
+  auto tailEnd = loadProfileEnd(p.at("tail taper"));
 
   BoardProfile profile { noseThickness, centerThickness, tailThickness,
       noseEnd, tailEnd, shape };
@@ -361,13 +369,20 @@ int main(int argc, char *argv[]) {
   if (bindingDist > 0)
     printf("  binding distance (board stance or ski boot length) = %.2f cm\n",
            bindingDist);
-  boost::property_tree::ptree machineConfig;
-  read_json(machineDef, machineConfig);
-  boost::property_tree::ptree boardConfig;
-  read_json(boardDef, boardConfig);
-  boost::property_tree::ptree bindingConfig;
+
+  auto readJson = [](const string filename, json& config) {
+    std::ifstream f(filename);
+    f >> config;
+    f.close();
+  };
+
+  json machineConfig;
+  readJson(machineDef, machineConfig);
+  json boardConfig;
+  readJson(boardDef, boardConfig);
+  json bindingConfig;
   if (bindingDef != "") {
-      read_json(bindingDef, bindingConfig);
+      readJson(bindingDef, bindingConfig);
   }
 
   printf("Building board shapes...\n");
@@ -415,20 +430,20 @@ int main(int argc, char *argv[]) {
     R"(<p><a href="%s">Board configuration</a> file "%s":</p>)",
     configLink, boardDef.c_str());
   overview.addCode([&](std::ofstream& s) {
-      write_json(s, boardConfig);
+      s << std::setw(4) << boardConfig << std::endl;
     });
   overview.addFormatted(
     R"(<p><a href="%s">Machine configuration</a> file "%s":</p>)",
     configLink, machineDef.c_str());
   overview.addCode([&](std::ofstream& s) {
-      write_json(s, machineConfig);
+      s << std::setw(4) << machineConfig << std::endl;
     });
   if (bindingDef != "") {
     overview.addFormatted(
       R"(<p><a href="%s">Binding configuration</a> file "%s":</p>)",
       configLink, bindingDef.c_str());
     overview.addCode([&](std::ofstream& s) {
-      write_json(s, bindingConfig);
+      s << std::setw(4) << bindingConfig << std::endl;
     });
   }
 

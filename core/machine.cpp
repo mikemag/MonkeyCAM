@@ -17,7 +17,6 @@
 #include "machine.h"
 
 #include <map>
-#include <boost/property_tree/ptree.hpp>
 #include <string>
 
 namespace MonkeyCAM {
@@ -25,14 +24,16 @@ namespace MonkeyCAM {
 //------------------------------------------------------------------------------
 // Machine
 
-Machine::Machine(const boost::property_tree::ptree& config)
+Machine::Machine(const json& config)
     : m_config(config)
 {
-  for (auto& tool : config.get_child("machine.tools")) {
-    auto id = tool.second.get<int>("id");
-    auto name = tool.second.get<std::string>("name");
-    auto dia = MCFixed::fromInches(tool.second.get<double>("diameter"));
-    auto gcodeNum = tool.second.get<int>("G-code #");
+  m_machine = m_config.at("machine");              \
+
+  for (auto& tool : m_machine.at("tools")) {
+    int id = tool.at("id");
+    std::string name = tool.at("name");
+    auto dia = MCFixed::fromInches(tool.at("diameter").get<double>());
+    int gcodeNum = tool.at("G-code #");
     m_tools.insert({ id, { name, dia, gcodeNum } });
   }
 }
