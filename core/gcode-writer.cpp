@@ -23,6 +23,10 @@
 
 #include "gcode-writer.h"
 #include "MonkeyCAMConfig.h"
+#include "activity-emitter.h"
+using ae = MonkeyCAM::ActivityEmitter;
+#include "json.hpp"
+using json = nlohmann::json;
 
 namespace MonkeyCAM {
 
@@ -414,6 +418,15 @@ void GCodeWriter::write(string directory) const {
     return;
   }
   printf("%s\n", m_filename.c_str());
+  ae::emitter().write(
+    {
+      {"ncFile",
+        {
+          {"filename", m_filename},
+          {"lineCount", m_lines.size() + m_headerComments.size() + 1}
+        }
+      }
+    });
   std::ofstream o;
   o.open(directory + m_filename);
   assert(o.is_open());

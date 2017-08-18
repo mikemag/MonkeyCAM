@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include <cmath>
 #include <iostream>
-#include <fstream>
 #include <cassert>
 #include <vector>
 #include <set>
@@ -30,7 +28,8 @@
 #include "gcode-writer.h"
 #include "overview-writer.h"
 #include "MonkeyCAMConfig.h"
-
+#include "activity-emitter.h"
+using ae = MonkeyCAM::ActivityEmitter;
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -315,6 +314,7 @@ int main(int argc, char *argv[]) {
          "PARTICULAR PURPOSE.\n");
   printf("\n");
 
+  boost::optional<int> jsonOutputFD;
   string boardDef = "";
   string machineDef = "";
   string bindingDef = "";
@@ -331,15 +331,31 @@ int main(int argc, char *argv[]) {
       bindingDist = std::atof(argv[++i]);
     } else if ((string(argv[i]) == "--outdir") && (i + 1 < argc)) {
       outdir = string(argv[++i]);
+    } else if ((string(argv[i]) == "--jsonOutputFD") && (i + 1 < argc)) {
+      jsonOutputFD = std::atoi(argv[++i]);
     }
   }
+
+  ae::initialize(jsonOutputFD);
+
+  if (jsonOutputFD) {
+    ae::emitter().write({
+        {"jsonOutputFD", *jsonOutputFD},
+        {"progressMax", 14} // +1 over the true count to allow for saving ;)
+      });
+  }
+
+  ae::emitter().write("version", "v%d.%d.%d", MonkeyCAM_VERSION_MAJOR,
+                      MonkeyCAM_VERSION_MINOR,
+                      MonkeyCAM_VERSION_PATCH);
+
   if (boardDef == "") {
-    printf("Missing required board definition file\n");
+    ae::emitter().fatal("Missing required board definition file");
     usage(argv[0]);
     return 1;
   }
   if (machineDef == "") {
-    printf("Missing required machine definition file\n");
+    ae::emitter().fatal("Missing required machine definition file\n");
     usage(argv[0]);
     return 1;
   }
@@ -348,8 +364,9 @@ int main(int argc, char *argv[]) {
   }
   struct stat stats;
   if ((stat(outdir.c_str(), &stats) != 0) || !S_ISDIR(stats.st_mode)) {
-    printf("Output directory '%s' does not exist, please create it first.\n",
-           outdir.c_str());
+    ae::emitter().fatal("Output directory '%s' does not exist, please create "
+                        "it first.\n",
+                        outdir.c_str());
     return 1;
   }
 #ifndef __MINGW32__
@@ -364,11 +381,12 @@ int main(int argc, char *argv[]) {
   printf("Using:\n  board: '%s'\n  machine: '%s'\n",
          boardDef.c_str(), machineDef.c_str());
   if (bindingDef != "") {
-    printf("  binding '%s'\n", bindingDef.c_str());
+    printf("  binding: '%s'\n", bindingDef.c_str());
   }
-  if (bindingDist > 0)
-    printf("  binding distance (board stance or ski boot length) = %.2f cm\n",
+  if (bindingDist > 0) {
+    printf("  binding distance (board stance or ski boot length): %.2f cm\n",
            bindingDist);
+  }
 
   auto readJson = [](const string filename, json& config) {
     std::ifstream f(filename);
@@ -385,39 +403,42 @@ int main(int argc, char *argv[]) {
       readJson(bindingDef, bindingConfig);
   }
 
+  int progress = 1;
+  ae::emitter().write("progress", "%d", progress++);
+
   printf("Building board shapes...\n");
   const MonkeyCAM::Machine machine { machineConfig };
   auto shape = MonkeyCAM::loadBoard(boardConfig, bindingConfig, bindingDist);
   auto profile = MonkeyCAM::loadProfile(boardConfig, *shape);
+  ae::emitter().write("progress", "%d", progress++);
 
   printf("Generating G-code programs to '%s'...\n", outdir.c_str());
   // Force the overall and core shapes to generate first, so they are
   // first in the overview.
   shape->buildCorePath(machine);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateTopProfile(machine, profile).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateEdgeTrench(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateCoreEdgeGroove(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateNoseTailSpacerCutout(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateGuideHoles(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateCoreAlignmentMarks(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateBaseCutout(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateInsertHoles(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
   shape->generateTopCutout(machine).write(outdir);
-  fflush(stdout);
+  ae::emitter().write("progress", "%d", progress++);
 
   string overviewName = shape->name() + "-overview.html";
   printf("Generating HTML overview %s%s\n",
          outdir.c_str(), overviewName.c_str());
-  fflush(stdout);
   MonkeyCAM::OverviewWriter overview(outdir + overviewName, shape->name());
   generateOverview(overview, *shape, profile);
   overview.addHeader("Configuration");
@@ -425,7 +446,8 @@ int main(int argc, char *argv[]) {
                   "echoed here to ensure it can always be regenerated later. "
                   "Note this is MonkeyCAM's interpretation of the files, "
                   "not the raw files.</p>");
-  auto configLink = "https://github.com/mikemag/MonkeyCAM/blob/master/docs/Configuration_Guide.md";
+  auto configLink = "https://github.com/mikemag/MonkeyCAM/blob/master/docs/"
+    "Configuration_Guide.md";
   overview.addFormatted(
     R"(<p><a href="%s">Board configuration</a> file "%s":</p>)",
     configLink, boardDef.c_str());
@@ -446,6 +468,7 @@ int main(int argc, char *argv[]) {
       s << std::setw(4) << bindingConfig << std::endl;
     });
   }
+  ae::emitter().write("progress", "%d", progress++);
 
   printf("Done.\n");
   return 0;
