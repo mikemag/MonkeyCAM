@@ -306,6 +306,42 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
   }
 }
 
+void readJson(const string filename,
+              json& config,
+              const string configName) {
+  std::ifstream f(filename);
+  try {
+    f >> config;
+    f.close();
+  } catch (json::parse_error& e) {
+    string what = e.what();
+    string msg = what.substr(what.find(':') + 2, std::string::npos);
+    f.seekg(0);
+    auto offset = e.byte;
+    auto lineNumber = 1;
+    auto remainingOffset = e.byte;
+    char c;
+    while (f.get(c) && --offset) {
+      if (c == '\n') {
+        lineNumber++;
+        remainingOffset = offset;
+      }
+    }
+    printf("Parse error in %s on line %d character %lu: %s\n",
+           filename.c_str(), lineNumber, remainingOffset, msg.c_str());
+    ae::emitter().write({
+        {"parse error", {
+            {"configName", configName},
+            {"lineNumber", lineNumber},
+            {"offset", remainingOffset},
+            {"message", msg}
+          }
+        }
+      });
+    exit(1);
+  }
+};
+
 int main(int argc, char *argv[]) {
   printf("MonkeyCAM v%d.%d.%d %s@%s, Copyright (C) 2013-2017 Michael M. Magruder\n",
          MonkeyCAM_VERSION_MAJOR,
@@ -353,8 +389,14 @@ int main(int argc, char *argv[]) {
                       MonkeyCAM_VERSION_MAJOR,
                       MonkeyCAM_VERSION_MINOR,
                       MonkeyCAM_VERSION_PATCH);
-  ae::emitter().write("gitBranch", MonkeyCAM_GIT_BRANCH);
-  ae::emitter().write("gitCommitHash", MonkeyCAM_GIT_COMMIT_HASH);
+  ae::emitter().write({
+      {"git", {
+          {"branch", MonkeyCAM_GIT_BRANCH},
+          {"commitHash", MonkeyCAM_GIT_COMMIT_HASH},
+          {"commitDate", MonkeyCAM_GIT_COMMIT_DATE}
+        }
+      }
+    });
 
   if (boardDef == "") {
     ae::emitter().fatal("Missing required board definition file");
@@ -395,21 +437,13 @@ int main(int argc, char *argv[]) {
            bindingDist);
   }
 
-  auto readJson = [](const string filename, json& config) {
-    std::ifstream f(filename);
-    f >> config;
-    f.close();
-  };
-
-  // @TODO: produce better error messages with line number and what the parse
-  // error is. Do this for both normal output and JSON output.
   json machineConfig;
-  readJson(machineDef, machineConfig);
+  readJson(machineDef, machineConfig, "Machine Configuration");
   json boardConfig;
-  readJson(boardDef, boardConfig);
+  readJson(boardDef, boardConfig, "Board Configuration");
   json bindingConfig;
   if (bindingDef != "") {
-      readJson(bindingDef, bindingConfig);
+    readJson(bindingDef, bindingConfig, "Binding Configuration");
   }
 
   int progress = 1;
