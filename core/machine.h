@@ -20,9 +20,7 @@
 #include <string>
 #include <map>
 
-#include "json.hpp"
-using json = nlohmann::json;
-
+#include "config.h"
 #include "mcfixed.h"
 
 namespace MonkeyCAM {
@@ -50,16 +48,17 @@ struct Tool {
 
 class Machine {
  public:
-  Machine(const json& config);
+  Machine(Config& config);
 
   const Tool& tool(int id) const { return m_tools.at(id); }
 
 #define MPT(_f, _t, _n) const _t _f() const { \
-  return m_machine.at(_n).get<_t>();          \
+    return m_config.get<_t>(_n);              \
 }
-#define MPI(_f, _n) const MCFixed _f() const {                \
-  return MCFixed::fromInches(m_machine.at(_n).get<double>()); \
+#define MPI(_f, _n) const MCFixed _f() const {            \
+    return MCFixed::fromInches(m_config.get<double>(_n)); \
 }
+
   MPT(rapidSpeed, int, "rapid speed")
   MPT(normalSpeed, int, "normal speed")
   MPI(bottomRapidHeight, "bottom rapid height")
@@ -104,8 +103,7 @@ class Machine {
 #undef MPI
 
  private:
-  const json m_config;
-  /*const*/ json m_machine;
+  Config& m_config;
   /*const*/ std::map<int, const Tool> m_tools;
 };
 

@@ -15,6 +15,7 @@
  */
 
 #include "machine.h"
+#include "config.h"
 
 #include <map>
 #include <string>
@@ -24,18 +25,28 @@ namespace MonkeyCAM {
 //------------------------------------------------------------------------------
 // Machine
 
-Machine::Machine(const json& config)
+Machine::Machine(Config& config)
     : m_config(config)
 {
-  m_machine = m_config.at("machine");              \
+  auto machine = m_config.get<json>("machine", Config::validateIsObject);
+  m_config.push("machine", machine);
+  auto tools = m_config.get<json>("tools", Config::validateIsArray);
+  m_config.push("tools", tools);
 
-  for (auto& tool : m_machine.at("tools")) {
-    int id = tool.at("id");
-    std::string name = tool.at("name");
-    auto dia = MCFixed::fromInches(tool.at("diameter").get<double>());
-    int gcodeNum = tool.at("G-code #");
+  int toolNum = 0;
+  for (auto& tool : tools) {
+    m_config.push(("[" + std::to_string(toolNum++) + "]").c_str(),
+                  tool);
+    auto id = m_config.get<int>("id");
+    auto name = m_config.get<std::string>("name");
+    auto dia = MCFixed::fromInches(
+      m_config.get<double>("diameter"));
+    auto gcodeNum = m_config.get<int>("G-code #");
     m_tools.insert({ id, { name, dia, gcodeNum } });
+    m_config.pop();
   }
+  m_config.pop();
+  // NB: leaving 'machine' pushed for the accessors later.
 }
 
 } // namespace MonkeyCAM

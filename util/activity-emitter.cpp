@@ -65,8 +65,14 @@ void ActivityEmitter::fatal(const char* fmt, ...) {
   va_end(args);
   printf("%s\n", buff);
   if (!m_jsonOutputFile) return;
-  fprintf(m_jsonOutputFile, R"({"fatalError": "%s"})", buff);
-  fprintf(m_jsonOutputFile, ",\n");
+  json j = {
+    {"error", {
+        {"kind", "Fatal Error"},
+        {"message", buff}
+      }
+    }
+  };
+  fprintf(m_jsonOutputFile, "%s,\n", j.dump().c_str());
   fflush(m_jsonOutputFile);
 }
 

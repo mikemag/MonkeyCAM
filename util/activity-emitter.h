@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef incl_activity_emitter_H_
+#define incl_activity_emitter_H_
+
 #include <boost/optional/optional.hpp>
 #include "json.hpp"
 using json = nlohmann::json;
@@ -39,3 +42,5 @@ class ActivityEmitter {
 };
 
 } // namespace MonkeyCAM
+
+#endif // incl_activity_emitter_H_

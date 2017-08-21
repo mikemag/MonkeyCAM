@@ -11,5 +11,6 @@ endif(UNIX)
 set(MONKEYCAM_UTIL_SRCS
     activity-emitter.cpp
     basic-math.cpp
+    config.cpp
     )
 add_library(util ${MONKEYCAM_UTIL_SRCS})
