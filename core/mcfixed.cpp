@@ -31,7 +31,8 @@ std::string MCFixed::str() const {
   const char* minus = "";
   if ((m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
-  snprintf(buff, sizeof(buff), "%s%lld.%.*lld", minus, a, Precision, b);
+  snprintf(buff, sizeof(buff), "%s%lld.%.*lld",
+	   minus, (long long)a, Precision, (long long)b);
   return std::string(buff);
 }
 
@@ -42,7 +43,8 @@ std::string MCFixed::inchesStr() const {
   const char* minus = "";
   if ((x.m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
-  snprintf(buff, sizeof(buff), "%s%lld.%.*lld", minus, a, Precision, b);
+  snprintf(buff, sizeof(buff), "%s%lld.%.*lld",
+	   minus, (long long)a, Precision, (long long)b);
   return std::string(buff);
 }
 

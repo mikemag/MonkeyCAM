@@ -1101,7 +1101,7 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
     boxFromRange({ 0, profile.path().begin(), profile.path().end() }));
 
   vector<vector<vector<Path>>> cutGroups;
-  for (int i = 0; i < roughingProfilePaths.size(); i++) {
+  for (uint i = 0; i < roughingProfilePaths.size(); i++) {
     vector<vector<Path>> pathSets;
     auto& roughingProfile = roughingProfilePaths[i];
     auto& roughingBox = roughingBoxes[i];
