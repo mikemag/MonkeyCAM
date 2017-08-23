@@ -138,9 +138,7 @@ MonkeyCAM currently depends on the following packages:
 * CMake 3.6.1. See http://www.cmake.org/ or install via something like Ports.
 * Boost 1.59.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See
-  http://sourceforge.net/projects/polyclipping/. The CMake files
-  assume this is installed in a sibling directory with the top-level
-  MonkeyCAM directory, named clipper_ver5.1.6.
+  http://sourceforge.net/projects/polyclipping/. The C++ version is copied in the clipper directory.
 
 ## Contributing
 

@@ -6,5 +6,5 @@ elseif(MINGW)
   set(CMAKE_CXX_FLAGS "-g -std=gnu++11")
 endif(UNIX)
 
-set(CLIPPER_SRCS ../../clipper_ver5.1.6/cpp/clipper.cpp)
+set(CLIPPER_SRCS clipper.cpp)
 add_library(clipper ${CLIPPER_SRCS})
