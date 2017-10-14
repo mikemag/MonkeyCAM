@@ -41,9 +41,9 @@ add_subdirectory(core)
 add_subdirectory(cli)
 #add_subdirectory(test)
 
-install(FILES "${PROJECT_BINARY_DIR}/LICENSE" DESTINATION .)
-install(FILES "${PROJECT_BINARY_DIR}/README.md" DESTINATION .)
-install(DIRECTORY "${PROJECT_BINARY_DIR}/example" DESTINATION .)
+install(FILES "${PROJECT_BINARY_DIR}/../LICENSE" DESTINATION .)
+install(FILES "${PROJECT_BINARY_DIR}/../README.md" DESTINATION .)
+install(DIRECTORY "${PROJECT_BINARY_DIR}/../example" DESTINATION .)
 
 if(APPLE)
   set(CPACK_GENERATOR "DragNDrop")

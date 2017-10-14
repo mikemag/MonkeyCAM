@@ -24,7 +24,7 @@ More information about ski and snowboard construction can be found at
 ## Documentation
 
 See the [MonkeyCAM v4.0 User’s Guide](
-https://github.com/mikemag/MonkeyCAM/blob/master/docs/Users_Guide.md)
+https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
 for an overview of how to use and configure MonkeyCAM.
 
 ## License
@@ -39,7 +39,7 @@ The G-code programs **generated** by MonkeyCAM are license-free.
 ## Current Release
 
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
-for the current release, which includes release notes and links to
+for the current engine release, which includes release notes and links to
 download binaries.
 
 ## Features and Current Status
@@ -82,56 +82,27 @@ has been discarded.
 
 My plan for work includes, roughly in order:
 
-* Target more G-code controllers with different formats and requirements.
-* More options for effective edge, nose, and tail. (MonkeyCAM v3, for
-  instance, had 6 tail options.)
-* Port the code to soften the transition between edge and
-  nose/tail. (You can work around this with a sandblock and two min of
-  your time for now.)
-* Read the overall board shape from other CAD programs (DXF at least).
-* Mold design and program to cut molds.
-* Rouging passes for the core profile.
-* Output the overall shape, insert locations, etc. to PDF/DXF for
-  printing or use in other CAD programs.
-* Host MonkeyCAM on servers in something like AWS or Google Apps;
-  serve the UI while running the engine on the server, provide local
-  storage for board configurations.
-* Adapt for other kinds of 'boards': kite boards, skate boards, etc.
-
-My plan does not currently include any further significant UI work. I
-find the HTML overview generated as of v4.0.3 more than adequate to
-iterate on design and understand what the parts will look like. I will
-continue to refine the overview, of course. I hope others find it
-equally easy to use.
-
-If anyone is interested in building an interactive UI for MonkeyCAM
-please contact me and I will be happy to help with logistics and
-integrating the current engine with your UI. Some potential ideas to
-consider:
-
-* Create an interactive web-based UI built on HTML 5, and
-  enable local execution.
-  * The UI should include easy controls for inputting the shape
-    parameters, plus live visualization of the overall shape, profile,
-    insert placement, etc. It also should include specifying the machining
-    parameters.
-* Cretae a G-code validation UI, built on the same framework
-  as the design UI.
-  * This includes import of the G-code programs output from MonkeyCAM,
-    as well as pretty much any G-code program, visualization of the
-    tool path, overlay of multiple programs together for validation,
-    and stepping through G-code programs to better understand how the
-    cutter will move.
-
-Why not just open source MonkeyCAM v3 and its UI? Honestly, the code
-for older versions of MonkeyCAM had grown rather organically over
-almost 10 years and three major revisions. It is a huge mess of C#,
-WinForms, and Managed DirectX, and I'd really prefer no one but me
-ever sees that code again. :)
+* Engine
+  * Target more G-code controllers with different formats and requirements.
+  * More options for effective edge, nose, and tail. (MonkeyCAM v3, for
+    instance, had 6 tail options.)
+  * Port the code to soften the transition between edge and
+    nose/tail. (You can work around this with a sandblock and two min of
+    your time for now.)
+  * Read the overall board shape from other CAD programs (DXF at least).
+  * Mold design and program to cut molds.
+  * Rouging passes for the core profile.
+  * Output the overall shape, insert locations, etc. to PDF/DXF for
+    printing or use in other CAD programs.
+  * Adapt for other kinds of 'boards': kite boards, skate boards, etc.
+* Web App
+  * Improve input UI, remove need to use JSON.
+  * Improve the results UI, remove the need for the overview HTML currently generated.
+  * Worker reliability and scaling: retry, allow multiple workers again.
 
 ## Dependencies
 
-MonkeyCAM currently depends on the following packages:
+MonkeyCAM engine currently depends on the following packages:
 
 * Mac build: Mac OSX 10.11.6 El Capitan with the system compiler, Apple LLVM version 8.0.0 (clang-800.0.42.1).
 * Ubuntu build: ubuntu 16.04 LTS with the default compiler, gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609.
