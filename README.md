@@ -13,7 +13,9 @@ design of skis and snowboards only. The
 portion is slightly more general, but again is specialized to ski and
 snowboard manufacture.
 
-Here is an overview of what MonkeyCAM generates: https://rawgit.com/mikemag/MonkeyCAM/master/Sample-output/Sample-snowboard-overview.html
+The easiest way to use MonkeyCAM is at [MonkeyCAM.org](https://www.monkeycam.org). See the [tour](https://www.monkeycam.org/tour) for an overview of the site.
+
+MonkeyCAM creates nine G-Code programs to cut all parts of a ski or snowboard on your CNC machine. For a real example of the results, see https://monkeycam.org/results/5744863563743232
 
 MonkeyCAM is published on Github at https://github.com/mikemag/MonkeyCAM
 
@@ -38,13 +40,17 @@ The G-code programs **generated** by MonkeyCAM are license-free.
 
 ## Current Release
 
+The current version of MonkeyCAM is always live at [MonkeyCAM.org](https://www.monkeycam.org), where you can use it without having to download it.
+
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
 for the current engine release, which includes release notes and links to
 download binaries.
 
 ## Features and Current Status
 
-MonkeyCAM is currently a command-line program only. The program takes
+
+
+The MonkeyCAM engine is currently a command-line program only, which is made available with a very basic UI at [MonkeyCAM.org](https://www.monkeycam.org). The program takes
 configuration files to describe the ski or snowboard shape via a small
 set of parameters and generates the following G-code programs plus a
 HTML overview of the board:
@@ -67,7 +73,7 @@ program also loads in Mach 3 and simulates correctly. The programs not
 involving holes load in ShopBot's controller and simulate correctly,
 but the ones with holes do not work for ShopBot right now.
 
-There is no interactive user interface. Configuration is done via two
+There is no interactive user interface. Configuration is done via three
 text files, and all results are either G-Code programs, or the HTML
 overview which can be easily used to refine the board shape.
 
@@ -111,6 +117,12 @@ MonkeyCAM engine currently depends on the following packages:
 * Boost 1.58.0. See http://www.boost.org/ or install via something like Ports.
 * Clipper 5.1.6. See
   http://sourceforge.net/projects/polyclipping/. The C++ version is copied in the clipper directory.
+
+The web app currently depends on the following packages:
+
+* Node.js, v6.11.1 for the cloud functions, and v8.2.1 for the client and worker.
+* See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
+* The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
 
 ## Contributing
 
