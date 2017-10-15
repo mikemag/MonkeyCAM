@@ -1,0 +1,94 @@
+/*
+ * Copyright 2013-2017 Michael M. Magruder (https://github.com/mikemag)
+ *
+ * This source code is licensed under the Apache license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.App {
+  margin: 16px;
+  font-size: 16px;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+.CodeMirror {
+  height: 25em;
+}
+
+.json-editor-panel .panel-body {
+  padding: 0px;
+}
+
+.run-monkeycam {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.run-monkeycam #spinner {
+  margin-left: 1em;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3em;
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+.job-status-progress {
+  max-width: 16rem;
+}
+
+.carousel-control.left,
+.carousel-control.right {
+  background-image: none;
+}
+
+/*
+ * react-circular-progressbar styles
+ *
+ * All of the styles in this file are optional and configurable!
+ */
+
+.CircularProgressbar {
+  /*
+   * This fixes an issue where the CircularProgressbar svg has
+   * 0 width inside a "display: flex" container, and thus not visible.
+   *
+   * If you're not using "display: flex", you can remove this style.
+   */
+  width: 100%;
+}
+
+.CircularProgressbar .CircularProgressbar-path {
+  stroke: #3e98c7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease 0s;
+}
+
+.CircularProgressbar .CircularProgressbar-trail {
+  stroke: #d6d6d6;
+}
+
+.CircularProgressbar .CircularProgressbar-text {
+  fill: #3e98c7;
+  font-size: 20px;
+  dominant-baseline: middle;
+  text-anchor: middle;
+}
+
+.CircularProgressbar.complete .CircularProgressbar-path {
+  stroke: #5cb85c;
+}
+.CircularProgressbar.complete .CircularProgressbar-text {
+  fill: #5cb85c;
+}

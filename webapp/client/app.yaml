@@ -1,0 +1,33 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /static/(.*)
+  static_files: build/static/\1
+  upload: build/static/(.*)
+  secure: always
+
+- url: /(\w*\.(json|js|ico))$
+  static_files: build/\1
+  upload: build/\w*\.(json|js|ico)$
+  secure: always
+
+- url: /(.*)
+  static_files: build/index.html
+  upload: build/index.html
+  secure: always
+
+# Recommended file skipping declaration from the GAE tutorials
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^package.json
+- ^package-lock.json
+- \.gitignore
+- ^node_modules/(.*/)?
+- ^src/(.*/)?
+- ^public/(.*/)?
