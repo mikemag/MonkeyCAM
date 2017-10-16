@@ -20,7 +20,6 @@ const nconf = require('./config');
 const mcj = require('./MonkeyCAMJob');
 
 const stream = require('stream');
-const jsonStream = require('JSONStream').parse('*');
 
 let app = express();
 const port = parseInt(process.env.PORT || '3004', 10);
@@ -143,12 +142,20 @@ async function runMonkeyCAM(jobDir, inputs, progressId) {
         done();
       }
     });
-
+    const jsonStream = require('JSONStream').parse('*');
+    const fd3Finished = new Promise((resolve, reject) => {
+      resultStream.on('finish', () => {
+        resolve();
+      });
+    });
     monkeyCamProcess.stdio[3].pipe(jsonStream).pipe(resultStream);
 
     monkeyCamProcess.on('close', async (code, signal) => {
       console.log('Done');
       clearInterval(timerId);
+      console.log('Waiting for JSON output to flush');
+      await fd3Finished; // Wait for the json output to flush completely.
+      console.log('Saving...');
       await mcj.MonkeyCAMJobProgress.save(progressId, progress);
       results['exitCode'] = code;
       results['signal'] = signal;
