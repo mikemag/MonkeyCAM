@@ -37,7 +37,7 @@ class TourPage extends Component {
                   <Panel>
                     <h4>1. Design</h4>
                     Enter your board design, binding layout, and CNC
-                    machine/materials config then hit Run MonkeyCAM.
+                    machine/materials config, then hit Run MonkeyCAM.
                   </Panel>
                 </Col>
                 <Col sm={4}>

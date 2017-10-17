@@ -97,7 +97,7 @@ My plan for work includes, roughly in order:
     your time for now.)
   * Read the overall board shape from other CAD programs (DXF at least).
   * Mold design and program to cut molds.
-  * Rouging passes for the core profile.
+  * Roughing passes for the core profile.
   * Output the overall shape, insert locations, etc. to PDF/DXF for
     printing or use in other CAD programs.
   * Adapt for other kinds of 'boards': kite boards, skate boards, etc.

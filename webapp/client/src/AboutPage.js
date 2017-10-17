@@ -65,8 +65,8 @@ class AboutPage extends Component {
               <p>It's free :)</p>
               <p>
                 But seriously, this site has been implemented in a way which
-                ensures all of the hosting, and server processing, stays under
-                the Google Free Tier limits for Google App Engine and Compute
+                ensures all of the hosting and server processing stays under the
+                Google Free Tier limits for Google App Engine and Compute
                 Engine. In particular, much of the API back-end is actually
                 implemented with Google Cloud Functions, which are quite slow
                 when they are infrequently used.
