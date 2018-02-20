@@ -161,10 +161,11 @@ class MonkeyCAMJob {
       'progressId',
       'overviewPublicURL',
       'zipPublicURL',
-      'createdAt',
       'startedAt',
       'finishedAt',
-      'monkeyCAMResults'
+      'monkeyCAMResults',
+      'attemptCount',
+      'backoffMS'
     ];
     const excludedFields = ['key', 'inputs'];
     let e = { key: this.key, data: [] };
@@ -242,7 +243,7 @@ class MonkeyCAMJob {
     throw new Error('Unable to update persistent job state');
   }
 
-  async enqueue() {
+  async enqueue(jobQueueTopic) {
     this.createdAt = Date.now();
     this.inputsId = await this.inputs.save();
     this.progressId = await MonkeyCAMJobProgress.create();
@@ -252,13 +253,15 @@ class MonkeyCAMJob {
 
     try {
       const pubsub = PubSub({ projectId: 'monkeycam-web-app' });
-      const job_queue_topic = pubsub.topic('MonkeyCAM-Job-Queue');
+      const job_queue_topic = pubsub.topic(jobQueueTopic);
       const job_queue_publisher = job_queue_topic.publisher();
       const dataBuffer = Buffer.from(
         JSON.stringify({ id: this.key.id, inputsId: this.inputsId })
       );
       const messageId = await job_queue_publisher.publish(dataBuffer);
-      console.log('Published message id ' + messageId);
+      console.log(
+        'Published message id ' + messageId + ' to topic ' + jobQueueTopic
+      );
       try {
         await MonkeyCAMJob.updateJobState(this.key.id, STATE_QUEUED);
       } catch (err) {

@@ -8,6 +8,13 @@
 const cors = require('cors')({ origin: true, maxAge: 60 * 60 });
 const mcj = require('./MonkeyCAMJob');
 
+var jobQueueTopic = 'MonkeyCAM-Job-Queue';
+var development = process.env.NODE_ENV !== 'production';
+
+if (development) {
+  jobQueueTopic = 'MonkeyCAM-Job-Queue-Test';
+}
+
 function getJobStatus(req, res) {
   cors(req, res, async () => {
     if (req.body.jobid === undefined) {
@@ -108,7 +115,7 @@ function addJob(req, res) {
         req.body.bindingConfig || {},
         req.body.machineConfig,
         req.body.bindingDist || 0
-      ).enqueue();
+      ).enqueue(jobQueueTopic);
       console.log('Added jobid=', jobId);
       res.send({ jobId: jobId });
     } catch (err) {

@@ -57,5 +57,5 @@ function onError(error) {
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-  console.log('MonkeyCAM Cloud Functions Test Tost listening on ' + bind);
+  console.log('MonkeyCAM Cloud Functions Test Host listening on ' + bind);
 }

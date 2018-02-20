@@ -21,13 +21,26 @@ const mcj = require('./MonkeyCAMJob');
 
 const stream = require('stream');
 
+var jobQueueSubscription = 'MonkeyCAM-Job-Queue-sub';
+var jobQueueTopic = 'MonkeyCAM-Job-Queue';
+
+var development = process.env.NODE_ENV !== 'production';
+
+if (development) {
+  console.log('Development mode');
+  jobQueueSubscription = 'MonkeyCAM-Job-Queue-Test-sub';
+  jobQueueTopic = 'MonkeyCAM-Job-Queue-Test';
+} else {
+  console.log('Production mode');
+}
+
 let app = express();
 const port = parseInt(process.env.PORT || '3004', 10);
 app.set('port', port);
 let server = http.createServer(app);
 server.listen(port);
 
-startListeningForJobs();
+startListeningForJobs(jobQueueSubscription);
 
 server.on('error', error => {
   if (error.syscall !== 'listen') {
@@ -54,6 +67,10 @@ server.on('listening', () => {
   const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   console.log('MonkeyCAM Worker listening on ' + bind);
 });
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function setupJobDir(jobDir, boardConfig, bindingConfig, machineConfig) {
   await fse.emptyDir(jobDir);
@@ -237,13 +254,14 @@ async function uploadFile(jobDir, persistentKey, dateString, boardName) {
   return `https://storage.googleapis.com/${bucket.name}/${file.name}`;
 }
 
-function startListeningForJobs() {
+function startListeningForJobs(jobQueueSubscription) {
   const pubsub = PubSub({ projectId: 'monkeycam-web-app' });
-  const subscription = pubsub.subscription('MonkeyCAM-Job-Queue-sub');
+  const subscription = pubsub.subscription(jobQueueSubscription);
   subscription.on('error', function(err) {
     console.log(err);
   });
   subscription.on('message', processMonkeyCAMJob);
+  console.log('Listening for jobs on subscription ' + jobQueueSubscription);
 
   // HACK: When underlying connections are lost, the pool stalls forever and no messages come in.
   // Removing and re-adding the listener creates a fresh pool to get it going again.
@@ -251,11 +269,8 @@ function startListeningForJobs() {
   let timerId = setInterval(async () => {
     try {
       // @TODO: don't do this if there are any messages being processed...
-      console.log('Hack: removing and re-adding listener...');
       subscription.removeListener('message', processMonkeyCAMJob);
-      console.log('Hack: removed listener...');
       subscription.on('message', processMonkeyCAMJob);
-      console.log('Hack: added listener.');
     } catch (err) {
       console.log(err);
     }
@@ -268,8 +283,9 @@ async function processMonkeyCAMJob(message) {
   console.log(messageArgs);
   const persistentKey = messageArgs.id;
   console.log('Draining id ' + persistentKey);
+  let job = null;
   try {
-    let job = await mcj.MonkeyCAMJob.updateJobState(
+    job = await mcj.MonkeyCAMJob.updateJobState(
       persistentKey,
       mcj.STATE_RUNNING,
       {
@@ -295,7 +311,9 @@ async function processMonkeyCAMJob(message) {
 
     const results = await runMonkeyCAM(jobDir, inputs, job.progressId);
     console.log(
-      `Child process exited with code ${results.exitCode}, signal ${results.signal}`
+      `Child process exited with code ${results.exitCode}, signal ${
+        results.signal
+      }`
     );
     console.log(results);
 
@@ -337,13 +355,35 @@ async function processMonkeyCAMJob(message) {
     message.ack();
     return;
   } catch (err) {
-    console.log('Failure processing job', err);
-    let newState = mcj.STATE_FAILED_RETRY;
-    let newProps = {};
-    // @TODO: need our own retry with the move to pubsub.
-    //newState = mcj.STATE_FAILED;
-    //newProps.finishedAt = Date.now();
-    await mcj.MonkeyCAMJob.updateJobState(persistentKey, newState, newProps);
-    message.nack();
+    console.log(`Failure processing job ${persistentKey}`, err);
+    if (job) {
+      let attemptCount = job.attemptCount || 1;
+      let backoffMS = job.backoffMS || 1000 + Math.floor(Math.random() * 1000); // 1s - 2s
+
+      if (attemptCount < 3) {
+        await mcj.MonkeyCAMJob.updateJobState(
+          persistentKey,
+          mcj.STATE_FAILED_RETRY,
+          {
+            attemptCount: attemptCount + 1,
+            backoffMS: backoffMS * 2
+          }
+        );
+        console.log(
+          `Backoff ${backoffMS}ms after failed job, attempt #${attemptCount}`
+        );
+        await sleep(backoffMS);
+        message.nack();
+        return;
+      }
+    }
+
+    // Final backstop is to just give up.
+    console.log(`Giving up on failed job ${persistentKey}`);
+    await mcj.MonkeyCAMJob.updateJobState(persistentKey, mcj.STATE_FAILED, {
+      failureReason: 'Failure running MonkeyCAM: ' + err.message,
+      finishedAt: Date.now()
+    });
+    message.ack();
   }
 }
