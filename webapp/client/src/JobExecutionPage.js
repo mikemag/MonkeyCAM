@@ -10,6 +10,7 @@ import { Alert, Button, Grid, Row, Col, Panel, Table } from 'react-bootstrap';
 import CircularProgressbar from 'react-circular-progressbar';
 import Spinner from 'react-spinkit';
 import TimeAgo from 'react-timeago';
+import { BadJobNotice } from './CommonComponents';
 
 async function getJobStatus(jobId) {
   let res = await fetch(
@@ -115,27 +116,36 @@ class JobStatus extends Component {
       newState.donePolling = true;
       updatePollingInterval = true;
       newState.alertArea = (
-        <Alert bsStyle="danger">
-          Too many server errors in a row. Please refresh the page to check on
-          the status at a later time.
-        </Alert>
+        <div>
+          <Alert bsStyle="danger">
+            Too many server errors in a row. Please refresh the page to check on
+            the status at a later time.
+          </Alert>
+          <BadJobNotice />
+        </div>
       );
     } else if (newState.pollCount > 45 || jobAge > 120) {
       newState.donePolling = true;
       updatePollingInterval = true;
       newState.alertArea = (
-        <Alert bsStyle="danger">
-          The job is taking much longer than expected. Please refresh the page
-          to check on the status at a later time.
-        </Alert>
+        <div>
+          <Alert bsStyle="danger">
+            The job is taking much longer than expected. Please refresh the page
+            to check on the status at a later time.
+          </Alert>
+          <BadJobNotice />
+        </div>
       );
     } else if (newState.pollCount > 40 || jobAge > 50) {
       newState.pollDelay = 10000;
       newState.alertArea = (
-        <Alert bsStyle="warning">
-          This is taking quite a bit longer than usual, there may be a problem
-          with the servers.
-        </Alert>
+        <div>
+          <Alert bsStyle="warning">
+            This is taking quite a bit longer than usual, there may be a problem
+            with the servers.
+          </Alert>
+          <BadJobNotice />
+        </div>
       );
     } else if (newState.pollCount > 30 || jobAge > 30) {
       newState.pollDelay = 2000;

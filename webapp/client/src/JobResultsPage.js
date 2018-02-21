@@ -10,6 +10,7 @@ import { Button, Grid, Row, Col, Panel, Table, Alert } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import Spinner from 'react-spinkit';
 import TimeAgo from 'react-timeago';
+import { BadJobNotice } from './CommonComponents';
 
 class JobExecutionDetails extends Component {
   render() {
@@ -279,15 +280,18 @@ class JobResultsPage extends Component {
         );
       } else {
         errorDesc = (
-          <Alert bsStyle="danger" className="text-left">
-            <h4>Failed to generate G-code programs</h4>
-            <JobErrorDetails
-              error={
-                this.state.basicResults.failureReason ||
-                this.state.basicResults.error
-              }
-            />
-          </Alert>
+          <div>
+            <Alert bsStyle="danger" className="text-left">
+              <h4>Failed to generate G-code programs</h4>
+              <JobErrorDetails
+                error={
+                  this.state.basicResults.failureReason ||
+                  this.state.basicResults.error
+                }
+              />
+            </Alert>
+            <BadJobNotice />
+          </div>
         );
       }
 
