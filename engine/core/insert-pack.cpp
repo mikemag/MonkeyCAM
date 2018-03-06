@@ -24,6 +24,18 @@ namespace MonkeyCAM {
 //------------------------------------------------------------------------------
 // Base insert pack
 
+InsertPack::InsertPack(const std::vector<double>& insertX,
+                       const std::vector<double>& insertY)
+{
+  for (unsigned it = 0; it != insertX.size(); it++) {
+    m_insertsPath.push_back(Point(insertX[it], insertY[it]));
+  }
+
+  std::sort(m_insertsPath.begin(), m_insertsPath.end());
+  auto newEnd = std::unique(m_insertsPath.begin(), m_insertsPath.end());
+  m_insertsPath.resize(std::distance(m_insertsPath.begin(), newEnd));
+}
+
 void InsertPack::moveIntoPosition(Point center) {
   std::transform(m_insertsPath.begin(), m_insertsPath.end(),
                  m_insertsPath.begin(), [&](Point& p) { return p + center; });
@@ -63,21 +75,6 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
   m_insertsPath.push_back(Point(stanceX - x, -y));
   m_insertsPath.push_back(Point(stanceX + x, y));
   m_insertsPath.push_back(Point(stanceX + x, -y));
-}
-
-//------------------------------------------------------------------------------
-// Ski insert pack (also used for any generic binding pattern)
-
-SkiInsertPack::SkiInsertPack(const std::vector<double>& insertX,
-                             const std::vector<double>& insertY)
-{
-  for (unsigned it = 0; it != insertX.size(); it++) {
-    m_insertsPath.push_back(Point(insertX[it], insertY[it]));
-  }
-
-  std::sort(m_insertsPath.begin(), m_insertsPath.end());
-  auto newEnd = std::unique(m_insertsPath.begin(), m_insertsPath.end());
-  m_insertsPath.resize(std::distance(m_insertsPath.begin(), newEnd));
 }
 
 }

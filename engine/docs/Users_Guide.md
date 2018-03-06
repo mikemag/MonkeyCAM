@@ -1,7 +1,6 @@
 # MonkeyCAM v4.0 User's Guide
 
-MonkeyCAM v4.0 is an open source CAD/CAM program for designing skis
-and snowboards, and generating
+MonkeyCAM v4.0 is an open source CAD/CAM program for designing skis, snowboards and splitboards, and generating
 [G-code](http://en.wikipedia.org/wiki/G-code) programs to cut board
 parts with a [CNC
 machine](http://en.wikipedia.org/wiki/Numerical_control).
@@ -22,6 +21,10 @@ and generates the following nine G-code programs:
 * Edge trenches to enable inlay of different edge wood and/or sidewall
   material along the effective edge of the core
 
+For splitboards, it also generates one more program:
+
+* Center trench to enable inlay of sidewall material along the center of the core
+
 MonkeyCAM also generates an overview HTML file which shows diagrams
 for all of the generated shapes and programs. Using this it is very
 easy to iterate on a design and make fine adjustments. Example:
@@ -39,13 +42,13 @@ for more details.
 
 ## Configuration Files
 
-MonkeyCAM uses three configuration files, one to describe the board/ski, one to 
-describe the binding inserts (optional, no inserts if ommitted), and one to 
+MonkeyCAM uses three configuration files, one to describe the board/ski, one to
+describe the binding inserts (optional, no inserts if ommitted), and one to
 describe the details of how to machine the board. The board
 definition file describes the shape of the board, and the thickness and
-taper of the core. The binding definition file describes the placement of 
-inserts. The machine and tool definition file describes machining parameters 
-used by various programs (rapid and various cutting heights and depths, raw 
+taper of the core. The binding definition file describes the placement of
+inserts. The machine and tool definition file describes machining parameters
+used by various programs (rapid and various cutting heights and depths, raw
 material thicknesses, etc.) and parameters of each tool used.
 
 See the [MonkeyCAM v4.0 Configuration Guide](Configuration_Guide.md)

@@ -43,8 +43,10 @@ The G-code programs **generated** by MonkeyCAM are license-free.
 The current version of MonkeyCAM is always live at [MonkeyCAM.org](https://www.monkeycam.org), where you can use it without having to download it.
 
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
-for the current engine release, which includes release notes and links to
-download binaries.
+for the last engine release, which includes release notes and links to
+download binaries. **Note that engine binaries are not released with
+every new feature, nor for every platform, and may be well behind what
+is available at MonkeyCAM.org.**
 
 ## Features and Current Status
 

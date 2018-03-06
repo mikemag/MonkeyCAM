@@ -31,6 +31,8 @@ namespace MonkeyCAM {
 // true position when it is added to a BoardShape.
 class InsertPack {
  public:
+  InsertPack(const std::vector<double>& insertX,
+             const std::vector<double>& insertY);
   const Path& insertsPath() const { return m_insertsPath; }
   void moveIntoPosition(Point center);
   const Point& minPoint() const { return m_insertsPath.front(); }
@@ -60,15 +62,6 @@ class SnowboardInsertPack : public InsertPack {
   MCFixed m_vSpacing;
   int m_countNose;
   int m_countTail;
-};
-
-// Ski binding inserts.
-class SkiInsertPack : public InsertPack {
- public:
-  SkiInsertPack(const std::vector<double>& insertX,
-                const std::vector<double>& insertY);
- private:
-  void addInsertGroup();
 };
 
 } // namespace MonkeyCAM

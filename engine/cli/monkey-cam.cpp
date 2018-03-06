@@ -69,7 +69,7 @@ std::unique_ptr<ShapeEdgePart> loadEdgePart(Config& config)
   return std::unique_ptr<ShapeEdgePart> { new BasicArc };
 }
 
-std::unique_ptr<InsertPack> loadInserts(Config& config) {
+std::unique_ptr<InsertPack> loadSnowboardInserts(Config& config) {
   auto countNose = config.get<int>("count nose");
   auto countTail = config.get<int>("count tail");
   auto offset = config.get("offset", 4.0);
@@ -80,7 +80,8 @@ std::unique_ptr<InsertPack> loadInserts(Config& config) {
         hSpacing, vSpacing } };
 }
 
-std::unique_ptr<InsertPack> loadSkiInsert(Config& config, const json& points) {
+std::unique_ptr<InsertPack> loadGenericInsert(Config& config,
+                                              const json& points) {
   vector<double> insertX;
   vector<double> insertY;
   int pointNum = 0;
@@ -93,7 +94,7 @@ std::unique_ptr<InsertPack> loadSkiInsert(Config& config, const json& points) {
   }
 
   return std::unique_ptr<InsertPack> {
-  new SkiInsertPack { insertX, insertY } };
+  new InsertPack { insertX, insertY } };
 }
 
 std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
@@ -101,6 +102,7 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
                                       double bindingDist) {
   Config::ObjectHolder h(boardConfig, "board");
   auto name = boardConfig.get<std::string>("name");
+  auto isSplitboard = boardConfig.get<bool>("splitboard", false);
   auto noseLength = boardConfig.get<double>("nose length");
   auto eeLength = boardConfig.get<double>("effective edge length");
   auto tailLength = boardConfig.get<double>("tail length");
@@ -142,14 +144,14 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
   {
     Config::ObjectHolder h(boardConfig, "nose insert pack",
                            [&] {
-                             nosePack = loadInserts(boardConfig);
+                             nosePack = loadSnowboardInserts(boardConfig);
                            });
   }
   std::unique_ptr<InsertPack> tailPack;
   {
     Config::ObjectHolder h(boardConfig, "tail insert pack",
                            [&] {
-                             tailPack = loadInserts(boardConfig);
+                             tailPack = loadSnowboardInserts(boardConfig);
                            });
   }
 
@@ -163,34 +165,48 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
       {
         Config::ObjectHolder h(bindingConfig, "nose insert pack",
                                [&] {
-                                 nosePack = loadInserts(bindingConfig);
+                                 nosePack = loadSnowboardInserts(bindingConfig);
                                });
       }
       {
         Config::ObjectHolder h(bindingConfig, "tail insert pack",
                                [&] {
-                                 tailPack = loadInserts(bindingConfig);
+                                 tailPack = loadSnowboardInserts(bindingConfig);
                                });
       }
       {
         Config::ArrayHolder a(bindingConfig, "toe",
                               [&](json& array) {
-                                toeInserts = loadSkiInsert(bindingConfig,
-                                                           array);
+                                toeInserts = loadGenericInsert(bindingConfig,
+                                                               array);
+                              });
+      }
+      {
+        Config::ArrayHolder a(bindingConfig, "nose",
+                              [&](json& array) {
+                                toeInserts = loadGenericInsert(bindingConfig,
+                                                               array);
                               });
       }
       {
         Config::ArrayHolder a(bindingConfig, "center",
                               [&](json& array) {
-                                centerInserts = loadSkiInsert(bindingConfig,
-                                                              array);
+                                centerInserts = loadGenericInsert(bindingConfig,
+                                                                  array);
                               });
       }
       {
         Config::ArrayHolder a(bindingConfig, "heel",
                               [&](json& array) {
-                                heelInserts = loadSkiInsert(bindingConfig,
-                                                            array);
+                                heelInserts = loadGenericInsert(bindingConfig,
+                                                                array);
+                              });
+      }
+      {
+        Config::ArrayHolder a(bindingConfig, "tail",
+                              [&](json& array) {
+                                heelInserts = loadGenericInsert(bindingConfig,
+                                                                array);
                               });
       }
     });
@@ -199,7 +215,7 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
     new BoardShape { name, noseLength, eeLength, tailLength, sidecutRadius,
         waistWidth, taper, nose, edge, tail, refStance, setback, bindingDist,
         nosePack, tailPack, toeInserts, centerInserts, heelInserts, spacerWidth,
-        noseEdgeExt, tailEdgeExt } };
+        noseEdgeExt, tailEdgeExt, isSplitboard } };
 }
 
 BoardProfile::End loadProfileEnd(Config& config) {
@@ -422,7 +438,7 @@ int main(int argc, char *argv[]) {
   if (jsonOutputFD) {
     ae::emitter().write({
         {"jsonOutputFD", *jsonOutputFD},
-        {"progressMax", 14} // +1 over the true count to allow for saving ;)
+        {"progressMax", 15} // +1 over the true count to allow for saving ;)
       });
   }
 
@@ -500,6 +516,10 @@ int main(int argc, char *argv[]) {
   ae::emitter().write("progress", "%d", progress++);
   shape->generateEdgeTrench(machine).write(outdir);
   ae::emitter().write("progress", "%d", progress++);
+  if (shape->isSplitboard()) {
+    shape->generateSplitboardCenterTrench(machine).write(outdir);
+    ae::emitter().write("progress", "%d", progress++);
+  }
   shape->generateCoreEdgeGroove(machine).write(outdir);
   ae::emitter().write("progress", "%d", progress++);
   shape->generateNoseTailSpacerCutout(machine).write(outdir);

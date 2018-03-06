@@ -50,7 +50,9 @@ class BoardShape {
              std::unique_ptr<InsertPack>& heelInserts,
              MCFixed spacerWidth,
              boost::optional<MCFixed> noseEdgeExt,
-             boost::optional<MCFixed> tailEdgeExt);
+             boost::optional<MCFixed> tailEdgeExt,
+             bool isSplitboard
+            );
   ~BoardShape();
   const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
@@ -62,6 +64,7 @@ class BoardShape {
   const GCodeWriter generateGuideHoles(const Machine& machine);
   const GCodeWriter generateCoreEdgeGroove(const Machine& machine);
   const GCodeWriter generateEdgeTrench(const Machine& machine);
+  const GCodeWriter generateSplitboardCenterTrench(const Machine& machine);
   const GCodeWriter generateInsertHoles(const Machine& machine);
   const GCodeWriter generateTopProfile(const Machine& machine,
                                        BoardProfile& profile);
@@ -84,15 +87,20 @@ class BoardShape {
     return m_debugPathSets;
   }
 
+  const bool isSplitboard() const { return m_isSplitboard; }
+
  private:
   void setupInserts();
   void addInsertPack(InsertPack& pack, Point center);
   const Point leftGuideHole(const Machine& machine) const;
   const Point rightGuideHole(const Machine& machine) const;
 
-  DebugPathSet&  addDebugPathSet(std::string header);
+  DebugPathSet& addDebugPathSet(std::string header);
 
   const void addCoreCenterComment(GCodeWriter& g);
+
+  const Path spreadPathForSplitboards(const Path& p, const Machine& machine);
+  const Point spreadPointForSplitboards(const Point& p, const Machine& machine);
 
   std::string m_name;
 
@@ -124,6 +132,8 @@ class BoardShape {
 
   boost::optional<MCFixed> m_noseEdgeExt;
   boost::optional<MCFixed> m_tailEdgeExt;
+
+  bool m_isSplitboard;
 
   Path m_overallPath;
   Path m_corePath;

@@ -1,13 +1,14 @@
 # MonkeyCAM v4.0 Configuration Guide
 
-MonkeyCAM uses three configuration files, one to describe the board/ski, one to 
-describe the binding inserts (optional, no inserts if ommitted), and one to 
-describe the details of how to machine the board. The board
-definition file describes the shape of the board, and the thickness and
-taper of the core. The binding definition file describes the placement of 
-inserts. The machine and tool definition file describes machining parameters 
-used by various programs (rapid and various cutting heights and depths, raw 
-material thicknesses, etc.) and parameters of each tool used.
+MonkeyCAM uses three configuration files, one to describe the
+board/ski, one to describe the binding inserts (optional, no inserts
+if ommitted), and one to describe the details of how to machine the
+board. The board definition file describes the shape of the board, and
+the thickness and taper of the core. The binding definition file
+describes the placement of inserts. The machine and tool definition
+file describes machining parameters used by various programs (rapid
+and various cutting heights and depths, raw material thicknesses,
+etc.) and parameters of each tool used.
 
 See the [MonkeyCAM v4.0 User’s Guide](Users_Guide.md) for an overview.
 
@@ -85,6 +86,13 @@ Name of the ski or snowboard. This will be used as the prefix of all
 generated files.
 
 
+#### Splitboard
+"splitboard": `boolean`
+
+`true` if the snowboard is a splitboard, `false` otherwise. Optional,
+and if missing will be assumed to be `false`.
+
+
 #### Nose Length
 "nose length": `number`
 
@@ -147,7 +155,7 @@ of the nose.
 The `type` may be `"Basic Bezier"` or `"Flat"`, other
 options will be available in the future. `"Basic Bezier"` specifies a classic
 Bezier curve with two control points for one half of the nose shape,
-and this curve is mirrored to get the other half. `"Flat"` is similar 
+and this curve is mirrored to get the other half. `"Flat"` is similar
 but includes an additional flat section of specified width at the tip. The control points
 are constrained to ensure that the Bezier curves join properly at the
 nose and to the effective edge.
@@ -218,9 +226,9 @@ same.
 *Optional.*
 
 The setback, in centimeters, which defines how much the reference
-stance of a board, or boot center of a ski, is shifted away from the 
-center of the effective edge towards the tail. A value of `0` keeps the 
-reference stance centered over the center of the effective edge. A positive 
+stance of a board, or boot center of a ski, is shifted away from the
+center of the effective edge towards the tail. A value of `0` keeps the
+reference stance centered over the center of the effective edge. A positive
 value shifts the reference stance towards the tail. Optional. If omitted a
 value of `0` is assumed.
 
@@ -337,7 +345,7 @@ the tail from the center of the effective edge.
 #### Reference Stance Width
 "reference stance width": `number`
 
-*Optional. Replaced by '--binding-distance' keyword on command line but 
+*Optional. Replaced by '--binding-distance' keyword on command line but
 retained for backwards compatibility. To be removed in future version.*
 
 The width, in centimeters, between the center insert group in each
@@ -346,21 +354,21 @@ i.e., the center of the effective edge.
 
 #### Nose Insert Pack
 
-*Optional. Moved to Binding definition file ([See below](#nose-insert-pack-1)). 
-Functionality is currently retained in board definition file for backwards 
+*Optional. Moved to Binding definition file ([See below](#nose-insert-pack-1)).
+Functionality is currently retained in board definition file for backwards
 compatibility. To be removed in future version.*
 
 
 #### Tail Insert Pack
 
-*Optional. Moved to Binding definition file ([See below](#tail-insert-pack-1)). 
-Functionality is currently retained in board definition file for backwards 
+*Optional. Moved to Binding definition file ([See below](#tail-insert-pack-1)).
+Functionality is currently retained in board definition file for backwards
 compatibility. To be removed in future version.*
 
 
 ## Binding definition
 
-*Optional. The whole binding definition file is optional. 
+*Optional. The whole binding definition file is optional.
 Omit for skis or boards with no inserts.*
 
 The binding definition configuration file contains a single section
@@ -508,24 +516,24 @@ See the Nose Insert Pack; the tail is the same.
 ### Ski binding inserts
 
 Inserts for skis can be specified at three locations: Toe, Center or Heel.
-These keywords could also be used to make user defined insert patterns for 
+These keywords could also be used to make user defined insert patterns for
 any other purpose on skis or boards (e.g. splitboard inserts?).
 
-Ski binding insert functionality uses a JSON `array` to specify the position 
-of the center of each insert. The positions are defined as offsets from 
-a reference point (either the boot toe, center, or heel). Offsets are 
+Ski binding insert functionality uses a JSON `array` to specify the position
+of the center of each insert. The positions are defined as offsets from
+a reference point (either the boot toe, center, or heel). Offsets are
 specified in cm along the ski towards the tail (x) or across the ski to the
 left (y).
 
-A JSON `array` consists of a series of comma seperated rows, each enclosed 
-in curly brackets `{row}`, and the whole array enclosed in square brackets 
-`[.....]`. For all the ski binding definition arrays each row contains 
-comma seperated "x" and "y" parameters specifying the coordinates of an 
+A JSON `array` consists of a series of comma seperated rows, each enclosed
+in curly brackets `{row}`, and the whole array enclosed in square brackets
+`[.....]`. For all the ski binding definition arrays each row contains
+comma seperated "x" and "y" parameters specifying the coordinates of an
 individual insert `"x": number, "y": number`.
 
 
 #### Toe
-"toe": 
+"toe":
 \[
   {"x": `number`,   "y": `number`},
   {"x": `number`,   "y": `number`},
@@ -535,17 +543,17 @@ individual insert `"x": number, "y": number`.
 
 *Optional.*
 
-Toe inserts are specified with position relative to the center of the 
-boot toe. For tech/pin ski touring bindings toe inserts are specified 
-relative to the center of the pin centerline. Note that for frame bindings 
-with a fixed length (i.e. the distance from the front screw holes to the 
-back screw holes is fixed as the binding is all one piece) then all of the 
+Toe inserts are specified with position relative to the center of the
+boot toe. For tech/pin ski touring bindings toe inserts are specified
+relative to the center of the pin centerline. Note that for frame bindings
+with a fixed length (i.e. the distance from the front screw holes to the
+back screw holes is fixed as the binding is all one piece) then all of the
 binding inserts will be specified relative to the toe (and hence should
 be part of the "toe" section of the binding definition file).
 
 
 #### Center
-"center": 
+"center":
 \[
   {"x": `number`,   "y": `number`},
   ...
@@ -557,7 +565,7 @@ Center inserts are specified relative to the boot/stance center.
 
 
 #### Heel
-"heel": 
+"heel":
 \[
   {"x": `number`,   "y": `number`},
   ...
@@ -573,15 +581,15 @@ Heel inserts are relative to the center of the boot heel.
     "toe":
     [
       {"x": -2.5,   "y": 2.0},
-      {"x": -2.5,   "y": -2.0}, 
-      {"x": 2.0,   "y": -2.0}, 
-      {"x": 2.0,   "y": 2.0} 
+      {"x": -2.5,   "y": -2.0},
+      {"x": 2.0,   "y": -2.0},
+      {"x": 2.0,   "y": 2.0}
     ],
     "heel":
     [
       {"x": -1.5,   "y": 1.8},
-      {"x": -1.5,   "y": -1.8}, 
-      {"x": 3.75,   "y": -1.8}, 
+      {"x": -1.5,   "y": -1.8},
+      {"x": 3.75,   "y": -1.8},
       {"x": 3.75,   "y": 1.8}
     ]
 ```
@@ -916,6 +924,40 @@ that the trench cuts beyond the boundaries of the core blank.
 Currently this measurement is a bit of trial-and-error, though a value
 of about `3` inches is typically sufficient. See the [issue](
 https://github.com/mikemag/MonkeyCAM/issues/6) about improving this.
+
+### Splitboard Parameters
+
+Each of these effects every program generated, as the core is widended
+down the center to allow the board to be cut in half after pressing.
+
+#### Splitboard Center Gap
+
+"splitboard center gap": `number`
+
+The width, in inches, of the gap to leave down the center of the board
+for the board to be split after layup. This should be the width of
+your bandsaw blade plus a little bit of slop for error to ensure the
+blade doesn't bind and dig into the metal center edges. You will
+seperate the edged base halves by this amount while preparing for
+layup.
+
+
+#### Splitboard Center Trench Width
+
+"splitboard center trench width": `number`
+
+The width, in inches, of the center trench. This should be the width of
+your sidewall material, and of any additional stringers you want to
+lay down perfectly along the center of the splitboard.
+
+Note carefully that the `splitboard center gap` does not effect this
+trench width, and that the portion of your sidewall material within
+this gap will be lost when you split the board after layup. In effect,
+this "gap" is much like the sidewall overhang and ensures that
+sidewall material can be trimmed back to the center edges during
+finishing.
+
+
 
 ### Tools
 

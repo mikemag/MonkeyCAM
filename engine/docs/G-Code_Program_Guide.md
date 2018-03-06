@@ -82,7 +82,21 @@ further. This ensures that the sidewalls are machined along with the
 rest of the core, so everything matches perfectly.
 
 This program uses a straight cutter, typically 0.250”. It cuts all the
-way thru the core
+way thru the core.
+
+
+## Center Trench
+
+The “center trench” program cuts a trench along the center of the core
+to allow you to easily inlay sidewall material for splitboards. This
+program is only generated for splitboards.
+
+This program is run and sidewall material added before proceeding
+further. This ensures that the center sidewalls are machined along with the
+rest of the core, so everything matches perfectly.
+
+This program uses a straight cutter, typically 0.250”. It cuts all the
+way thru the core.
 
 
 ## Edge Groove

@@ -99,6 +99,8 @@ class Machine {
   MPI(sidewallOverhang, "sidewall overhang")
   MPI(edgeTrenchWidth, "edge trench width")
   MPI(edgeTrenchExtension, "edge trench extension")
+  MPI(splitboardCenterTrenchWidth, "splitboard center trench width")
+  MPI(splitboardCenterGap, "splitboard center gap")
 #undef MPT
 #undef MPI
 

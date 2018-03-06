@@ -41,6 +41,43 @@ MirroredPath::MirroredPath(const Path& path) {
 }
 
 //------------------------------------------------------------------------------
+// SpreadYPath
+
+SpreadYPath::SpreadYPath(const Path& path, MCFixed gapWidth) {
+  // @TODO: might be better to use Clipper to slice this in half via
+  // two seperate boolean ops, and shift those, then re-join
+  // them. This brute-force approach is fast, but special-casey and
+  // would fail for any path with a horizontal line along Y=0.
+  assert(path.size() > 1);
+  Point shiftUp = Point(0, gapWidth / 2, 0);
+  Point shiftDown = Point(0, -gapWidth / 2, 0);
+  auto lastPoint = Point::MinPoint;
+  for (int i = 0; i < path.size(); i++) {
+    auto p = path[i];
+    if (p == lastPoint) continue; // De-dup
+    if (p.Y < 0) emplace_back(p + shiftDown);
+    else if (p.Y > 0) emplace_back(p + shiftUp);
+    else {
+      // Split the point on either size of 0. We need to add them in
+      // the proper order, so determine the crossing direction. Also,
+      // avoid adding points before or after the ends. This gives the
+      // nice result that the ends are unchanged if they're at Y=0.
+      bool ascending = (i == 0) ? p.Y < path[i+1].Y : p.Y > lastPoint.Y;
+      if (ascending) {
+        if (i != 0) emplace_back(p + shiftDown);
+        emplace_back(p);
+        if (i != path.size() - 1) emplace_back(p + shiftUp);
+      } else {
+        if (i != 0) emplace_back(p + shiftUp);
+        emplace_back(p);
+        if (i != path.size() - 1) emplace_back(p + shiftDown);
+      }
+    }
+    lastPoint = p;
+  }
+}
+
+//------------------------------------------------------------------------------
 // ToolOffsetPath
 
 // @TODO: this isn't robust at all. It works for profile paths with

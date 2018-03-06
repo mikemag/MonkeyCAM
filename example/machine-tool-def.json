@@ -54,6 +54,9 @@
     "edge trench width": 1.2894,
     "edge trench extension": 3,
 
+    "splitboard center trench width": 0.5,
+    "splitboard center gap": 0.100,
+
     "tools":
     [
       {

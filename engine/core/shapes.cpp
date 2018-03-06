@@ -48,7 +48,8 @@ BoardShape::BoardShape(string name,
                        std::unique_ptr<InsertPack>& heelInserts,
                        MCFixed spacerWidth,
                        boost::optional<MCFixed> noseEdgeExt,
-                       boost::optional<MCFixed> tailEdgeExt)
+                       boost::optional<MCFixed> tailEdgeExt,
+                       bool isSplitboard)
     : m_name(name)
     , m_noseLength(noseLength)
     , m_effectiveEdge(effectiveEdge)
@@ -70,6 +71,7 @@ BoardShape::BoardShape(string name,
     , m_spacerWidth(spacerWidth)
     , m_noseEdgeExt(noseEdgeExt)
     , m_tailEdgeExt(tailEdgeExt)
+    , m_isSplitboard(isSplitboard)
     , m_maxCoreX(0)
 {
   // Nose and tail width come from the sidecut depth...
@@ -103,10 +105,53 @@ DebugPathSet& BoardShape::addDebugPathSet(std::string header) {
   return *dps;
 }
 
+// Counter-clockwise from lower left.
+Path formRectanglePath(Point ll, Point ur) {
+  Path p;
+  p.push_back(ll);
+  p.push_back(Point(ur.X, ll.Y));
+  p.push_back(ur);
+  p.push_back(Point(ll.X, ur.Y));
+  p.push_back(ll);
+  return p;
+}
+
+// Pocket a given path. Result paths are in order from outside in.
+// @TODO: factor with the core top profile code.
+vector<vector<Path>> pocket(
+  const Path& outerPath,
+  const Tool& tool,
+  double toolOverlapPercentage,
+  MCFixed depth
+) {
+  // Offset the outer path until the offset disappears. nb: the first
+  // path must be offset by half the tool diameter to ensure we follow
+  // the limiting path correctly.
+  vector<vector<Path>> pathSets;
+  MCFixed offset = -tool.diameter * 0.5;
+  for (int i = 1; i < 100; i++) { // Artifical upper limit
+    auto paths = PathUtils::OffsetPath(outerPath, offset);
+    if (paths.empty()) break; // All done!
+    // Reverse each path so we're conventional cutting the pocket walls.
+    for (auto& path : paths) {
+      std::reverse(path.begin(), path.end());
+      std::transform(path.begin(), path.end(), path.begin(),
+                     [&](const Point& p) { return Point(p.X, p.Y, depth); });
+    }
+    pathSets.push_back(paths);
+    offset -= tool.diameter * toolOverlapPercentage;
+  }
+  return pathSets;
+}
+
 // Build an overall board shape, which is the true finished shape of
 // the board.
 //
 // Path is counterclockwise, start point at (0,0,0).
+//
+// NB: the Machine parameter is for informational purposes only! Board
+// shapes are independent of the machine, materials, or cutting
+// methods.
 const Path& BoardShape::buildOverallPath(const Machine& machine) {
   if (m_overallPath.size() != 0) return m_overallPath;
   MCFixed noseEndX = 0;
@@ -166,6 +211,15 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
     MCFixed::strWithSuffix(m_noseEdgeExt).c_str(),
     MCFixed::strWithSuffix(m_tailEdgeExt).c_str()
   );
+  if (m_isSplitboard) {
+    dps.addDescription(
+      "<h3>Splitboards</h3>"
+      "<p>Splitboards are created by adding space down the middle of the "
+      "board for a blade to cut the board in half after layup. This 'gap' is "
+      "not shown in the overall shape shown here but it is reflected in all of "
+      "the G-Code programs generated to cut the core.</p>"
+    );
+  }
   dps.addPath([&] {
       return DebugPath {
         m_overallPath,
@@ -179,21 +233,34 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
         DebugAnnotationDesc {
           "Width guides",
           "Guidelines to mark key widths of the board: nose/tail maximum "
-          "width, waist width, and the true center of the board (shorter "
-          "line).", "blue", true
+          "width, and waist width.",
+          "blue", true
         }
       };
-      MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
       a.addSvgFormat(
-        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
+        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
         noseTranX.dbl(), (-noseHalfWidth + 1).dbl(),
         noseTranX.dbl(), (noseHalfWidth - 1).dbl(),
         eeCenterX.dbl(), (-waistHalfWidth + 1).dbl(),
         eeCenterX.dbl(), (waistHalfWidth - 1).dbl(),
-        trueCenterX.dbl(), (-waistHalfWidth + 5).dbl(),
-        trueCenterX.dbl(), (waistHalfWidth - 5).dbl(),
         tailTranX.dbl(), (-tailHalfWidth + 1).dbl(),
         tailTranX.dbl(), (tailHalfWidth - 1).dbl()
+      );
+      return a;
+    });
+  dps.addAnnotation([&] {
+      auto a = DebugAnnotation {
+        DebugAnnotationDesc {
+          "True center guide",
+          "Guideline to mark true center of the board.",
+          "orange", true
+        }
+      };
+      MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
+      a.addSvgFormat(
+        R"(<path d="M%f %f L%f %f"/>)",
+        trueCenterX.dbl(), (-waistHalfWidth + 5).dbl(),
+        trueCenterX.dbl(), (waistHalfWidth - 5).dbl()
       );
       return a;
     });
@@ -268,6 +335,29 @@ const void BoardShape::addCoreCenterComment(GCodeWriter& g) {
   g.headerCommentF("    X=%s Y=0.0000 Z=0.0000", centerX.inchesStr().c_str());
 }
 
+const Path BoardShape::spreadPathForSplitboards(const Path& p,
+                                                const Machine& machine) {
+  if (m_isSplitboard) {
+    return SpreadYPath(p, machine.splitboardCenterGap());
+  }
+  return p;
+}
+
+const Point BoardShape::spreadPointForSplitboards(const Point& p,
+                                                  const Machine& machine) {
+  if (m_isSplitboard) {
+    Point q = p;
+    if (q.Y < 0) {
+      q.Y -= machine.splitboardCenterGap() / 2;
+    } else {
+      q.Y += machine.splitboardCenterGap() / 2;
+    }
+    return q;
+  }
+  return p;
+}
+
+
 template<class TIter>
 void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
                      Point startPoint, MCFixed endX,
@@ -302,9 +392,10 @@ void roundSpacerEnds(Path& path, TIter beginIt, TIter endIt,
 // Generate the shape of the core for a board with sidewalls, and
 // nose/tail inset to accomodate nose/tail spacers.
 //
-// The edge portion of the core extends out past the real edges by
-// ~2mm. This gives us a bit of extra play side-to-side which allows
-// the core and base to be slightly mis-aligned.
+// The edge portion of the core extends out past the real edges by the
+// configured sidewall overhang, typically ~2mm. This gives us a bit
+// of extra play side-to-side which allows the core and base to be
+// slightly mis-aligned.
 //
 // The nose and tail portions are set inward by the width of the nose
 // and tail spacers.
@@ -397,6 +488,15 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
     m_spacerWidth.str().c_str(),
     machine.sidewallOverhang().str().c_str()
   );
+  if (m_isSplitboard) {
+    dps.addDescription(
+      "<h3>Splitboards</h3>"
+      "<p>Splitboards are created by adding space down the middle of the "
+      "board for a blade to cut the board in half after layup. This 'gap' is "
+      "not shown in the core shape shown here but it is reflected in all of "
+      "the G-Code programs generated to cut the core.</p>"
+    );
+  }
   dps.addPath([&] {
       return DebugPath {
         m_corePath,
@@ -479,9 +579,31 @@ void BoardShape::setupInserts() {
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
   }
   if (m_centerInserts) {
-    m_centerInserts->moveIntoPosition(Point(setback + eeCenterX, 0));
+    MCFixed xOffset = setback + eeCenterX;
+    MCFixed yOffset = 0;
+    if (m_isSplitboard) {
+      // Splitboards use the center group for the touring
+      // inserts. These are relative to the center of the board, with
+      // no setback, with the two outer inserts of the touring bracket
+      // on the center line, placing the pivot point just a bit
+      // towards the nose of the centerline.
+      //
+      // @TODO: is this reasonable? Assumes the centerline of the
+      // board is the balance point of the board, which may not be
+      // true due to taper and core profile.
+      xOffset = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
+      // Center the touring bracket on the left half of the board.
+      yOffset = -m_waistWidth / 4;
+    }
+    m_centerInserts->moveIntoPosition(Point(xOffset, yOffset));
     auto p = m_centerInserts->insertsPath();
     m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+    if (m_isSplitboard) {
+      // Duplicate the center pack for splitboards across the centerline.
+      m_centerInserts->moveIntoPosition(Point(0, m_waistWidth / 2));
+      p = m_centerInserts->insertsPath();
+      m_insertsPath.insert(m_insertsPath.end(), p.begin(), p.end());
+    }
   }
   if (m_heelInserts) {
     m_heelInserts->moveIntoPosition(Point(stanceX + setback + eeCenterX, 0));
@@ -499,9 +621,22 @@ void BoardShape::setupInserts() {
 
 const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto tool = machine.tool(machine.baseCutoutTool());
+  auto overallPath = buildOverallPath(machine);
+
+  // For splitboards we emit only the left half of the base. Since all
+  // boards are currently symmetrical, one can simply flip the base
+  // material and run again to get the other half.
+  if (m_isSplitboard) {
+    Path leftHalf;
+    for (auto& p : overallPath) {
+      if (p.Y > 0.0) continue;
+      leftHalf.emplace_back(p);
+    }
+    overallPath = leftHalf;
+  }
 
   // 1. Get path assuming full wrap of metal edge
-  auto fullWrapPath = PathUtils::OffsetPath(buildOverallPath(machine), -0.2);
+  auto fullWrapPath = PathUtils::OffsetPath(overallPath, -0.2);
   assert(fullWrapPath.size() == 1);
 
   // 2. Form box outlining limit of metal edges (whole board if no partial edges)
@@ -516,8 +651,8 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   MCFixed boxHalfWidth = std::max(std::max(m_noseWidth, m_waistWidth),
                                   m_tailWidth) / 2 + 1;
   Path edgeLimitBox;
-  edgeLimitBox.push_back(Point(noseEdgeX, - boxHalfWidth));
-  edgeLimitBox.push_back(Point(tailEdgeX, - boxHalfWidth));
+  edgeLimitBox.push_back(Point(noseEdgeX, -boxHalfWidth));
+  edgeLimitBox.push_back(Point(tailEdgeX, -boxHalfWidth));
   edgeLimitBox.push_back(Point(tailEdgeX, boxHalfWidth));
   edgeLimitBox.push_back(Point(noseEdgeX, boxHalfWidth));
   edgeLimitBox.push_back(Point(noseEdgeX, -boxHalfWidth));
@@ -538,6 +673,12 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   auto op = offsetPaths[0];
 
   DebugPathSet& dps = addDebugPathSet("Base Cutout");
+  if (m_isSplitboard) {
+    dps.addDescription(
+      "<p>For splitboards, we only generate the left half of the base. Since "
+      "boards are symmetrical, one can simply flip the base material and run "
+      "the program again to get the right half.</p>");
+  }
   dps.addPath([&] {
       return DebugPath {
         op,
@@ -620,7 +761,7 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
     });
   dps.addPath([&] {
       return DebugPath {
-        m_overallPath,
+        spreadPathForSplitboards(m_overallPath, machine),
         DebugAnnotationDesc {
           "Overall shape",
             "The final shape of the board, including edges.",
@@ -644,26 +785,31 @@ const Path BoardShape::alignmentMarksPath(const Machine& machine) {
   auto markYOffset = machine.alignmentMarkOffset() +
     machine.edgeGrooveEdgeWidth();
   auto markDepth = machine.alignmentMarkDepth();
+  auto centerMarkDepth = markDepth;
+  if (m_isSplitboard) {
+    // There is a center edge groove on splitboards, so we need to mark in that.
+    centerMarkDepth += machine.edgeGrooveDepth();
+  }
   auto deepMarkDepth = machine.alignmentMarkDeepDepth();
   Path marks;
   // Nose, two spaced a 10cm apart to make it easy to strike a good pencil line.
-  marks.push_back(Point(m_spacerWidth + markXOffset, 0, markDepth));
-  marks.push_back(Point(m_spacerWidth + markXOffset + 10, 0, markDepth));
+  marks.push_back(Point(m_spacerWidth + markXOffset, 0, centerMarkDepth));
+  marks.push_back(Point(m_spacerWidth + markXOffset + 10, 0, centerMarkDepth));
   // Tail
   marks.push_back(Point(boardLength - m_spacerWidth - markXOffset, 0,
-                        markDepth));
+                        centerMarkDepth));
   marks.push_back(Point(boardLength - m_spacerWidth - markXOffset - 10, 0,
-                        markDepth));
+                        centerMarkDepth));
   // Overall center
   marks.push_back(Point(boardCenterX, (m_waistWidth / 2) - markYOffset,
                         markDepth));
-  marks.push_back(Point(boardCenterX, 0, markDepth));
+  marks.push_back(Point(boardCenterX, 0, centerMarkDepth));
   marks.push_back(Point(boardCenterX, (-m_waistWidth / 2) + markYOffset,
                         markDepth));
   // EE center
   marks.push_back(Point(eeCenterX, (m_waistWidth / 2) - markYOffset,
                         markDepth));
-  marks.push_back(Point(eeCenterX, 0, markDepth));
+  marks.push_back(Point(eeCenterX, 0, centerMarkDepth));
   marks.push_back(Point(eeCenterX, (-m_waistWidth / 2) + markYOffset,
                         markDepth));
   // Extra deep mark above the guide holes, to assist with
@@ -690,7 +836,7 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
   DebugPathSet& dps = addDebugPathSet("Core Alignment Marks");
   dps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        spreadPathForSplitboards(buildCorePath(machine), machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",
@@ -730,7 +876,8 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
 // Core edge groove
 
 const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
-  auto overallPath = buildOverallPath(machine);
+  auto overallPath = spreadPathForSplitboards(buildOverallPath(machine),
+                                              machine);
   auto tool = machine.tool(machine.edgeGrooveTool());
   auto edgeWidth = machine.edgeGrooveEdgeWidth(); // Entire edge, not just tines
   auto grooveWidth = machine.sidewallOverhang() + edgeWidth;
@@ -751,7 +898,7 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
     "used, multiple machining passes are required.</p>");
   dps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        spreadPathForSplitboards(buildCorePath(machine), machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",
@@ -807,6 +954,54 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
     currentOffset -= stepOffset;
     if (currentOffset < endOffset) currentOffset = endOffset;
   }
+
+  // Add a center groove for splitboards. This groove is straight down
+  // the middle of the board, twice the edge width (one edge on each
+  // half) plus the gap width.
+  vector<vector<Path>> centerGroovePathSets;
+  if (m_isSplitboard) {
+    auto centerGrooveWidth = edgeWidth * 2 + machine.splitboardCenterGap();
+    assert(centerGrooveWidth >= tool.diameter);
+    auto halfGroove = centerGrooveWidth / 2;
+    auto centerGroovePath = formRectanglePath(
+      Point(-machine.sidewallOverhang(), -halfGroove),
+      Point(m_noseLength + m_effectiveEdge + m_tailLength +
+            machine.sidewallOverhang(), halfGroove));
+
+    centerGroovePathSets = pocket(centerGroovePath, tool,
+                                  machine.edgeGrooveOverlapPercentage(),
+                                  grooveDepth);
+
+    dps.addDescription(
+      "<p>Splitboards get a groove down the center, too, to allow for an edge "
+      "on each half including the gap between halves.</p>");
+
+    for (auto& pathSet : centerGroovePathSets) {
+      for (auto& path : pathSet) {
+        dps.addPath([&] {
+            return DebugPath {
+              path,
+              DebugAnnotationDesc {
+                "Splitboard center groove path",
+                "The paths used to pocket the center groove.",
+                "blue"
+              }
+            };
+          });
+      }
+    }
+    dps.addPath([&] {
+        return DebugPath {
+          centerGroovePath,
+          DebugAnnotationDesc {
+            "Splitboard center groove",
+            "The final center groove, including the splitboard center gap.",
+            "purple", true
+          }
+        };
+      });
+  }
+
   GCodeWriter g(m_name + "-core-edge-groove.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
                 machine.normalSpeed(), machine.bottomRapidHeight());
@@ -814,6 +1009,11 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
   g.spindleOn();
   g.emitPathSets(groovePathSets, true, machine.bottomRapidHeight(), 0,
                  machine.normalSpeed());
+  if (m_isSplitboard) {
+    g.comment("Center groove for splitboard");
+    g.emitPathSets(centerGroovePathSets, true, machine.bottomRapidHeight(), 0,
+                   machine.normalSpeed());
+  }
   g.spindleOff();
   g.close();
   return g;
@@ -891,7 +1091,7 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
   addCoreCenterComment(g);
   g.spindleOn();
   for (auto& p : m_insertsPath) {
-    g.rapidToPoint(p);
+    g.rapidToPoint(spreadPointForSplitboards(p, machine));
     emitInsert(g, machine, rapidHeight);
   }
   g.spindleOff();
@@ -911,7 +1111,9 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   // on the nose and tail, since those are inset by the nose and tail
   // spacers, but that's an acceptable tradeoff for the simplicity of
   // this.
-  auto offsetPaths = PathUtils::OffsetPath(buildOverallPath(machine),
+  auto overallPath = spreadPathForSplitboards(buildOverallPath(machine),
+                                              machine);
+  auto offsetPaths = PathUtils::OffsetPath(overallPath,
                                            machine.sidewallOverhang());
   // nb: the roughing support is pretty experimental right now!!
 #if ROUGHING
@@ -936,7 +1138,7 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   }
   dps.addPath([&] {
     return DebugPath {
-      buildCorePath(machine),
+      spreadPathForSplitboards(buildCorePath(machine), machine),
       DebugAnnotationDesc {
         "Core shape",
         "The final shape of the core, including sidewalls with overhang.",
@@ -1173,8 +1375,8 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
     "impact. The spacers are cut wider and longer than necessary to ensure "
     "they overlap the edges well, and for simplicity.</p>");
   auto tool = machine.tool(machine.baseCutoutTool());
-  auto nosePath = m_noseSpacerPath;
-  auto tailPath = m_tailSpacerPath;
+  auto nosePath = spreadPathForSplitboards(m_noseSpacerPath, machine);
+  auto tailPath = spreadPathForSplitboards(m_tailSpacerPath, machine);
   dps.addPath([&] {
       return DebugPath {
         nosePath,
@@ -1201,7 +1403,7 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
     });
   dps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        spreadPathForSplitboards(buildCorePath(machine), machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",
@@ -1294,17 +1496,6 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
 //------------------------------------------------------------------------------
 // Core edge trench
 
-// Counter-clockwise from lower left.
-Path formRectanglePath(Point ll, Point ur) {
-  Path p;
-  p.push_back(ll);
-  p.push_back(Point(ur.X, ll.Y));
-  p.push_back(ur);
-  p.push_back(Point(ll.X, ur.Y));
-  p.push_back(ll);
-  return p;
-}
-
 // Extend a path which is open, i.e., a line, on both ends the given
 // length.
 void extendLine(Path& p, MCFixed length) {
@@ -1323,7 +1514,8 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   // We need to move the edge of the overall shape to the center of
   // the edge trench so we can offset it evenly on each side.
   DebugPathSet& dps = addDebugPathSet("Edge Trench");
-  auto& overallPath = buildOverallPath(machine);
+  auto& overallPath = spreadPathForSplitboards(buildOverallPath(machine),
+                                               machine);
   auto etCenterAdjust = machine.sidewallOverhang() -
     (machine.edgeTrenchWidth() / 2);
   auto etCenterOverallPaths = PathUtils::OffsetPath(overallPath,
@@ -1335,12 +1527,16 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   // out the edge paths. These extend an extra 1 unit past the ends
   // and sides to ensure containtment of the shape.
   auto noseTrimPath = formRectanglePath(
-    Point(-1, -(m_noseWidth / 2) - 1),
-    Point(m_noseLength, (m_noseWidth / 2) + 1));
+    spreadPointForSplitboards(Point(-1, -(m_noseWidth / 2) - 1), machine),
+    spreadPointForSplitboards(Point(m_noseLength, (m_noseWidth / 2) + 1),
+                              machine));
   auto tailTrimPath = formRectanglePath(
-    Point(m_noseLength + m_effectiveEdge, -(m_tailWidth / 2) - 1),
-    Point(m_noseLength + m_effectiveEdge + m_tailLength + 1,
-          (m_tailWidth / 2) + 1));
+    spreadPointForSplitboards(
+      Point(m_noseLength + m_effectiveEdge,
+            -(m_tailWidth / 2) - 1), machine),
+    spreadPointForSplitboards(
+      Point(m_noseLength + m_effectiveEdge + m_tailLength + 1,
+            (m_tailWidth / 2) + 1), machine));
   auto etCenterPaths = PathUtils::ClipPathsDifference(
     vector<Path> { etCenterOverallPath },
     vector<Path> { noseTrimPath, tailTrimPath });
@@ -1368,13 +1564,13 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   //
   // @TODO: older versions of MonkeyCAM used to compute the
   // intersection with the core path, then extend from there, so older
-  // extension values were quite a bit shorter. This is preferable,
+  // extension values were quite a bit shorter. That is preferable,
   // and I should adjust this to do the same one day.
   auto tool = machine.tool(machine.coreCutoutTool());
   extendLine(etUpperCenter, machine.edgeTrenchExtension() +
-             tool.diameter);
+             (tool.diameter / 2));
   extendLine(etLowerCenter, machine.edgeTrenchExtension() +
-             tool.diameter);
+             (tool.diameter / 2));
 
   // Form the trench paths by offseting the two centerlines.
   auto trenches =
@@ -1399,7 +1595,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
     "the sidewall overhang. The trench is %scm wide and extends %scm past the "
     "ends of the effective edge.</p>",
     machine.edgeTrenchWidth().str().c_str(),
-    (machine.edgeTrenchExtension() + tool.diameter).str().c_str()
+    (machine.edgeTrenchExtension() + (tool.diameter / 2)).str().c_str()
   );
   dps.addPath([&] {
       return DebugPath {
@@ -1424,7 +1620,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
         trenches[0],
         DebugAnnotationDesc {
           "Edge Trench",
-          "The final shapre of the edge trench.",
+          "The final shape of the edge trench.",
           "blue", true
         }
       };
@@ -1434,14 +1630,14 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
         trenches[1],
         DebugAnnotationDesc {
           "Edge Trench",
-          "The final shapre of the edge trench.",
+          "The final shape of the edge trench.",
           "blue", true
         }
       };
     });
   dps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        spreadPathForSplitboards(buildCorePath(machine), machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",
@@ -1466,6 +1662,89 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   return g;
 }
 
+const GCodeWriter BoardShape::generateSplitboardCenterTrench(
+  const Machine& machine
+) {
+  DebugPathSet& dps = addDebugPathSet("Splitboard Center Trench");
+
+  // The center trench for a splitboard is straight, and extends the
+  // entire length of the core, plus twice the cutter radius to leave
+  // room for the rounded corners on both ends.
+  auto tool = machine.tool(machine.coreCutoutTool());
+  assert(machine.splitboardCenterTrenchWidth() >= tool.diameter);
+  auto halfCTW =  machine.splitboardCenterTrenchWidth() / 2;
+  auto centerTrenchPath = formRectanglePath(
+    Point(m_spacerWidth - (tool.diameter / 2), -halfCTW),
+    Point(m_noseLength + m_effectiveEdge + m_tailLength - m_spacerWidth +
+          (tool.diameter / 2), halfCTW));
+
+  // Offset the trenches inwards for machining.
+  auto ps = PathUtils::OffsetPath(centerTrenchPath, -tool.diameter / 2);
+  assert(ps.size() == 1);
+  auto cto = ps[0];
+  std::reverse(cto.begin(), cto.end());
+
+  dps.addDescription(
+    "<p>The center trench for splitboards provides space in which to place "
+    "sidewall material for the inner edges of the splitboard. "
+    "Note carefully that the gap between the board halves, defined by the "
+    "'splitboard center gap' machine parameter, means that you will have a "
+    "bit less than half of your sidewall material on each half of the "
+    "board.</p>"
+    "<p>The trench is %scm wide and extends %scm past the "
+    "ends of the core. The splitboard center gap is %scm wide.</p>"
+    "<p>This is generated as a separate program because complicated edge and "
+    "center inlays could be too much for one glue-up. This gives the option of "
+    "doing the center seperate from the edges if one wishes. Otherwise, this "
+    "can be run right after the edge trench program with the same machine "
+    "setup.</p>",
+    machine.splitboardCenterTrenchWidth().str().c_str(),
+    (tool.diameter / 2).str().c_str(),
+    machine.splitboardCenterGap().str().c_str()
+  );
+  dps.addPath([&] {
+      return DebugPath {
+        cto,
+        DebugAnnotationDesc {
+          "Splitboard Center Trench Path",
+          "The path used to cut the splitboard center trench."
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        centerTrenchPath,
+        DebugAnnotationDesc {
+          "Splitboard Center Trench",
+          "The final shape of the splitboard center trench.",
+          "blue", true
+        }
+      };
+    });
+  dps.addPath([&] {
+      return DebugPath {
+        spreadPathForSplitboards(buildCorePath(machine), machine),
+        DebugAnnotationDesc {
+          "Core shape",
+          "The final shape of the core, including sidewalls with overhang.",
+          "orange", true
+        }
+      };
+    });
+
+  GCodeWriter g(m_name + "-splitboard-center-trench.nc", tool,
+                GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
+                machine.normalSpeed(), machine.topRapidHeight());
+  addCoreCenterComment(g);
+  g.rapidToPoint(cto[0]);
+  g.spindleOn();
+  g.emitSpiralPath(cto, machine.coreBlankThickness(), 3);
+  g.rapidToPoint(cto[0]);
+  g.spindleOff();
+  g.close();
+  return g;
+}
+
 //------------------------------------------------------------------------------
 // Core top cutout
 //
@@ -1477,8 +1756,9 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   DebugPathSet& dps = addDebugPathSet("Core Top Cutout");
   // Offset the core path as usual
   auto tool = machine.tool(machine.coreCutoutTool());
-  auto paths = PathUtils::OffsetPath(buildCorePath(machine),
-                                     tool.diameter / 2);
+  auto paths = PathUtils::OffsetPath(
+    spreadPathForSplitboards(buildCorePath(machine), machine),
+    tool.diameter / 2);
   assert(paths.size() == 1);
   auto op = paths[0];
   dps.addPath([&] {
@@ -1492,7 +1772,7 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
     });
   dps.addPath([&] {
       return DebugPath {
-        buildCorePath(machine),
+        spreadPathForSplitboards(buildCorePath(machine), machine),
         DebugAnnotationDesc {
           "Core shape",
           "The final shape of the core, including sidewalls with overhang.",

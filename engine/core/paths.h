@@ -72,6 +72,14 @@ class MirroredPath : public Path {
 };
 
 //------------------------------------------------------------------------------
+// A path which spreads another path across the Y axis by adding a fixed gap.
+
+class SpreadYPath : public Path {
+ public:
+  SpreadYPath(const Path& path, MCFixed gapWidth);
+};
+
+//------------------------------------------------------------------------------
 // A path which offsets another path using a given tool diameter. The
 // source path has the height in Y, not Z, and Z is unused. Y is
 // unchanged for all points in the output, only X is modified to
@@ -163,7 +171,7 @@ class DebugPathSet {
 };
 
 //------------------------------------------------------------------------------
-// A collection of help functions which operate on paths.
+// A collection of helper functions which operate on paths.
 
 namespace PathUtils {
 
