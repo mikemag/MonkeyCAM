@@ -31,8 +31,8 @@ class HomePage extends Component {
             <Panel header={title} bsStyle="primary">
               <p className="text-center">
                 <a href="https://github.com/mikemag/MonkeyCAM">MonkeyCAM</a> is
-                an open source CAD/CAM program for designing skis and
-                snowboards, and then instantly generating all of the {' '}
+                an open source CAD/CAM program for designing skis, snowboards
+                and splitboards, and then instantly generating all of the{' '}
                 <a href="http://en.wikipedia.org/wiki/G-code">G-Code</a>{' '}
                 programs needed to cut the key parts with a{' '}
                 <a href="http://en.wikipedia.org/wiki/Numerical_control">

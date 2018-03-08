@@ -175,6 +175,52 @@ const sampleSkiConfig = {
   }
 };
 
+const sampleSplitboardConfig = {
+  board: {
+    name: 'Sample-splitboard',
+    splitboard: true,
+    'nose length': 18,
+    'effective edge length': 136,
+    'tail length': 14,
+    'sidecut radius': 1100,
+    'waist width': 24.6,
+    taper: 0.4,
+    'nose shape': {
+      type: 'Basic Bezier',
+      'end handle': 0.5,
+      'transition handle': 0.75
+    },
+    'edge shape': {
+      type: 'Basic Arc'
+    },
+    'tail shape': {
+      type: 'Basic Bezier',
+      'end handle': 0.5,
+      'transition handle': 0.75
+    },
+    'reference stance width': 52,
+    'stance setback': 2,
+    'nose and tail spacer width': 2
+  },
+  profile: {
+    'nose thickness': 0.2,
+    'center thickness': 0.79,
+    'tail thickness': 0.2,
+    'nose taper': {
+      'taper start': 0.45,
+      'start handle': 0.7,
+      'end handle': 0.8,
+      'taper end': 1.0
+    },
+    'tail taper': {
+      'taper start': 0.51,
+      'start handle': 0.68,
+      'end handle': 0.85,
+      'taper end': 1.0
+    }
+  }
+};
+
 const sampleSnowboardBindingConfig = {
   binding: {
     'nose insert pack': {
@@ -208,6 +254,51 @@ const sampleSkiBindingConfig = {
       { x: -1.5, y: -1.8 },
       { x: 3.75, y: -1.8 },
       { x: 3.75, y: 1.8 }
+    ]
+  }
+};
+
+const sampleSplitboardBindingConfig = {
+  binding: {
+    'binding name': 'Standard Voile Splitboard Mounting',
+    source:
+      'http://www.voile.com/voile_splitboard_hole_pattern_specs.pdf, retrieved 2018\
+/03/05',
+    nose: [
+      { x: 6.35, y: -4.28625 },
+      { x: 6.35, y: 4.28625 },
+      { x: 3.81, y: -4.28625 },
+      { x: 3.81, y: 4.28625 },
+      { x: 1.27, y: -4.28625 },
+      { x: 1.27, y: 4.28625 },
+      { x: -1.27, y: -4.28625 },
+      { x: -1.27, y: 4.28625 },
+      { x: -3.81, y: -4.28625 },
+      { x: -3.81, y: 4.28625 },
+      { x: -6.35, y: -4.28625 },
+      { x: -6.35, y: 4.28625 }
+    ],
+    center: [
+      { x: -2.8575, y: 0.0 },
+      { x: 0.0, y: -3.65125 },
+      { x: 0.0, y: 3.65125 },
+
+      { x: 15.9385, y: 0.0 },
+      { x: 18.6385, y: 0.0 }
+    ],
+    tail: [
+      { x: 6.35, y: -4.28625 },
+      { x: 6.35, y: 4.28625 },
+      { x: 3.81, y: -4.28625 },
+      { x: 3.81, y: 4.28625 },
+      { x: 1.27, y: -4.28625 },
+      { x: 1.27, y: 4.28625 },
+      { x: -1.27, y: -4.28625 },
+      { x: -1.27, y: 4.28625 },
+      { x: -3.81, y: -4.28625 },
+      { x: -3.81, y: 4.28625 },
+      { x: -6.35, y: -4.28625 },
+      { x: -6.35, y: 4.28625 }
     ]
   }
 };
@@ -266,6 +357,9 @@ const sampleMachineConfig = {
 
     'edge trench width': 1.2894,
     'edge trench extension': 3,
+
+    'splitboard center gap': 0.1,
+    'splitboard center trench width': 0.5,
 
     tools: [
       {
@@ -370,6 +464,9 @@ class DesignPage extends Component {
     this.handleBindingDistSubmit = this.handleBindingDistSubmit.bind(this);
     this.handleLoadSampleSnowboard = this.handleLoadSampleSnowboard.bind(this);
     this.handleLoadSampleSki = this.handleLoadSampleSki.bind(this);
+    this.handleLoadSampleSplitboard = this.handleLoadSampleSplitboard.bind(
+      this
+    );
   }
 
   handleRunMonkeyCAM = e => {
@@ -422,6 +519,16 @@ class DesignPage extends Component {
     e.preventDefault();
   }
 
+  handleLoadSampleSplitboard(e) {
+    this.setState({
+      boardConfig: sampleSplitboardConfig,
+      bindingConfig: sampleSplitboardBindingConfig,
+      machineConfig: sampleMachineConfig,
+      bindingDist: ''
+    });
+    e.preventDefault();
+  }
+
   getCMValidationState() {
     if (!this.state.bindingDist) return null;
     const f = parseFloat(this.state.bindingDist);
@@ -456,8 +563,9 @@ class DesignPage extends Component {
           this.setState({
             isLoadingInputs: false,
             loadingInputsErrors:
-              `Failed to fetch configs from storage for id ${this.props.match
-                .params.inputsid}:` + e
+              `Failed to fetch configs from storage for id ${
+                this.props.match.params.inputsid
+              }:` + e
           });
         });
     }
@@ -520,6 +628,13 @@ class DesignPage extends Component {
                   onClick={this.handleLoadSampleSki}
                 >
                   Start with a sample ski
+                </Button>
+                <Button
+                  bsStyle="primary"
+                  style={{ margin: 5 }}
+                  onClick={this.handleLoadSampleSplitboard}
+                >
+                  Start with a sample splitboard
                 </Button>
               </div>
             </div>

@@ -23,11 +23,9 @@ class AboutPage extends Component {
               <h3>What is this?</h3>
               <p>
                 MonkeyCAM is an{' '}
-                <a href="https://github.com/mikemag/MonkeyCAM">
-                  open source
-                </a>{' '}
-                CAD/CAM program for designing skis and snowboards, and
-                generating{' '}
+                <a href="https://github.com/mikemag/MonkeyCAM">open source</a>{' '}
+                CAD/CAM program for designing skis, snowboards and splitboards,
+                and generating{' '}
                 <a href="http://en.wikipedia.org/wiki/G-code">G-code</a>{' '}
                 programs to cut board parts with a{' '}
                 <a href="http://en.wikipedia.org/wiki/Numerical_control">

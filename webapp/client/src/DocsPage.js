@@ -21,10 +21,10 @@ class DocsPage extends Component {
           <Col sm={12}>
             <Panel header={title} bsStyle="primary">
               <p>
-                MonkeyCAM is an open source CAD/CAM program for designing skis
-                and snowboards, and generating G-code programs to cut board
-                parts with a CNC machine. It takes configuration files to
-                describe the ski or snowboard shape via a small set of
+                MonkeyCAM is an open source CAD/CAM program for designing skis,
+                snowboards and splitboards, and generating G-code programs to
+                cut board parts with a CNC machine. It takes configuration files
+                to describe the ski or snowboard shape via a small set of
                 parameters and generates the following nine G-code programs:
               </p>
               <ul>
@@ -68,6 +68,14 @@ class DocsPage extends Component {
                   the core
                 </li>
               </ul>
+              <p>For splitboards, it also generates one more program:</p>
+              <ul>
+                <li>
+                  <strong>Center trench</strong> to enable inlay of sidewall
+                  material along the center of the core
+                </li>
+              </ul>
+
               <p>
                 MonkeyCAM also generates an overview HTML file which shows
                 diagrams for all of the generated shapes and programs. Using

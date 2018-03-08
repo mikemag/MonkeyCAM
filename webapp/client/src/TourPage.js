@@ -85,8 +85,8 @@ class TourPage extends Component {
               <h3>Design</h3>
               <p>
                 Enter your board design, binding layout, and machine/materials
-                configuration in JSON format. Start with a sample ski or
-                snowboard to make it easier.
+                configuration in JSON format. Start with a sample ski,
+                snowboard, or splitboard to make it easier.
               </p>
               <p>
                 When you're ready, hit Run MonkeyCAM. The results will be ready
