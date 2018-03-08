@@ -3,7 +3,7 @@ project(MonkeyCAM)
 
 set(MonkeyCAM_VERSION_MAJOR 4)
 set(MonkeyCAM_VERSION_MINOR 0)
-set(MonkeyCAM_VERSION_PATCH 6)
+set(MonkeyCAM_VERSION_PATCH 7)
 
 execute_process(
   COMMAND git rev-parse --abbrev-ref HEAD
