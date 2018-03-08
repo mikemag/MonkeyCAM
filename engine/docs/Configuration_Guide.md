@@ -513,26 +513,45 @@ defined. Additional groups are specified with the other parameters.
 See the Nose Insert Pack; the tail is the same.
 
 
-### Ski binding inserts
+### Generic binding inserts
 
-Inserts for skis can be specified at three locations: Toe, Center or Heel.
-These keywords could also be used to make user defined insert patterns for
-any other purpose on skis or boards (e.g. splitboard inserts?).
+Inserts for skis, snowboards, and splitboards can be specified at
+three locations: Toe (Nose), Center or Heel (Tail).
 
-Ski binding insert functionality uses a JSON `array` to specify the position
-of the center of each insert. The positions are defined as offsets from
-a reference point (either the boot toe, center, or heel). Offsets are
-specified in cm along the ski towards the tail (x) or across the ski to the
-left (y).
+Insert locations are specified using a JSON `array` to specify the
+position of the center of each insert. The positions are defined as
+offsets from a reference point which differs depending on the type of
+board being built:
 
-A JSON `array` consists of a series of comma seperated rows, each enclosed
-in curly brackets `{row}`, and the whole array enclosed in square brackets
-`[.....]`. For all the ski binding definition arrays each row contains
-comma seperated "x" and "y" parameters specifying the coordinates of an
-individual insert `"x": number, "y": number`.
+* For skis, the `toe` and `heel` are relative to the setback and the
+  `--bindingdist` parameter, while the `center` is relative to the
+  center of the effective edge.
+
+* For snowboards, the `nose` and `tail` are relative to the setback
+  and reference stance.
+
+* For splitboards, the `nose` and `tail` are relative to the setback
+  and reference stance, while the `center` is relative to the true
+  center of the board. This allows the touring insert pack to be
+  centered over the balance point of the board independent of the
+  other parameters.
+
+All offsets are specified in cm along the board towards the tail (x) or
+across the board from left to right (y).
+
+A JSON `array` consists of a series of comma seperated rows, each
+enclosed in curly brackets `{row}`, and the whole array enclosed in
+square brackets `[.....]`. For all the binding definition arrays each
+row contains comma seperated "x" and "y" parameters specifying the
+coordinates of an individual insert `"x": number, "y": number`.
 
 
-#### Toe
+#### Toe/Nose
+
+The name can be `toe` or `nose` depending on preference. For clarity,
+skis typically use `toe` while snowboards and splitboards typically
+use `nose`.
+
 "toe":
 \[
   {"x": `number`,   "y": `number`},
@@ -543,13 +562,15 @@ individual insert `"x": number, "y": number`.
 
 *Optional.*
 
-Toe inserts are specified with position relative to the center of the
-boot toe. For tech/pin ski touring bindings toe inserts are specified
-relative to the center of the pin centerline. Note that for frame bindings
-with a fixed length (i.e. the distance from the front screw holes to the
-back screw holes is fixed as the binding is all one piece) then all of the
-binding inserts will be specified relative to the toe (and hence should
-be part of the "toe" section of the binding definition file).
+Toe/nose inserts are specified with position relative to the center of
+the boot toe for skis, and relative to the reference stance for
+snowboards and splitboards. For tech/pin ski touring bindings toe
+inserts are specified relative to the center of the pin
+centerline. Note that for frame bindings with a fixed length (i.e. the
+distance from the front screw holes to the back screw holes is fixed
+as the binding is all one piece) then all of the binding inserts will
+be specified relative to the toe (and hence should be part of the
+"toe" section of the binding definition file).
 
 
 #### Center
@@ -561,10 +582,20 @@ be part of the "toe" section of the binding definition file).
 
 *Optional.*
 
-Center inserts are specified relative to the boot/stance center.
+Center inserts are specified relative to the boot/stance center for
+skis, and relative to the true board center for splitboards.
+
+For splitboards, the center pack is also duplicated and centered over
+each half of the splitboard. This is specifically for the touring
+inserts.
 
 
-#### Heel
+#### Heel/Tail
+
+The name can be `heel` or `tail` depending on preference. For clarity,
+skis typically use `heel` while snowboards and splitboards typically
+use `tail`.
+
 "heel":
 \[
   {"x": `number`,   "y": `number`},
@@ -573,7 +604,8 @@ Center inserts are specified relative to the boot/stance center.
 
 *Optional.*
 
-Heel inserts are relative to the center of the boot heel.
+Heel inserts are relative to the center of the boot heel for skis, and
+relative to the reference stance for snowboards and splitboards.
 
 
 #### Example
