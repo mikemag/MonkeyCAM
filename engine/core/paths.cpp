@@ -52,7 +52,7 @@ SpreadYPath::SpreadYPath(const Path& path, MCFixed gapWidth) {
   Point shiftUp = Point(0, gapWidth / 2, 0);
   Point shiftDown = Point(0, -gapWidth / 2, 0);
   auto lastPoint = Point::MinPoint;
-  for (int i = 0; i < path.size(); i++) {
+  for (uint i = 0; i < path.size(); i++) {
     auto p = path[i];
     if (p == lastPoint) continue; // De-dup
     if (p.Y < 0) emplace_back(p + shiftDown);
