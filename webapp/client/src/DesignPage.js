@@ -262,8 +262,7 @@ const sampleSplitboardBindingConfig = {
   binding: {
     'binding name': 'Standard Voile Splitboard Mounting',
     source:
-      'http://www.voile.com/voile_splitboard_hole_pattern_specs.pdf, retrieved 2018\
-/03/05',
+      'http://www.voile.com/voile_splitboard_hole_pattern_specs.pdf, retrieved 2018/03/05',
     nose: [
       { x: 6.35, y: -4.28625 },
       { x: 6.35, y: 4.28625 },
