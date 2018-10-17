@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <cassert>
-#include <stdarg.h>
-#include <boost/range/adaptor/reversed.hpp>
-#include "clipper.hpp"
 #include "paths.h"
+#include <stdarg.h>
+#include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
+#include <cassert>
+#include "clipper.hpp"
 
 namespace MonkeyCAM {
 
@@ -54,15 +54,17 @@ SpreadYPath::SpreadYPath(const Path& path, MCFixed gapWidth) {
   auto lastPoint = Point::MinPoint;
   for (uint i = 0; i < path.size(); i++) {
     auto p = path[i];
-    if (p == lastPoint) continue; // De-dup
-    if (p.Y < 0) emplace_back(p + shiftDown);
-    else if (p.Y > 0) emplace_back(p + shiftUp);
+    if (p == lastPoint) continue;  // De-dup
+    if (p.Y < 0)
+      emplace_back(p + shiftDown);
+    else if (p.Y > 0)
+      emplace_back(p + shiftUp);
     else {
       // Split the point on either size of 0. We need to add them in
       // the proper order, so determine the crossing direction. Also,
       // avoid adding points before or after the ends. This gives the
       // nice result that the ends are unchanged if they're at Y=0.
-      bool ascending = (i == 0) ? p.Y < path[i+1].Y : p.Y > lastPoint.Y;
+      bool ascending = (i == 0) ? p.Y < path[i + 1].Y : p.Y > lastPoint.Y;
       if (ascending) {
         if (i != 0) emplace_back(p + shiftDown);
         emplace_back(p);
@@ -93,9 +95,12 @@ ToolOffsetPath::ToolOffsetPath(const Path& path, MCFixed toolDiameter) {
     auto p2 = path[i];
     // Which way does the line segment go?
     MCFixed offset;
-    if (p1.Y > p2.Y) offset = toolDiameter / 2; // Decending
-    else if (p1.Y < p2.Y) offset = -toolDiameter / 2; // Ascending
-    else offset = 0; // Flat
+    if (p1.Y > p2.Y)
+      offset = toolDiameter / 2;  // Decending
+    else if (p1.Y < p2.Y)
+      offset = -toolDiameter / 2;  // Ascending
+    else
+      offset = 0;  // Flat
     // If the start of the line segment was not moved, and we are
     // moving the end of the segment, then go ahead and move the start
     // of the segment.
@@ -127,7 +132,7 @@ ToolOffsetPath::ToolOffsetPath(const Path& path, MCFixed toolDiameter) {
 // are considered from right to left.
 bool segmentCrossesProfilePoint(Point p1, Point p2, const Path& profilePath,
                                 Point& crossingPoint) {
-  if (p1.X < p2.X) { // Left to right
+  if (p1.X < p2.X) {  // Left to right
     for (auto& p : profilePath) {
       if ((p1.X < p.X) && (p.X < p2.X)) {
         crossingPoint = p;
@@ -158,8 +163,8 @@ Point breakLineSegmentAtPoint(Point p1, Point p2, Point bp) {
 
 // Given a point find the start and end points of the profile region
 // the point lives in.
-void getRegionBounds(const Path& profilePath, Point p,
-                     Point& rStart, Point& rEnd) {
+void getRegionBounds(const Path& profilePath, Point p, Point& rStart,
+                     Point& rEnd) {
   for (unsigned int i = 0; i < profilePath.size() - 1; i++) {
     if ((profilePath[i].X <= p.X) && (p.X < profilePath[i + 1].X)) {
       rStart = profilePath[i];
@@ -172,8 +177,7 @@ void getRegionBounds(const Path& profilePath, Point p,
   return;
 }
 
-ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
-{
+ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath) {
   // First, form the new path from the original by breaking line
   // segments where they cross the profile points.
   for (unsigned int i = 0; i < path.size() - 1; i++) {
@@ -181,11 +185,11 @@ ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
     auto p2 = path[i + 1];
     bool crossedPoint = false;
     do {
-      push_back(p1); // p1 goes right into the new path.
+      push_back(p1);  // p1 goes right into the new path.
       // Does p1->p2 cross a profile point?
       Point crossingPoint;
-      crossedPoint = segmentCrossesProfilePoint(p1, p2, profilePath,
-                                                crossingPoint);
+      crossedPoint =
+          segmentCrossesProfilePoint(p1, p2, profilePath, crossingPoint);
       if (crossedPoint) {
         // Yup, so go ahead and break the line at the profile point.
         auto newPoint = breakLineSegmentAtPoint(p1, p2, crossingPoint);
@@ -230,26 +234,17 @@ ProfiledPath::ProfiledPath(const Path& path, const Path& profilePath)
 // DebugPath
 
 DebugPath::DebugPath(const Path& path, const DebugAnnotationDesc& desc)
-    : m_desc(desc)
-{
+    : m_desc(desc) {
   push_back_path(path);
 }
 
 DebugAnnotationDesc::DebugAnnotationDesc(const std::string name,
                                          const std::string desc,
-                                         const std::string color,
-                                         bool dashed)
-    : m_name(name)
-    , m_desc(desc)
-    , m_color(color)
-    , m_dashed(dashed)
-{
-}
+                                         const std::string color, bool dashed)
+    : m_name(name), m_desc(desc), m_color(color), m_dashed(dashed) {}
 
 DebugAnnotation::DebugAnnotation(const DebugAnnotationDesc& desc)
-    : m_desc(desc)
-{
-}
+    : m_desc(desc) {}
 
 void DebugAnnotation::addSvgFormat(const char* fmt, ...) {
   va_list args;
@@ -277,9 +272,7 @@ void DebugAnnotation::addSvgCircle(Point p, MCFixed diameter) {
 }
 
 DebugPathSet::DebugPathSet(const std::string header)
-    : m_header(header),
-      m_headerLink(header)
-{
+    : m_header(header), m_headerLink(header) {
   std::replace(m_headerLink.begin(), m_headerLink.end(), ' ', '_');
 }
 
@@ -296,7 +289,7 @@ void DebugPathSet::addDescription(const char* fmt, ...) {
   va_end(args);
 }
 
-void DebugPathSet::addAnnotation(std::function<DebugAnnotation ()> func) {
+void DebugPathSet::addAnnotation(std::function<DebugAnnotation()> func) {
   m_annotations.push_back(func());
 }
 
@@ -305,10 +298,7 @@ void DebugPathSet::addAnnotation(std::function<DebugAnnotation ()> func) {
 
 namespace PathUtils {
 
-enum PathClosure {
-  Open,
-  Closed
-};
+enum PathClosure { Open, Closed };
 
 ClipperLib::Polygon pathToPolygon(const Path& path, PathClosure c = Closed) {
   // Our paths are closed, and may have duplicated points in
@@ -321,8 +311,7 @@ ClipperLib::Polygon pathToPolygon(const Path& path, PathClosure c = Closed) {
   if (c == Closed) --pathEnd;
   for (auto p = pathStart; p != pathEnd; ++p) {
     if ((p == pathStart) || (lastPoint != *p)) {
-      poly.push_back(ClipperLib::IntPoint(p->X.scaledInt(),
-                                          p->Y.scaledInt()));
+      poly.push_back(ClipperLib::IntPoint(p->X.scaledInt(), p->Y.scaledInt()));
     }
     lastPoint = *p;
   }
@@ -332,13 +321,13 @@ ClipperLib::Polygon pathToPolygon(const Path& path, PathClosure c = Closed) {
 Path polygonToPath(const ClipperLib::Polygon& poly, PathClosure c = Closed) {
   Path path;
   for (const auto& p : poly) {
-    path.emplace_back(Point(MCFixed::fromPreScaled(p.X),
-                            MCFixed::fromPreScaled(p.Y)));
+    path.emplace_back(
+        Point(MCFixed::fromPreScaled(p.X), MCFixed::fromPreScaled(p.Y)));
   }
   auto smallest = std::min_element(path.begin(), path.end());
   std::rotate(path.begin(), smallest, path.end());
   if (c == Closed) {
-    path.emplace_back(path[0]); // Poly is open, so close it now
+    path.emplace_back(path[0]);  // Poly is open, so close it now
   }
   return path;
 }
@@ -399,7 +388,6 @@ std::vector<Path> OffsetLines(const std::vector<Path>& paths, MCFixed offset) {
   return resultPaths;
 }
 
-
 // Use Clipper to constrain one set of paths with another.
 std::vector<Path> ClipPathsIntersect(const std::vector<Path>& subjects,
                                      const std::vector<Path>& clips) {
@@ -412,8 +400,8 @@ std::vector<Path> ClipPathsIntersect(const std::vector<Path>& subjects,
   for (auto& p : clips) clip.emplace_back(pathToPolygon(p));
   c.AddPolygons(subject, ClipperLib::ptSubject);
   c.AddPolygons(clip, ClipperLib::ptClip);
-  c.Execute(ClipperLib::ctIntersection, solution,
-            ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+  c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero,
+            ClipperLib::pftNonZero);
   for (const auto& poly : solution) {
     resultPaths.emplace_back(polygonToPath(poly));
   }
@@ -432,8 +420,8 @@ std::vector<Path> ClipPathsDifference(const std::vector<Path>& subjects,
   for (auto& p : clips) clip.emplace_back(pathToPolygon(p));
   c.AddPolygons(subject, ClipperLib::ptSubject);
   c.AddPolygons(clip, ClipperLib::ptClip);
-  c.Execute(ClipperLib::ctDifference, solution,
-            ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+  c.Execute(ClipperLib::ctDifference, solution, ClipperLib::pftNonZero,
+            ClipperLib::pftNonZero);
   for (const auto& poly : solution) {
     resultPaths.emplace_back(polygonToPath(poly));
   }
@@ -445,11 +433,11 @@ double Area(const Path& path) {
   ClipperLib::Polygon poly = pathToPolygon(path);
   assert(ClipperLib::Orientation(poly));
   return ClipperLib::Area(poly) /
-    (MCFixed::ScalingFactor * MCFixed::ScalingFactor);
+         (MCFixed::ScalingFactor * MCFixed::ScalingFactor);
 }
 
 void RemoveShortLines(Path& path, MCFixed minLength) {
-  auto len2 = minLength.dbl() * minLength.dbl(); // Deal in squares below
+  auto len2 = minLength.dbl() * minLength.dbl();  // Deal in squares below
   auto lineStart = path.begin();
   auto lineEnd = lineStart + 1;
   while (lineEnd != path.end()) {
@@ -507,6 +495,6 @@ Path SimpleLeadIn(const Path& path, MCFixed startHeight, MCFixed length) {
   return leadIn;
 }
 
-} // namespace PathUtils
+}  // namespace PathUtils
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

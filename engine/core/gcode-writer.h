@@ -17,10 +17,10 @@
 #ifndef incl_gcode_writer_H_
 #define incl_gcode_writer_H_
 
+#include <stdarg.h>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <stdarg.h>
 
 #include "machine.h"
 #include "paths.h"
@@ -45,14 +45,13 @@ class GCodeWriter {
 
   // Feed speeds are in IPM, suitable for a Fxx.
   GCodeWriter(std::string filename, Tool const& tool, ZeroZ zeroHeight,
-              XYOrigin origin, int normalSpeed,
-              MCFixed rapidHeight);
+              XYOrigin origin, int normalSpeed, MCFixed rapidHeight);
   GCodeWriter();
 
   void spindleOn();
   void spindleOff();
   void rapidToPoint(Point p);
-  void feedToPoint(Point p, int feedRate = -1); // -1 uses default speed
+  void feedToPoint(Point p, int feedRate = -1);  // -1 uses default speed
   void comment(std::string s = "", int indent = 0);
   void commentF(const char* fmt, ...);
   void headerComment(std::string s = "", int indent = 0);
@@ -116,6 +115,6 @@ class GCodeWriter {
   GCodeLines m_lines;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_gcode_writer_H_
+#endif  // incl_gcode_writer_H_

@@ -15,13 +15,13 @@
  */
 
 #include "mcfixed.h"
-#include <cmath>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
 
 namespace MonkeyCAM {
 
-std::ostream& operator << (std::ostream& outs, const MCFixed& mcf) {
+std::ostream& operator<<(std::ostream& outs, const MCFixed& mcf) {
   return outs << "MCF(" << mcf.m_data << ")";
 }
 
@@ -31,8 +31,8 @@ std::string MCFixed::str() const {
   const char* minus = "";
   if ((m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
-  snprintf(buff, sizeof(buff), "%s%lld.%.*lld",
-	   minus, (long long)a, Precision, (long long)b);
+  snprintf(buff, sizeof(buff), "%s%lld.%.*lld", minus, (long long)a, Precision,
+           (long long)b);
   return std::string(buff);
 }
 
@@ -43,9 +43,9 @@ std::string MCFixed::inchesStr() const {
   const char* minus = "";
   if ((x.m_data < 0) && ((a != 0) || (b != 0))) minus = "-";
   char buff[100];
-  snprintf(buff, sizeof(buff), "%s%lld.%.*lld",
-	   minus, (long long)a, Precision, (long long)b);
+  snprintf(buff, sizeof(buff), "%s%lld.%.*lld", minus, (long long)a, Precision,
+           (long long)b);
   return std::string(buff);
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

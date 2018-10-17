@@ -22,20 +22,17 @@ namespace MonkeyCAM {
 
 /* static */ ActivityEmitter* ActivityEmitter::m_emitter = NULL;
 
-/* static */ void ActivityEmitter::initialize(boost::optional<int> fd)
-{
+/* static */ void ActivityEmitter::initialize(boost::optional<int> fd) {
   m_emitter = new ActivityEmitter(fd);
 }
 
 ActivityEmitter::ActivityEmitter(boost::optional<int> fd)
-    : m_jsonOutputFD(-1),
-      m_jsonOutputFile(NULL)
-{
+    : m_jsonOutputFD(-1), m_jsonOutputFile(NULL) {
   if (fd) {
     m_jsonOutputFD = *fd;
     m_jsonOutputFile = fdopen(m_jsonOutputFD, "w");
     printf("Outputting JSON to FD %d\n", m_jsonOutputFD);
-    fprintf(m_jsonOutputFile, "["); // The reader expects an array of objects.
+    fprintf(m_jsonOutputFile, "[");  // The reader expects an array of objects.
   }
 }
 
@@ -65,15 +62,9 @@ void ActivityEmitter::fatal(const char* fmt, ...) {
   va_end(args);
   printf("%s\n", buff);
   if (!m_jsonOutputFile) return;
-  json j = {
-    {"error", {
-        {"kind", "Fatal Error"},
-        {"message", buff}
-      }
-    }
-  };
+  json j = {{"error", {{"kind", "Fatal Error"}, {"message", buff}}}};
   fprintf(m_jsonOutputFile, "%s,\n", j.dump().c_str());
   fflush(m_jsonOutputFile);
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

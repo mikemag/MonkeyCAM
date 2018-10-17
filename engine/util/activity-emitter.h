@@ -41,6 +41,6 @@ class ActivityEmitter {
   FILE* m_jsonOutputFile;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_activity_emitter_H_
+#endif  // incl_activity_emitter_H_

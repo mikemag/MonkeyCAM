@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <iostream>
 #include <fstream>
 #include <functional>
+#include <iostream>
 
 #include "paths.h"
 
@@ -43,4 +43,4 @@ class OverviewWriter {
   std::ofstream m_outputStream;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

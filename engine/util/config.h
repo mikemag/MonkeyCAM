@@ -28,8 +28,7 @@ namespace MonkeyCAM {
 
 class Config {
  public:
-  Config(const std::string configName,
-         const std::string filename);
+  Config(const std::string configName, const std::string filename);
 
   static void validateIsArray(const json& j);
   static void validateIsObject(const json& j);
@@ -42,14 +41,11 @@ class Config {
     m_stack.push({p, j});
   }
 
-  void pop() {
-    m_stack.pop();
-  }
+  void pop() { m_stack.pop(); }
 
-  template<typename T> T getCommon(
-    const char* key,
-    std::function<void(const json&)> validator = NULL
-  ) {
+  template <typename T>
+  T getCommon(const char* key,
+              std::function<void(const json&)> validator = NULL) {
     try {
       auto e = m_stack.top();
       auto j = e.m_json.at(key);
@@ -59,29 +55,22 @@ class Config {
       std::string what = err.what();
       std::string msg = what.substr(what.find(']') + 2, std::string::npos);
       auto e = m_stack.top();
-      printf("Type error in %s (%s): '%s%s%s', %s\n",
-             m_configName.c_str(), m_fileName.c_str(),
-             e.m_path.c_str(), e.m_path.empty() ? "" : ".", key,
-             msg.c_str());
-      ae::emitter().write({
-          {"error", {
-              {"kind", "Type Error"},
-              {"configName", m_configName},
-              {"path", e.m_path},
-              {"key", key},
-              {"message", msg}
-            }
-          }
-        });
+      printf("Type error in %s (%s): '%s%s%s', %s\n", m_configName.c_str(),
+             m_fileName.c_str(), e.m_path.c_str(), e.m_path.empty() ? "" : ".",
+             key, msg.c_str());
+      ae::emitter().write({{"error",
+                            {{"kind", "Type Error"},
+                             {"configName", m_configName},
+                             {"path", e.m_path},
+                             {"key", key},
+                             {"message", msg}}}});
       exit(1);
     }
   }
 
-  template<typename T>
+  template <typename T>
   boost::optional<T> getOptional(
-    const char* key,
-    std::function<void(const json&)> validator = NULL
-  ) {
+      const char* key, std::function<void(const json&)> validator = NULL) {
     try {
       return boost::optional<T>(getCommon<T>(key, validator));
     } catch (json::out_of_range& e) {
@@ -89,11 +78,9 @@ class Config {
     }
   }
 
-  template<typename T> T get(
-    const char* key,
-    T defaultValue,
-    std::function<void(const json&)> validator = NULL
-  ) {
+  template <typename T>
+  T get(const char* key, T defaultValue,
+        std::function<void(const json&)> validator = NULL) {
     try {
       return getCommon<T>(key);
     } catch (json::out_of_range& err) {
@@ -101,51 +88,35 @@ class Config {
     }
   }
 
-  template<typename T> T get(
-    const char* key,
-    std::function<void(const json&)> validator = NULL
-  ) {
+  template <typename T>
+  T get(const char* key, std::function<void(const json&)> validator = NULL) {
     try {
       return getCommon<T>(key, validator);
     } catch (json::out_of_range& err) {
       auto e = m_stack.top();
-      printf("Missing parameter in %s (%s): '%s%s%s'\n",
-             m_configName.c_str(), m_fileName.c_str(),
-             e.m_path.c_str(), e.m_path.empty() ? "" : ".", key);
-      ae::emitter().write({
-          {"error", {
-              {"kind", "Missing Parameter"},
-              {"configName", m_configName},
-              {"path", e.m_path},
-              {"key", key}
-            }
-          }
-        });
+      printf("Missing parameter in %s (%s): '%s%s%s'\n", m_configName.c_str(),
+             m_fileName.c_str(), e.m_path.c_str(), e.m_path.empty() ? "" : ".",
+             key);
+      ae::emitter().write({{"error",
+                            {{"kind", "Missing Parameter"},
+                             {"configName", m_configName},
+                             {"path", e.m_path},
+                             {"key", key}}}});
       exit(1);
     }
   }
 
   class ObjectHolder {
    public:
-    ObjectHolder(
-      Config& config,
-      const char* key
-    ) :
-        m_config(config),
-        m_pop(true)
-    {
+    ObjectHolder(Config& config, const char* key)
+        : m_config(config), m_pop(true) {
       auto v = config.get<json>(key, Config::validateIsObject);
       config.push(key, v);
     }
 
-    ObjectHolder(
-      Config& config,
-      const char* key,
-      std::function<void()> optionalWork
-    ) :
-        m_config(config),
-        m_pop(false)
-    {
+    ObjectHolder(Config& config, const char* key,
+                 std::function<void()> optionalWork)
+        : m_config(config), m_pop(false) {
       auto v = config.getOptional<json>(key, Config::validateIsObject);
       if (v) {
         m_pop = true;
@@ -165,14 +136,9 @@ class Config {
 
   class ArrayHolder {
    public:
-    ArrayHolder(
-      Config& config,
-      const char* key,
-      std::function<void(json& array)> optionalWork
-    ) :
-        m_config(config),
-        m_pop(false)
-    {
+    ArrayHolder(Config& config, const char* key,
+                std::function<void(json& array)> optionalWork)
+        : m_config(config), m_pop(false) {
       auto v = config.getOptional<json>(key, Config::validateIsArray);
       if (v) {
         m_pop = true;
@@ -190,7 +156,6 @@ class Config {
     bool m_pop;
   };
 
-
  private:
   const std::string m_configName;
   const std::string m_fileName;
@@ -203,6 +168,6 @@ class Config {
   std::stack<Entry> m_stack;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_config_H_
+#endif  // incl_config_H_

@@ -17,8 +17,8 @@
 #ifndef incl_machine_H_
 #define incl_machine_H_
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "config.h"
 #include "mcfixed.h"
@@ -52,12 +52,12 @@ class Machine {
 
   const Tool& tool(int id) const { return m_tools.at(id); }
 
-#define MPT(_f, _t, _n) const _t _f() const { \
-    return m_config.get<_t>(_n);              \
-}
-#define MPI(_f, _n) const MCFixed _f() const {            \
+#define MPT(_f, _t, _n) \
+  const _t _f() const { return m_config.get<_t>(_n); }
+#define MPI(_f, _n)                                       \
+  const MCFixed _f() const {                              \
     return MCFixed::fromInches(m_config.get<double>(_n)); \
-}
+  }
 
   MPT(rapidSpeed, int, "rapid speed")
   MPT(normalSpeed, int, "normal speed")
@@ -109,6 +109,6 @@ class Machine {
   /*const*/ std::map<int, const Tool> m_tools;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_machine_H_
+#endif  // incl_machine_H_

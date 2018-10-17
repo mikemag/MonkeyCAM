@@ -50,8 +50,7 @@ class InsertPack {
 // spacing can be changed via hSpacing and vSpacing.
 class SnowboardInsertPack : public InsertPack {
  public:
-  SnowboardInsertPack(int countNose, int countTail,
-                      MCFixed offset = 4,
+  SnowboardInsertPack(int countNose, int countTail, MCFixed offset = 4,
                       MCFixed hSpacing = 4, MCFixed vSpacing = 4);
 
  private:
@@ -64,6 +63,6 @@ class SnowboardInsertPack : public InsertPack {
   int m_countTail;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_insert_pack_H_
+#endif  // incl_insert_pack_H_

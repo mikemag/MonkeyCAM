@@ -24,8 +24,7 @@ namespace MonkeyCAM {
 static const double PI = 3.141592653589793;
 
 struct Matrix2x2 {
-  Matrix2x2(double a, double b,
-            double c, double d);
+  Matrix2x2(double a, double b, double c, double d);
   double Determinant();
 
  private:
@@ -33,8 +32,7 @@ struct Matrix2x2 {
 };
 
 struct Matrix3x3 {
-  Matrix3x3(double a, double b, double c,
-            double d, double e, double f,
+  Matrix3x3(double a, double b, double c, double d, double e, double f,
             double g, double h, double i);
   double Determinant();
 
@@ -46,9 +44,8 @@ struct Circle {
   double centerX;
   double centerY;
   double radius;
-  Circle(double p1X, double p1Y,
-         double p2X, double p2Y,
-         double p3X, double p3Y);
+  Circle(double p1X, double p1Y, double p2X, double p2Y, double p3X,
+         double p3Y);
 };
 
 struct Vector2D {
@@ -64,18 +61,12 @@ struct Vector2D {
     Normal = sqrt((X * X) + (Y * Y));
   }
 
-  Vector2D toUnitVector() {
-    return Vector2D(X / Normal, Y / Normal);
-  }
+  Vector2D toUnitVector() { return Vector2D(X / Normal, Y / Normal); }
 
-  Vector2D toPerpVector() {
-    return Vector2D(-Y, X);
-  }
+  Vector2D toPerpVector() { return Vector2D(-Y, X); }
 
-  Vector2D operator* (double d) {
-    return Vector2D(X * d, Y * d);
-  }
-  Vector2D& operator*= (double d) {
+  Vector2D operator*(double d) { return Vector2D(X * d, Y * d); }
+  Vector2D& operator*=(double d) {
     X *= d;
     Y *= d;
     return *this;
@@ -86,6 +77,6 @@ struct Vector2D {
   double Normal;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_basic_math_H_
+#endif  // incl_basic_math_H_

@@ -25,8 +25,7 @@ namespace MonkeyCAM {
 // Base insert pack
 
 InsertPack::InsertPack(const std::vector<double>& insertX,
-                       const std::vector<double>& insertY)
-{
+                       const std::vector<double>& insertY) {
   for (unsigned it = 0; it != insertX.size(); it++) {
     m_insertsPath.push_back(Point(insertX[it], insertY[it]));
   }
@@ -45,14 +44,13 @@ void InsertPack::moveIntoPosition(Point center) {
 // Classic snowboard 4x4 insert pack
 
 SnowboardInsertPack::SnowboardInsertPack(int countNose, int countTail,
-                                         MCFixed offset,
-                                         MCFixed hSpacing, MCFixed vSpacing)
-    : m_offset(offset)
-    , m_hSpacing(hSpacing)
-    , m_vSpacing(vSpacing)
-    , m_countNose(countNose)
-    , m_countTail(countTail)
-{
+                                         MCFixed offset, MCFixed hSpacing,
+                                         MCFixed vSpacing)
+    : m_offset(offset),
+      m_hSpacing(hSpacing),
+      m_vSpacing(vSpacing),
+      m_countNose(countNose),
+      m_countTail(countTail) {
   addInsertGroup(0);
   for (int i = 1; i <= m_countNose; i++) {
     addInsertGroup(-m_offset * i);
@@ -77,4 +75,4 @@ void SnowboardInsertPack::addInsertGroup(MCFixed stanceX) {
   m_insertsPath.push_back(Point(stanceX + x, -y));
 }
 
-}
+}  // namespace MonkeyCAM

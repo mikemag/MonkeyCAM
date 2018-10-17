@@ -64,8 +64,7 @@ class FlatBezier : public ShapeEndPart {
 
 class ShapeEdgePart {
  public:
-  virtual const Path &generate(Point nosePoint,
-                               Point waistPoint,
+  virtual const Path &generate(Point nosePoint, Point waistPoint,
                                Point tailPoint) = 0;
   virtual ~ShapeEdgePart() = default;
 
@@ -79,6 +78,6 @@ class BasicArc : public ShapeEdgePart {
   const Path &generate(Point nosePoint, Point waistPoint, Point tailPoint);
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_shape_parts_H_
+#endif  // incl_shape_parts_H_

@@ -17,8 +17,8 @@
 #ifndef incl_Point_H_
 #define incl_Point_H_
 
-#include "mcfixed.h"
 #include "../util/basic-math.h"
+#include "mcfixed.h"
 
 namespace MonkeyCAM {
 
@@ -29,39 +29,35 @@ class Point {
   Point(MCFixed x, MCFixed y) : X(x), Y(y), Z(0) {}
   Point(MCFixed x, MCFixed y, MCFixed z) : X(x), Y(y), Z(z) {}
 
-  bool operator== (const Point& p) const {
+  bool operator==(const Point& p) const {
     return X == p.X && Y == p.Y && Z == p.Z;
   }
-  bool operator!= (const Point& p) const {
-    return !(p == *this);
-  }
-  bool operator< (const Point& p) const {
+  bool operator!=(const Point& p) const { return !(p == *this); }
+  bool operator<(const Point& p) const {
     return X < p.X || (X == p.X && Y < p.Y) ||
-      (X == p.X && Y == p.Y && Z < p.Z);
+           (X == p.X && Y == p.Y && Z < p.Z);
   }
 
-  Point operator+ (const Point& p) const {
+  Point operator+(const Point& p) const {
     return Point(X + p.X, Y + p.Y, Z + p.Z);
   }
-  Point operator+ (const Vector2D& v) const {
+  Point operator+(const Vector2D& v) const {
     return Point(X + v.X, Y + v.Y, Z);
   }
-  Point& operator+= (const Point& p) {
+  Point& operator+=(const Point& p) {
     *this = *this + p;
     return *this;
   }
-  Point operator- (const Point& p) const {
+  Point operator-(const Point& p) const {
     return Point(X - p.X, Y - p.Y, Z - p.Z);
   }
-  Point operator- (const Vector2D& v) const {
+  Point operator-(const Vector2D& v) const {
     return Point(X - v.X, Y - v.Y, Z);
   }
 
   double distance(Point p) const;
   double distance2(Point p) const;
-  Vector2D toVector2D() const {
-    return Vector2D(X.dbl(), Y.dbl());
-  }
+  Vector2D toVector2D() const { return Vector2D(X.dbl(), Y.dbl()); }
 
   static Point Intersect(Point p1, Point p2, Point p3, Point p4);
 
@@ -73,6 +69,6 @@ class Point {
   MCFixed Z;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_Point_H_
+#endif  // incl_Point_H_

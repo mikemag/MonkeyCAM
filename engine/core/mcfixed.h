@@ -17,9 +17,9 @@
 #ifndef incl_mcfixed_H_
 #define incl_mcfixed_H_
 
-#include <iostream>
-#include <cstdint>
 #include <boost/optional/optional.hpp>
+#include <cstdint>
+#include <iostream>
 
 namespace MonkeyCAM {
 
@@ -39,9 +39,7 @@ struct MCFixed {
     x.m_data = i;
     return x;
   }
-  static MCFixed fromInches(double i) {
-    return MCFixed(i * 2.54);
-  }
+  static MCFixed fromInches(double i) { return MCFixed(i * 2.54); }
 
   int64_t scaledInt() const { return m_data; }
   double dbl() const {
@@ -56,62 +54,48 @@ struct MCFixed {
     return "None";
   }
 
-  MCFixed operator+ (const MCFixed& mcf) const {
+  MCFixed operator+(const MCFixed& mcf) const {
     return MCFixed(m_data + mcf.m_data);
   }
-  MCFixed& operator+= (const MCFixed& mcf) {
+  MCFixed& operator+=(const MCFixed& mcf) {
     m_data += mcf.m_data;
     return *this;
   }
-  MCFixed operator- (const MCFixed& mcf) const {
+  MCFixed operator-(const MCFixed& mcf) const {
     return MCFixed(m_data - mcf.m_data);
   }
-  MCFixed& operator-= (const MCFixed& mcf) {
+  MCFixed& operator-=(const MCFixed& mcf) {
     m_data -= mcf.m_data;
     return *this;
   }
-  MCFixed operator- () const {
-    return MCFixed(-m_data);
-  }
-  MCFixed operator* (const MCFixed& mcf) const {
+  MCFixed operator-() const { return MCFixed(-m_data); }
+  MCFixed operator*(const MCFixed& mcf) const {
     return MCFixed(m_data * mcf.m_data / ScalingFactor);
   }
-  MCFixed& operator*= (const MCFixed& mcf) {
+  MCFixed& operator*=(const MCFixed& mcf) {
     m_data *= mcf.m_data;
     return *this;
   }
-  MCFixed operator/ (const MCFixed& mcf) const {
+  MCFixed operator/(const MCFixed& mcf) const {
     return MCFixed(m_data * ScalingFactor / mcf.m_data);
   }
-  bool operator== (const MCFixed& mcf) const {
-    return m_data == mcf.m_data;
-  }
-  bool operator!= (const MCFixed& mcf) const {
-    return m_data != mcf.m_data;
-  }
-  bool operator< (const MCFixed& mcf) const {
-    return m_data < mcf.m_data;
-  }
-  bool operator<= (const MCFixed& mcf) const {
-    return m_data <= mcf.m_data;
-  }
-  bool operator> (const MCFixed& mcf) const {
-    return m_data > mcf.m_data;
-  }
-  bool operator>= (const MCFixed& mcf) const {
-    return m_data >= mcf.m_data;
-  }
+  bool operator==(const MCFixed& mcf) const { return m_data == mcf.m_data; }
+  bool operator!=(const MCFixed& mcf) const { return m_data != mcf.m_data; }
+  bool operator<(const MCFixed& mcf) const { return m_data < mcf.m_data; }
+  bool operator<=(const MCFixed& mcf) const { return m_data <= mcf.m_data; }
+  bool operator>(const MCFixed& mcf) const { return m_data > mcf.m_data; }
+  bool operator>=(const MCFixed& mcf) const { return m_data >= mcf.m_data; }
 
-  friend std::ostream& operator << (std::ostream& outs, const MCFixed& mcf);
+  friend std::ostream& operator<<(std::ostream& outs, const MCFixed& mcf);
 
   constexpr static int64_t ScalingFactor = 10000;
   constexpr static int Precision = 4;
 
-private:
+ private:
   MCFixed(int64_t i) : m_data(i) {}
   int64_t m_data;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_mcfixed_H_
+#endif  // incl_mcfixed_H_

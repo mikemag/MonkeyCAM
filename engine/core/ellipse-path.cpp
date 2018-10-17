@@ -39,4 +39,4 @@ EllipsePath::EllipsePath(Point center, MCFixed width, MCFixed height,
                      center.Y - height * MCFixed(sin(endAngle))));
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

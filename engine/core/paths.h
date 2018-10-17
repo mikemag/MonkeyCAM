@@ -26,7 +26,7 @@ namespace MonkeyCAM {
 //------------------------------------------------------------------------------
 // Base path. Supports an ordered set of points.
 
-//typedef std::vector<Point> Path;
+// typedef std::vector<Point> Path;
 class Path : public std::vector<Point> {
  public:
   void push_back_path(const Path& path);
@@ -38,10 +38,7 @@ class Path : public std::vector<Point> {
 
 class ArcPath : public Path {
  public:
-  enum Direction {
-    Clockwise,
-    Counterclockwise
-  };
+  enum Direction { Clockwise, Counterclockwise };
 
   ArcPath(Point p1, Point p2, Point p3, Direction d = Counterclockwise);
 };
@@ -50,9 +47,9 @@ class ArcPath : public Path {
 // A path which is a half ellipse.
 
 class EllipsePath : public Path {
-public:
-  EllipsePath(Point center, MCFixed width, MCFixed height,
-              double startAngle, double endAngle);
+ public:
+  EllipsePath(Point center, MCFixed width, MCFixed height, double startAngle,
+              double endAngle);
 };
 
 //------------------------------------------------------------------------------
@@ -103,10 +100,8 @@ class ProfiledPath : public Path {
 
 class DebugAnnotationDesc {
  public:
-  DebugAnnotationDesc(const std::string name = "",
-                      const std::string desc = "",
-                      const std::string color = "black",
-                      bool dashed = false);
+  DebugAnnotationDesc(const std::string name = "", const std::string desc = "",
+                      const std::string color = "black", bool dashed = false);
 
   const std::string& name() const { return m_name; }
   const std::string& desc() const { return m_desc; }
@@ -150,9 +145,9 @@ class DebugPathSet {
  public:
   DebugPathSet(const std::string header);
 
-  void addPath(std::function<DebugPath ()> pathFunc);
+  void addPath(std::function<DebugPath()> pathFunc);
   void addDescription(const char* fmt, ...);
-  void addAnnotation(std::function<DebugAnnotation ()> annotationFunc);
+  void addAnnotation(std::function<DebugAnnotation()> annotationFunc);
 
   const std::string& header() const { return m_header; }
   const std::string& headerLink() const { return m_headerLink; }
@@ -186,8 +181,8 @@ double Area(const Path& path);
 void RemoveShortLines(Path& path, MCFixed minLength);
 Path SimpleLeadIn(const Path& path, MCFixed startHeight, MCFixed length);
 
-} // namespace PathUtils
+}  // namespace PathUtils
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_paths_H_
+#endif  // incl_paths_H_

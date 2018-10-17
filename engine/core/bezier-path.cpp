@@ -26,10 +26,8 @@ MCFixed bezier(double u, MCFixed x0, MCFixed x1, MCFixed x2, MCFixed x3) {
   double oneMinusU3 = pow(oneMinusU, 3.0);
   double u2 = pow(u, 2.0);
   double u3 = pow(u, 3.0);
-  return (x0.dbl() * oneMinusU3) +
-    (x1.dbl() * 3.0 * u * oneMinusU2) +
-    (x2.dbl() * 3.0 * u2 * oneMinusU) +
-    (x3.dbl() * u3);
+  return (x0.dbl() * oneMinusU3) + (x1.dbl() * 3.0 * u * oneMinusU2) +
+         (x2.dbl() * 3.0 * u2 * oneMinusU) + (x3.dbl() * u3);
 }
 
 BezierPath::BezierPath(Point p1, Point c1, Point c2, Point p2) {
@@ -46,4 +44,4 @@ BezierPath::BezierPath(Point p1, Point c1, Point c2, Point p2) {
   emplace_back(p2);
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

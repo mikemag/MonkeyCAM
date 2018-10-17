@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#include <cmath>
 #include "basic-math.h"
+#include <cmath>
 
 namespace MonkeyCAM {
 
 // -----------------------------------------------------------------------------
 // 2x2 matrix
 
-Matrix2x2::Matrix2x2(double a, double b,
-                     double c, double d) {
+Matrix2x2::Matrix2x2(double a, double b, double c, double d) {
   m_data[0][0] = a;
   m_data[0][1] = b;
   m_data[1][0] = c;
@@ -31,15 +30,14 @@ Matrix2x2::Matrix2x2(double a, double b,
 }
 
 double Matrix2x2::Determinant() {
-  return (m_data[0][0] * m_data[1][1]) - // ad
-    (m_data[0][1] * m_data[1][0]); // bc
+  return (m_data[0][0] * m_data[1][1]) -  // ad
+         (m_data[0][1] * m_data[1][0]);   // bc
 }
 
 // -----------------------------------------------------------------------------
 // 3x3 matrix
 
-Matrix3x3::Matrix3x3(double a, double b, double c,
-                     double d, double e, double f,
+Matrix3x3::Matrix3x3(double a, double b, double c, double d, double e, double f,
                      double g, double h, double i) {
   m_data[0][0] = a;
   m_data[0][1] = b;
@@ -53,36 +51,26 @@ Matrix3x3::Matrix3x3(double a, double b, double c,
 }
 
 double Matrix3x3::Determinant() {
-  return
-    (m_data[0][0] * m_data[1][1] * m_data[2][2]) - // aei
-    (m_data[0][0] * m_data[1][2] * m_data[2][1]) + // afh
-    (m_data[1][0] * m_data[2][1] * m_data[0][2]) - // dhc
-    (m_data[1][0] * m_data[0][1] * m_data[2][2]) + // dbi
-    (m_data[2][0] * m_data[0][1] * m_data[1][2]) - // gbf
-    (m_data[2][0] * m_data[1][1] * m_data[0][2]);  // gec
+  return (m_data[0][0] * m_data[1][1] * m_data[2][2]) -  // aei
+         (m_data[0][0] * m_data[1][2] * m_data[2][1]) +  // afh
+         (m_data[1][0] * m_data[2][1] * m_data[0][2]) -  // dhc
+         (m_data[1][0] * m_data[0][1] * m_data[2][2]) +  // dbi
+         (m_data[2][0] * m_data[0][1] * m_data[1][2]) -  // gbf
+         (m_data[2][0] * m_data[1][1] * m_data[0][2]);   // gec
 }
 
 // -----------------------------------------------------------------------------
 // A basic circle which can be constructed from three points
 
-Circle::Circle(double p1X, double p1Y,
-               double p2X, double p2Y,
-               double p3X, double p3Y) {
+Circle::Circle(double p1X, double p1Y, double p2X, double p2Y, double p3X,
+               double p3Y) {
   double p1x2y2 = pow(p1X, 2) + pow(p1Y, 2);
   double p2x2y2 = pow(p2X, 2) + pow(p2Y, 2);
   double p3x2y2 = pow(p3X, 2) + pow(p3Y, 2);
-  Matrix3x3 Ma { p1X, p1Y, 1,
-                 p2X, p2Y, 1,
-                 p3X, p3Y, 1 };
-  Matrix3x3 Md { p1x2y2, p1Y, 1,
-                 p2x2y2, p2Y, 1,
-                 p3x2y2, p3Y, 1 };
-  Matrix3x3 Me { p1x2y2, p1X, 1,
-                 p2x2y2, p2X, 1,
-                 p3x2y2, p3X, 1 };
-  Matrix3x3 Mf { p1x2y2, p1X, p1Y,
-                 p2x2y2, p2X, p2Y,
-                 p3x2y2, p3X, p3Y };
+  Matrix3x3 Ma{p1X, p1Y, 1, p2X, p2Y, 1, p3X, p3Y, 1};
+  Matrix3x3 Md{p1x2y2, p1Y, 1, p2x2y2, p2Y, 1, p3x2y2, p3Y, 1};
+  Matrix3x3 Me{p1x2y2, p1X, 1, p2x2y2, p2X, 1, p3x2y2, p3X, 1};
+  Matrix3x3 Mf{p1x2y2, p1X, p1Y, p2x2y2, p2X, p2Y, p3x2y2, p3X, p3Y};
   double a = Ma.Determinant();
   double d = Md.Determinant() * -1;
   double e = Me.Determinant();
@@ -92,4 +80,4 @@ Circle::Circle(double p1X, double p1Y,
   radius = sqrt(((pow(d, 2) + pow(e, 2)) / (4 * pow(a, 2))) - (f / a));
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

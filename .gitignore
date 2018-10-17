@@ -24,3 +24,5 @@ engine/install_manifest.txt
 CPackConfig.cmake
 CPackSourceConfig.cmake
 _CPack_Packages
+engine/.vscode
+engine/build

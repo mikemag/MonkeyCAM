@@ -17,10 +17,10 @@
 #ifndef incl_shapes_H_
 #define incl_shapes_H_
 
-#include <cassert>
-#include <string>
-#include <memory>
 #include <boost/optional/optional.hpp>
+#include <cassert>
+#include <memory>
+#include <string>
 
 #include "board-profile.h"
 #include "gcode-writer.h"
@@ -34,25 +34,20 @@ namespace MonkeyCAM {
 
 class BoardShape {
  public:
-  BoardShape(std::string name,
-             MCFixed noseLength, MCFixed effectiveEdge, MCFixed tailLength,
-             MCFixed sidecutRadius, MCFixed waistWidth, MCFixed taper,
-             std::unique_ptr<ShapeEndPart>& nosePart,
+  BoardShape(std::string name, MCFixed noseLength, MCFixed effectiveEdge,
+             MCFixed tailLength, MCFixed sidecutRadius, MCFixed waistWidth,
+             MCFixed taper, std::unique_ptr<ShapeEndPart>& nosePart,
              std::unique_ptr<ShapeEdgePart>& edgePart,
              std::unique_ptr<ShapeEndPart>& tailPart,
              boost::optional<MCFixed> refStance,
-             boost::optional<MCFixed> setback,
-             MCFixed bindingDist,
+             boost::optional<MCFixed> setback, MCFixed bindingDist,
              std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
              std::unique_ptr<InsertPack>& toeInserts,
              std::unique_ptr<InsertPack>& centerInserts,
-             std::unique_ptr<InsertPack>& heelInserts,
-             MCFixed spacerWidth,
+             std::unique_ptr<InsertPack>& heelInserts, MCFixed spacerWidth,
              boost::optional<MCFixed> noseEdgeExt,
-             boost::optional<MCFixed> tailEdgeExt,
-             bool isSplitboard
-            );
+             boost::optional<MCFixed> tailEdgeExt, bool isSplitboard);
   ~BoardShape();
   const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
@@ -73,8 +68,9 @@ class BoardShape {
   const Path& insertsPath() const { return m_insertsPath; }
   MCFixed noseLength() const { return m_noseLength; }
   MCFixed eeLength() const { return m_effectiveEdge; }
-  MCFixed overallLength() const { return m_noseLength + m_tailLength +
-      m_effectiveEdge; }
+  MCFixed overallLength() const {
+    return m_noseLength + m_tailLength + m_effectiveEdge;
+  }
   MCFixed maxWidth() const {
     return std::max(std::max(m_noseWidth, m_waistWidth), m_tailWidth);
   }
@@ -145,6 +141,6 @@ class BoardShape {
   std::vector<DebugPathSet*> m_debugPathSets;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_shapes_H_
+#endif  // incl_shapes_H_

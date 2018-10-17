@@ -16,8 +16,8 @@
 
 #include "config.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "activity-emitter.h"
 using ae = MonkeyCAM::ActivityEmitter;
@@ -28,12 +28,8 @@ using std::string;
 
 namespace MonkeyCAM {
 
-Config::Config(const string configName,
-               const string fileName
-              ) :
-    m_configName(configName),
-    m_fileName(fileName)
-{
+Config::Config(const string configName, const string fileName)
+    : m_configName(configName), m_fileName(fileName) {
   if (m_fileName.empty()) {
     m_stack.push({"", m_rootJson});
     return;
@@ -57,18 +53,14 @@ Config::Config(const string configName,
         remainingOffset = offset;
       }
     }
-    printf("Parse error in %s on line %d character %lu: %s\n",
-           fileName.c_str(), lineNumber, remainingOffset, msg.c_str());
-    ae::emitter().write({
-        {"error", {
-            {"kind", "Parse Error"},
-            {"configName", configName},
-            {"lineNumber", lineNumber},
-            {"offset", remainingOffset},
-            {"message", msg}
-          }
-        }
-      });
+    printf("Parse error in %s on line %d character %lu: %s\n", fileName.c_str(),
+           lineNumber, remainingOffset, msg.c_str());
+    ae::emitter().write({{"error",
+                          {{"kind", "Parse Error"},
+                           {"configName", configName},
+                           {"lineNumber", lineNumber},
+                           {"offset", remainingOffset},
+                           {"message", msg}}}});
     exit(1);
   }
 }
@@ -76,15 +68,15 @@ Config::Config(const string configName,
 /* static */ void Config::validateIsArray(const json& j) {
   if (!j.is_array()) {
     throw json::type_error::create(
-      302, "type must be array, but is " + string(j.type_name()));
+        302, "type must be array, but is " + string(j.type_name()));
   }
 }
 
 /* static */ void Config::validateIsObject(const json& j) {
   if (!j.is_object()) {
     throw json::type_error::create(
-      302, "type must be object, but is " + string(j.type_name()));
+        302, "type must be object, but is " + string(j.type_name()));
   }
 }
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM

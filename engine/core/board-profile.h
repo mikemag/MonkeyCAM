@@ -32,19 +32,16 @@ class BoardProfile {
   // board's effective edge, as measured from the center of the board.
   struct End {
     double taperStart;
-    double pullStart; // Bezier control point for the start.
-    double pullEnd; // Bezier control point for the end.
+    double pullStart;  // Bezier control point for the start.
+    double pullEnd;    // Bezier control point for the end.
     double taperEnd;
   };
 
   BoardProfile(MCFixed noseThickness, MCFixed centerThickness,
-               MCFixed tailThickness, End nose, End tail,
-               BoardShape& shape);
+               MCFixed tailThickness, End nose, End tail, BoardShape& shape);
   const Path& path() const { return m_path; }
 
-  DebugPathSet& debugPathSet() {
-    return m_debugPathSet;
-  }
+  DebugPathSet& debugPathSet() { return m_debugPathSet; }
 
  private:
   MCFixed m_noseThickness;
@@ -57,6 +54,6 @@ class BoardProfile {
   DebugPathSet m_debugPathSet;
 };
 
-} // namespace MonkeyCAM
+}  // namespace MonkeyCAM
 
-#endif // incl_board_profile_H_
+#endif  // incl_board_profile_H_
