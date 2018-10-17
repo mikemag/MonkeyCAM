@@ -26,7 +26,8 @@ namespace MonkeyCAM {
 
 class ShapeEndPart {
  public:
-  virtual const Path& generate(Point endPoint, Point transitionPoint) = 0;
+  virtual const Path &generate(Point endPoint, Point transitionPoint) = 0;
+  virtual ~ShapeEndPart() = default;
 
  protected:
   Path m_path;
@@ -35,11 +36,9 @@ class ShapeEndPart {
 class BasicBezier : public ShapeEndPart {
  public:
   BasicBezier(double endHandle, double transitionHandle)
-      : m_endHandle(endHandle)
-      , m_transitionHandle(transitionHandle)
-    {}
+      : m_endHandle(endHandle), m_transitionHandle(transitionHandle) {}
 
-  const Path& generate(Point endPoint, Point transitionPoint);
+  const Path &generate(Point endPoint, Point transitionPoint);
 
  private:
   double m_endHandle;
@@ -49,12 +48,11 @@ class BasicBezier : public ShapeEndPart {
 class FlatBezier : public ShapeEndPart {
  public:
   FlatBezier(double flatWidth, double endHandle, double transitionHandle)
-      : m_flatWidth(flatWidth)
-      , m_endHandle(endHandle)
-      , m_transitionHandle(transitionHandle)
-    {}
+      : m_flatWidth(flatWidth),
+        m_endHandle(endHandle),
+        m_transitionHandle(transitionHandle) {}
 
-  const Path& generate(Point endPoint, Point transitionPoint);
+  const Path &generate(Point endPoint, Point transitionPoint);
 
  private:
   double m_flatWidth;
@@ -66,8 +64,10 @@ class FlatBezier : public ShapeEndPart {
 
 class ShapeEdgePart {
  public:
-  virtual const Path& generate(Point nosePoint, Point waistPoint,
+  virtual const Path &generate(Point nosePoint,
+                               Point waistPoint,
                                Point tailPoint) = 0;
+  virtual ~ShapeEdgePart() = default;
 
  protected:
   Path m_path;
@@ -76,7 +76,7 @@ class ShapeEdgePart {
 class BasicArc : public ShapeEdgePart {
  public:
   BasicArc() {}
-  const Path& generate(Point nosePoint, Point waistPoint, Point tailPoint);
+  const Path &generate(Point nosePoint, Point waistPoint, Point tailPoint);
 };
 
 } // namespace MonkeyCAM
