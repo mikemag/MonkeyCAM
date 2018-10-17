@@ -22,11 +22,11 @@ namespace MonkeyCAM {
 
 /* static */ ActivityEmitter* ActivityEmitter::m_emitter = NULL;
 
-/* static */ void ActivityEmitter::initialize(boost::optional<int> fd) {
+/* static */ void ActivityEmitter::initialize(std::optional<int> fd) {
   m_emitter = new ActivityEmitter(fd);
 }
 
-ActivityEmitter::ActivityEmitter(boost::optional<int> fd)
+ActivityEmitter::ActivityEmitter(std::optional<int> fd)
     : m_jsonOutputFD(-1), m_jsonOutputFile(NULL) {
   if (fd) {
     m_jsonOutputFD = *fd;

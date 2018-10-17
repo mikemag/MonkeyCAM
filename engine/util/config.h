@@ -17,7 +17,7 @@
 #ifndef incl_config_H_
 #define incl_config_H_
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 #include <stack>
 #include "json.hpp"
 using json = nlohmann::json;
@@ -69,12 +69,12 @@ class Config {
   }
 
   template <typename T>
-  boost::optional<T> getOptional(
+  std::optional<T> getOptional(
       const char* key, std::function<void(const json&)> validator = NULL) {
     try {
-      return boost::optional<T>(getCommon<T>(key, validator));
+      return std::optional<T>(getCommon<T>(key, validator));
     } catch (json::out_of_range& e) {
-      return boost::optional<T>();
+      return std::nullopt;
     }
   }
 

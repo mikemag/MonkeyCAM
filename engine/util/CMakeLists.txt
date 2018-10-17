@@ -1,11 +1,9 @@
 # util
 
 if(UNIX)
-  include_directories(/opt/local/include) # For boost
-  set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
+  set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++17")
 elseif(MINGW)
-  include_directories(../../boost_1_64_0)
-  set(CMAKE_CXX_FLAGS "-g -Werror -std=gnu++11") # NB Boost warnings with GCC
+  set(CMAKE_CXX_FLAGS "-g -Werror -std=gnu++17")
 endif(UNIX)
 
 set(MONKEYCAM_UTIL_SRCS

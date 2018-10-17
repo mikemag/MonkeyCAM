@@ -17,7 +17,7 @@
 #ifndef incl_activity_emitter_H_
 #define incl_activity_emitter_H_
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -25,7 +25,7 @@ namespace MonkeyCAM {
 
 class ActivityEmitter {
  public:
-  static void initialize(boost::optional<int> fd);
+  static void initialize(std::optional<int> fd);
   static ActivityEmitter& emitter() { return *m_emitter; }
 
   void write(const json& obj);
@@ -33,7 +33,7 @@ class ActivityEmitter {
   void fatal(const char* fmt, ...);
 
  private:
-  ActivityEmitter(boost::optional<int> fd);
+  ActivityEmitter(std::optional<int> fd);
 
   static ActivityEmitter* m_emitter;
 

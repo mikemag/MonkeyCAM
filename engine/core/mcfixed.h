@@ -17,9 +17,9 @@
 #ifndef incl_mcfixed_H_
 #define incl_mcfixed_H_
 
-#include <boost/optional/optional.hpp>
 #include <cstdint>
 #include <iostream>
+#include <optional>
 
 namespace MonkeyCAM {
 
@@ -47,7 +47,7 @@ struct MCFixed {
   }
   std::string str() const;
   std::string inchesStr() const;
-  static std::string strWithSuffix(const boost::optional<MCFixed>& mcf) {
+  static std::string strWithSuffix(const std::optional<MCFixed>& mcf) {
     if (mcf) {
       return (*mcf).str() + "cm";
     }

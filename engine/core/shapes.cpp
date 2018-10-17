@@ -15,7 +15,6 @@
  */
 
 #include <algorithm>
-#include <boost/range/adaptor/reversed.hpp>
 #include <cassert>
 #include <cmath>
 #include <stack>
@@ -37,16 +36,15 @@ BoardShape::BoardShape(string name, MCFixed noseLength, MCFixed effectiveEdge,
                        std::unique_ptr<ShapeEndPart>& nosePart,
                        std::unique_ptr<ShapeEdgePart>& edgePart,
                        std::unique_ptr<ShapeEndPart>& tailPart,
-                       boost::optional<MCFixed> refStance,
-                       boost::optional<MCFixed> setback, MCFixed bindingDist,
+                       std::optional<MCFixed> refStance,
+                       std::optional<MCFixed> setback, MCFixed bindingDist,
                        std::unique_ptr<InsertPack>& nosePack,
                        std::unique_ptr<InsertPack>& tailPack,
                        std::unique_ptr<InsertPack>& toeInserts,
                        std::unique_ptr<InsertPack>& centerInserts,
                        std::unique_ptr<InsertPack>& heelInserts,
-                       MCFixed spacerWidth,
-                       boost::optional<MCFixed> noseEdgeExt,
-                       boost::optional<MCFixed> tailEdgeExt, bool isSplitboard)
+                       MCFixed spacerWidth, std::optional<MCFixed> noseEdgeExt,
+                       std::optional<MCFixed> tailEdgeExt, bool isSplitboard)
     : m_name(name),
       m_noseLength(noseLength),
       m_effectiveEdge(effectiveEdge),

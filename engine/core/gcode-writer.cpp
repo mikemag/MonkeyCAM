@@ -16,7 +16,6 @@
 
 #include <time.h>
 #include <algorithm>
-#include <boost/range/adaptor/reversed.hpp>
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -281,7 +280,8 @@ void GCodeWriter::emitPath(Path& path, MCFixed depth) {
 void GCodeWriter::emitPathSets(vector<vector<Path>>& pathSets, bool rapidMove,
                                MCFixed rapidHeight, MCFixed leadInLength,
                                int transitionSpeed) {
-  for (auto& pathSet : boost::adaptors::reverse(pathSets)) {
+  for (auto rit = std::rbegin(pathSets); rit != std::rend(pathSets); ++rit) {
+    auto& pathSet = *rit;
     for (auto& path : pathSet) {
       if (rapidMove) {
         rapidMove = false;

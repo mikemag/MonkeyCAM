@@ -17,7 +17,6 @@
 #include "paths.h"
 #include <stdarg.h>
 #include <algorithm>
-#include <boost/range/adaptor/reversed.hpp>
 #include <cassert>
 #include "clipper.hpp"
 
@@ -143,7 +142,9 @@ bool segmentCrossesProfilePoint(Point p1, Point p2, const Path& profilePath,
     // Right to left. The rare special case of p1.X == p2.X falls in
     // here, too. That's okay, since we'll get the proper result of false
     // for that no matter how we do this.
-    for (auto& p : boost::adaptors::reverse(profilePath)) {
+    for (auto rit = std::rbegin(profilePath); rit != std::rend(profilePath);
+         ++rit) {
+      auto& p = *rit;
       if ((p2.X < p.X) && (p.X < p1.X)) {
         crossingPoint = p;
         return true;

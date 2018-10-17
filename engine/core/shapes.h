@@ -17,9 +17,9 @@
 #ifndef incl_shapes_H_
 #define incl_shapes_H_
 
-#include <boost/optional/optional.hpp>
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "board-profile.h"
@@ -39,15 +39,14 @@ class BoardShape {
              MCFixed taper, std::unique_ptr<ShapeEndPart>& nosePart,
              std::unique_ptr<ShapeEdgePart>& edgePart,
              std::unique_ptr<ShapeEndPart>& tailPart,
-             boost::optional<MCFixed> refStance,
-             boost::optional<MCFixed> setback, MCFixed bindingDist,
-             std::unique_ptr<InsertPack>& nosePack,
+             std::optional<MCFixed> refStance, std::optional<MCFixed> setback,
+             MCFixed bindingDist, std::unique_ptr<InsertPack>& nosePack,
              std::unique_ptr<InsertPack>& tailPack,
              std::unique_ptr<InsertPack>& toeInserts,
              std::unique_ptr<InsertPack>& centerInserts,
              std::unique_ptr<InsertPack>& heelInserts, MCFixed spacerWidth,
-             boost::optional<MCFixed> noseEdgeExt,
-             boost::optional<MCFixed> tailEdgeExt, bool isSplitboard);
+             std::optional<MCFixed> noseEdgeExt,
+             std::optional<MCFixed> tailEdgeExt, bool isSplitboard);
   ~BoardShape();
   const Path& buildOverallPath(const Machine& machine);
   const Path& buildCorePath(const Machine& machine);
@@ -114,8 +113,8 @@ class BoardShape {
   std::unique_ptr<ShapeEdgePart> m_edgePart;
   std::unique_ptr<ShapeEndPart> m_tailPart;
 
-  boost::optional<MCFixed> m_setback;
-  boost::optional<MCFixed> m_refStance;
+  std::optional<MCFixed> m_setback;
+  std::optional<MCFixed> m_refStance;
   MCFixed m_bindingDist;
   std::unique_ptr<InsertPack> m_noseInserts;
   std::unique_ptr<InsertPack> m_tailInserts;
@@ -126,8 +125,8 @@ class BoardShape {
 
   MCFixed m_spacerWidth;
 
-  boost::optional<MCFixed> m_noseEdgeExt;
-  boost::optional<MCFixed> m_tailEdgeExt;
+  std::optional<MCFixed> m_noseEdgeExt;
+  std::optional<MCFixed> m_tailEdgeExt;
 
   bool m_isSplitboard;
 

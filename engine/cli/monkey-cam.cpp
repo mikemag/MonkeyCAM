@@ -15,15 +15,14 @@
  */
 
 #include <sys/stat.h>
-#include <boost/optional/optional.hpp>
 #include <cassert>
 #include <iostream>
+#include <optional>
 #include <set>
 #include <vector>
 
 #include "MonkeyCAMConfig.h"
 #include "activity-emitter.h"
-#include "gcode-writer.h"
 #include "machine.h"
 #include "overview-writer.h"
 #include "paths.h"
@@ -124,15 +123,15 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
     tail = loadEndPart(boardConfig);
   }
 
-  boost::optional<MCFixed> setback(
+  std::optional<MCFixed> setback(
       boardConfig.getOptional<double>("stance setback"));
-  boost::optional<MCFixed> noseEdgeExt(
+  std::optional<MCFixed> noseEdgeExt(
       boardConfig.getOptional<double>("nose edge extension"));
-  boost::optional<MCFixed> tailEdgeExt(
+  std::optional<MCFixed> tailEdgeExt(
       boardConfig.getOptional<double>("tail edge extension"));
 
   // Inserts in board def file (retained for backwards compatibility)
-  boost::optional<MCFixed> refStance(
+  std::optional<MCFixed> refStance(
       boardConfig.getOptional<double>("reference stance width"));
 
   std::unique_ptr<InsertPack> nosePack;
@@ -382,7 +381,7 @@ int main(int argc, char* argv[]) {
       "PARTICULAR PURPOSE.\n");
   printf("\n");
 
-  boost::optional<int> jsonOutputFD;
+  std::optional<int> jsonOutputFD;
   string boardDef = "";
   string machineDef = "";
   string bindingDef = "";

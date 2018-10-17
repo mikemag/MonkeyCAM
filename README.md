@@ -25,8 +25,7 @@ More information about ski and snowboard construction can be found at
 
 ## Documentation
 
-See the [MonkeyCAM v4.0 User’s Guide](
-https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
+See the [MonkeyCAM v4.0 User’s Guide](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
 for an overview of how to use and configure MonkeyCAM.
 
 ## License
@@ -50,24 +49,22 @@ is available at MonkeyCAM.org.**
 
 ## Features and Current Status
 
-
-
 The MonkeyCAM engine is currently a command-line program only, which is made available with a very basic UI at [MonkeyCAM.org](https://www.monkeycam.org). The program takes
 configuration files to describe the ski or snowboard shape via a small
 set of parameters and generates the following G-code programs plus a
 HTML overview of the board:
 
-* Base cutout
-* Core:
-  * Guide holes to allow the core to be removed and flipped between programs
-  * Alignment marks to transfer key design points to the bottom of the core
-  * Edge relief to leave room for steel edges
-  * Insert holes for standard snowboard inserts (T-nuts) in a variety of patterns
-  * Top profile to impart the taper to the core
-  * Cutout, allowing for sidewall overhang and nose/tail spacers
-* Nose and tail spacers which match the core
-* Edge trenches to enable inlay of different edge wood and/or sidewall
-material along the effective edge of the core
+- Base cutout
+- Core:
+  - Guide holes to allow the core to be removed and flipped between programs
+  - Alignment marks to transfer key design points to the bottom of the core
+  - Edge relief to leave room for steel edges
+  - Insert holes for standard snowboard inserts (T-nuts) in a variety of patterns
+  - Top profile to impart the taper to the core
+  - Cutout, allowing for sidewall overhang and nose/tail spacers
+- Nose and tail spacers which match the core
+- Edge trenches to enable inlay of different edge wood and/or sidewall
+  material along the effective edge of the core
 
 The G-code programs emitted at this time have been tested on my CNC
 machine with a very old DeskCNC controller and work correctly. Each
@@ -90,41 +87,40 @@ has been discarded.
 
 My plan for work includes, roughly in order:
 
-* Engine
-  * Target more G-code controllers with different formats and requirements.
-  * More options for effective edge, nose, and tail. (MonkeyCAM v3, for
+- Engine
+  - Target more G-code controllers with different formats and requirements.
+  - More options for effective edge, nose, and tail. (MonkeyCAM v3, for
     instance, had 6 tail options.)
-  * Port the code to soften the transition between edge and
+  - Port the code to soften the transition between edge and
     nose/tail. (You can work around this with a sandblock and two min of
     your time for now.)
-  * Read the overall board shape from other CAD programs (DXF at least).
-  * Mold design and program to cut molds.
-  * Roughing passes for the core profile.
-  * Output the overall shape, insert locations, etc. to PDF/DXF for
+  - Read the overall board shape from other CAD programs (DXF at least).
+  - Mold design and program to cut molds.
+  - Roughing passes for the core profile.
+  - Output the overall shape, insert locations, etc. to PDF/DXF for
     printing or use in other CAD programs.
-  * Adapt for other kinds of 'boards': kite boards, skate boards, etc.
-* Web App
-  * Improve input UI, remove need to use JSON.
-  * Improve the results UI, remove the need for the overview HTML currently generated.
-  * Worker reliability and scaling: retry, allow multiple workers again.
+  - Adapt for other kinds of 'boards': kite boards, skate boards, etc.
+- Web App
+  - Improve input UI, remove need to use JSON.
+  - Improve the results UI, remove the need for the overview HTML currently generated.
+  - Worker reliability and scaling: retry, allow multiple workers again.
 
 ## Dependencies
 
 MonkeyCAM engine currently depends on the following packages:
 
-* Mac build: Mac OSX 10.11.6 El Capitan with the system compiler, Apple LLVM version 8.0.0 (clang-800.0.42.1).
-* Ubuntu build: ubuntu 16.04 LTS with the default compiler, gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609.
-* Windows build: Windows 10.0, MinGW with GCC 4.9.3-1.
-* CMake 3.5.1. See http://www.cmake.org/ or install via something like Ports.
-* Boost 1.58.0. See http://www.boost.org/ or install via something like Ports.
-* Clipper 5.1.6. See
+- Mac build: Mac OSX 10.11.6 El Capitan with the system compiler, Apple LLVM version 8.0.0 (clang-800.0.42.1).
+- Ubuntu build: ubuntu 16.04 LTS with the default compiler, gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609.
+- Windows build: Windows 10.0, MinGW with GCC 4.9.3-1.
+- CMake 3.5.1. See http://www.cmake.org/ or install via something like Ports.
+- Clipper 5.1.6. See
   http://sourceforge.net/projects/polyclipping/. The C++ version is copied in the clipper directory.
 
 The web app currently depends on the following packages:
 
-* Node.js, v6.11.1 for the cloud functions, and v8.2.1 for the client and worker.
-* See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
-* The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
+- Node.js, v6.11.1 for the cloud functions, and v8.2.1 for the client and worker.
+- See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
+- The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
 
 ## Contributing
 
@@ -134,5 +130,5 @@ then let's chat. Open up an issue with what you want to work on and
 we'll work out the details there, or fork the repo, make some changes
 and put up a pull request!
 
-* [Design Overview](https://github.com/mikemag/MonkeyCAM/wiki/Design-Overview): details on the internal design of MonkeyCAM and how it creates shapes and G-Code programs.
-* [Current issues and enhancements](https://github.com/mikemag/MonkeyCAM/issues)
+- [Design Overview](https://github.com/mikemag/MonkeyCAM/wiki/Design-Overview): details on the internal design of MonkeyCAM and how it creates shapes and G-Code programs.
+- [Current issues and enhancements](https://github.com/mikemag/MonkeyCAM/issues)
