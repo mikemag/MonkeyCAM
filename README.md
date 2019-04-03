@@ -109,7 +109,7 @@ My plan for work includes, roughly in order:
 
 MonkeyCAM engine currently depends on the following packages:
 
-- Mac build: Mac OSX 10.11.6 El Capitan with the system compiler, Apple LLVM version 8.0.0 (clang-800.0.42.1).
+- Mac build: Mac OSX 10.14.4 Mojave with the system compiler, Apple LLVM version 10.0.1 (clang-1001.0.46.3).
 - Ubuntu build: ubuntu 16.04 LTS with the default compiler, gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609.
 - Windows build: Windows 10.0, MinGW with GCC 4.9.3-1.
 - CMake 3.5.1. See http://www.cmake.org/ or install via something like Ports.
