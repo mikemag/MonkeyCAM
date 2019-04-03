@@ -84,7 +84,7 @@ BoardProfile::BoardProfile(MCFixed noseThickness, MCFixed centerThickness,
   MCFixed insertsY = m_centerThickness * -5;
   auto pointMarker = [&](DebugAnnotation& a, Point p, double len) {
     auto ls = (len < 0 ? -0.75 : 0.75) / 2;
-    a.addSvgFormat(R"(<path d="M%f %f l%f 0"/>)", p.X.dbl() + ls, p.Y.dbl(),
+    a.addSvgFormat(R"(<path d="M%f %f l%f 0"></path>)", p.X.dbl() + ls, p.Y.dbl(),
                    len);
     a.addSvgCircle(Point(p.X, -p.Y), 0.75);
     const char* anchor = len < 0 ? "end" : "start";
@@ -123,7 +123,7 @@ BoardProfile::BoardProfile(MCFixed noseThickness, MCFixed centerThickness,
         DebugAnnotationDesc{"Nose, centers, tail", "", "blue", true}};
     auto guideWidth = (shape.minWidth() / 2 - 2).dbl();
     auto wMarker = [&](MCFixed x, double width) {
-      a.addSvgFormat(R"(<path d="M%f %f L%f %f"/>)", x.dbl(), -width, x.dbl(),
+      a.addSvgFormat(R"(<path d="M%f %f L%f %f"></path>)", x.dbl(), -width, x.dbl(),
                      width);
     };
     wMarker(shape.noseLength(), guideWidth);

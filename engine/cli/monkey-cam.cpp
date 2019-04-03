@@ -243,11 +243,11 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
                   R"(This data is provided on an "AS IS" BASIS WITHOUT )"
                   "WARRANTIES OR CONDITIONS OF ANY KIND, either express or "
                   "implied. You should inspect this very carefully and "
-                  "recgonize that these overviews are not 100% accurate "
+                  "recognize that these overviews are not 100% accurate "
                   "representations of the generated G-Code programs. "
                   "YOU ARE RESPONSIBLE FOR ENSURING THOSE PROGRAMS WILL NOT "
                   "DAMAGE YOUR MACHINE OR MATERIALS.</div>");
-  overview.addFormatted(R"(<h1 style="margin-bottom:0px;">%s</h1>)",
+  overview.addFormatted(R"(<h1 style="margin-bottom:0;">%s</h1>)",
                         shape.name().c_str());
   time_t rawtime;
   time(&rawtime);
@@ -294,7 +294,7 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
                           pathSet->headerLink().c_str(),
                           pathSet->header().c_str());
   }
-  overview.addRaw("<li><a href=\"#Configuration\"</a>Configuration</li>");
+  overview.addRaw("<li><a href=\"#Configuration\">Configuration</a></li>");
   overview.addRaw("</ul>");
 
   int dw = std::ceil(shape.overallLength().dbl());
@@ -310,7 +310,7 @@ void generateOverview(MonkeyCAM::OverviewWriter& overview,
     auto descFormatter = [&](const MonkeyCAM::DebugAnnotationDesc& desc) {
       if (desc.name() != "" && seenDescs.find(desc.name()) == seenDescs.end()) {
         overview.addFormatted(
-            R"(<dt id="pathname">%s (<span style="color:%s">%s</span>)</dt><dd>%s</dd>)",
+            R"(<dt class="pathname">%s (<span style="color:%s">%s</span>)</dt><dd>%s</dd>)",
             desc.name().c_str(), desc.color().c_str(), desc.color().c_str(),
             desc.desc().c_str());
         seenDescs.insert(desc.name());

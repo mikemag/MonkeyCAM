@@ -2,7 +2,7 @@
 
 MonkeyCAM uses three configuration files, one to describe the
 board/ski, one to describe the binding inserts (optional, no inserts
-if ommitted), and one to describe the details of how to machine the
+if omitted), and one to describe the details of how to machine the
 board. The board definition file describes the shape of the board, and
 the thickness and taper of the core. The binding definition file
 describes the placement of inserts. The machine and tool definition
