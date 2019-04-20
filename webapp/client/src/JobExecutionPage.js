@@ -13,16 +13,19 @@ import TimeAgo from 'react-timeago';
 import { BadJobNotice } from './CommonComponents';
 
 async function getJobStatus(jobId) {
-  let res = await fetch('http://localhost:3000/getJobStatus', {
-    accept: 'application/json',
-    method: 'POST',
-    body: JSON.stringify({
-      jobid: jobId
-    }),
-    headers: {
-      'Content-Type': 'application/json'
+  let res = await fetch(
+    'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobStatus',
+    {
+      accept: 'application/json',
+      method: 'POST',
+      body: JSON.stringify({
+        jobid: jobId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }
-  });
+  );
   checkStatus(res);
   return res.json();
 }
