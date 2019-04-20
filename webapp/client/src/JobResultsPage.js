@@ -112,8 +112,8 @@ class JobErrorDetails extends Component {
       return (
         <div>
           {err.kind}
-          {err.configName ? ' in ' + err.configName : null}
-          : {err.path || err.key ? "'" : null}
+          {err.configName ? ' in ' + err.configName : null}:{' '}
+          {err.path || err.key ? "'" : null}
           {err.path ? err.path + '.' : null}
           {err.key}
           {err.path || err.key ? "'" : null}
@@ -153,37 +153,31 @@ class JobResultsPage extends Component {
   }
 
   async getJobBasicResults(jobId) {
-    let res = await fetch(
-      'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobStatus',
-      {
-        accept: 'application/json',
-        method: 'POST',
-        body: JSON.stringify({
-          jobid: jobId
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    let res = await fetch('http://localhost:3000/getJobStatus', {
+      accept: 'application/json',
+      method: 'POST',
+      body: JSON.stringify({
+        jobid: jobId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    );
+    });
     res = await checkStatus(res);
     return res.json();
   }
 
   async getJobFullResults(jobId) {
-    let res = await fetch(
-      'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobFullResults',
-      {
-        accept: 'application/json',
-        method: 'POST',
-        body: JSON.stringify({
-          jobid: jobId
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    let res = await fetch('http://localhost:3000/getJobFullResults', {
+      accept: 'application/json',
+      method: 'POST',
+      body: JSON.stringify({
+        jobid: jobId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    );
+    });
     res = await checkStatus(res);
     return res.json();
   }

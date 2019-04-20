@@ -1,6 +1,6 @@
 {
   "name": "monkeycam-cloud-functions",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "license": "Apache-2.0",
   "author": "Mike Magruder",
@@ -9,25 +9,17 @@
     "url": "https://github.com/mikemag/MonkeyCAM.git"
   },
   "engines": {
-    "node": "=6.11.1"
+    "node": "=8.15.0"
   },
   "scripts": {
-    "build-for-test": "rm -rf test && babel . --out-dir test --copy-files --ignore node_modules,deploy",
-    "build-for-deploy": "rm -rf deploy && babel . --out-dir deploy --copy-files --ignore 'node_modules,testhost.js,test'",
-    "start-testhost": "node test/testhost.js"
+    "start-testhost": "node testhost.js"
   },
   "dependencies": {
-    "@google-cloud/datastore": "^1.0.4",
-    "@google-cloud/pubsub": "^0.14.3",
+    "@google-cloud/datastore": "^3.1.2",
+    "@google-cloud/pubsub": "^0.28.1",
     "babel-runtime": "^6.26.0",
-    "body-parser": "^1.18.2",
-    "cors": "^2.8.4",
-    "express": "~4.15.2"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.0"
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4"
   }
 }
