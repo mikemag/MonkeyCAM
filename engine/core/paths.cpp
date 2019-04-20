@@ -261,13 +261,13 @@ void DebugAnnotation::addSvgCircle(Point p, MCFixed diameter) {
   snprintf(buff, sizeof(buff),
            R"(<circle cx="%f" cy="%f" r="%f" fill="%s" )"
            R"(fill-opacity="0.25" stroke-width="0.01" )"
-           R"(/>)",
+           R"(></circle>)",
            p.X.dbl(), -p.Y.dbl(), (diameter / 2).dbl(), m_desc.color().c_str());
   m_svg += buff;
   snprintf(buff, sizeof(buff),
            R"(<circle cx="%f" cy="%f" r="0.05" fill="%s" )"
            R"(fill-opacity="0.25" stroke-width="0.01" )"
-           R"(/>)",
+           R"(></circle>)",
            p.X.dbl(), -p.Y.dbl(), m_desc.color().c_str());
   m_svg += buff;
 }

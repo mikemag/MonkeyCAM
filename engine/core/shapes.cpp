@@ -220,7 +220,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
         "width, and waist width.",
         "blue", true}};
     a.addSvgFormat(
-        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
+        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"></path>)",
         noseTranX.dbl(), (-noseHalfWidth + 1).dbl(), noseTranX.dbl(),
         (noseHalfWidth - 1).dbl(), eeCenterX.dbl(), (-waistHalfWidth + 1).dbl(),
         eeCenterX.dbl(), (waistHalfWidth - 1).dbl(), tailTranX.dbl(),
@@ -233,7 +233,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
         "orange", true}};
     MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
     a.addSvgFormat(
-        R"(<path d="M%f %f L%f %f"/>)", trueCenterX.dbl(),
+        R"(<path d="M%f %f L%f %f"></path>)", trueCenterX.dbl(),
         (-waistHalfWidth + 5).dbl(), trueCenterX.dbl(),
         (waistHalfWidth - 5).dbl());
     return a;
@@ -241,7 +241,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
   dps.addAnnotation([&] {
     auto a = DebugAnnotation{DebugAnnotationDesc{
         "Inserts",
-        "All inserts. The larger circle is the outter rim, the smaller "
+        "All inserts. The larger circle is the outer rim, the smaller "
         "circle is the shaft hole.",
         "blue"}};
     for (auto& p : m_insertsPath) {
@@ -265,7 +265,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       a.addSvgCircle(Point(eeCenterX - (*m_refStance / 2) + setback, 0), 0.5);
       a.addSvgCircle(Point(eeCenterX + (*m_refStance / 2) + setback, 0), 0.5);
       a.addSvgFormat(
-          R"(<path d="M%f %f L%f %f"/>)", (eeCenterX + setback).dbl(), -4.0,
+          R"(<path d="M%f %f L%f %f"></path>)", (eeCenterX + setback).dbl(), -4.0,
           (eeCenterX + setback).dbl(), 4.0);
       return a;
     });
@@ -286,7 +286,7 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       a.addSvgCircle(Point(eeCenterX - (m_bindingDist / 2) + setback, 0), 0.5);
       a.addSvgCircle(Point(eeCenterX + (m_bindingDist / 2) + setback, 0), 0.5);
       a.addSvgFormat(
-          R"(<path d="M%f %f L%f %f"/>)", (eeCenterX + setback).dbl(), -4.0,
+          R"(<path d="M%f %f L%f %f"></path>)", (eeCenterX + setback).dbl(), -4.0,
           (eeCenterX + setback).dbl(), 4.0);
       return a;
     });
@@ -479,7 +479,7 @@ const Path& BoardShape::buildCorePath(const Machine& machine) {
     MCFixed waistHalfWidth = m_waistWidth / 2;
     MCFixed tailHalfWidth = m_tailWidth / 2;
     a.addSvgFormat(
-        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"/>)",
+        R"(<path d="M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f M%f %f L%f %f"></path>)",
         noseTranX.dbl(), (-noseHalfWidth + 4).dbl(), noseTranX.dbl(),
         (noseHalfWidth - 4).dbl(), eeCenterX.dbl(), (-waistHalfWidth + 1).dbl(),
         eeCenterX.dbl(), (waistHalfWidth - 1).dbl(), trueCenterX.dbl(),

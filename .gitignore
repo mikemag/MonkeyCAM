@@ -26,3 +26,7 @@ CPackSourceConfig.cmake
 _CPack_Packages
 engine/.vscode
 engine/build
+
+# CLion IDE config file
+.idea/
+

@@ -29,19 +29,19 @@ OverviewWriter::OverviewWriter(std::string filename, std::string name)
     : m_outputStream(filename) {
   assert(m_outputStream.is_open());
   m_outputStream << "<!DOCTYPE html>" << std::endl;
-  m_outputStream << "<html>" << std::endl;
-  m_outputStream << "<head><title>Overview of " << name << "</title></head>"
+  m_outputStream << "<html lang=\"en\">" << std::endl;
+  m_outputStream << "<head><meta charset=\"UTF-8\"><title>Overview of " << name << "</title>"
                  << std::endl;
-  m_outputStream << "<body>" << std::endl;
   m_outputStream
       << "<style>"
          R"(body {font-family:"arial";})"
          R"(#generated {font-style:italic;font-size:80%;})"
-         R"(#disclaimer {margin:0px;border:1px solid rgb(200,0,0);)"
+         R"(#disclaimer {margin:0;border:1px solid rgb(200,0,0);)"
          R"(background-color:rgba(255,0,0,0.1);padding:0.5em;font-size:80%;})"
-         R"(#pathname {font-weight:bold;})"
+         R"(.pathname {font-weight:bold;})"
          "</style>"
       << std::endl;
+  m_outputStream << "</head><body>" << std::endl;
 }
 
 OverviewWriter::~OverviewWriter() {
@@ -89,20 +89,19 @@ void OverviewWriter::startDrawing(int width, int height) {
     height++;  // Need the height to be even so the entire grid gets filled out.
   }
   addFormatted(R"(<svg xmlns="http://www.w3.org/2000/svg")"
-               R"(xmlns:xlink="http://www.w3.org/1999/xlink")"
-               R"(width="%dpx" height="%dpx" viewbox="%d %d %d %d">)",
+               R"( width="%dpx" height="%dpx" viewBox="%d %d %d %d">)",
                width * scale + 20,  // +20 for a little whitespace on the right
                height * scale, -widthExtra / 2, -height / 2, width, height);
   addFormatted(R"(<rect x="%d" y="%d" width="%d" height="%d" fill="yellow")"
-               R"(stroke="blue" stroke-width="0.2" fill-opacity="0.05")"
-               R"(stroke-opacity="0.9"/>)",
+               R"( stroke="blue" stroke-width="0.2" fill-opacity="0.05")"
+               R"( stroke-opacity="0.9"></rect>)",
                -widthExtra / 2, -height / 2, width, height);
   addFormatted(R"(<g stroke-opacity="0.33" stroke-width="0.025")"
-               R"(stroke="rgb(128,128,128) ">)");
+               R"( stroke="rgb(128,128,128) ">)");
   // Grid
   auto gridLine = [&](int i, int x1, int x2, int y1, int y2) {
     const char* width = i % 10 == 0 ? " stroke-width=\"0.075\"" : "";
-    addFormatted(R"(<line x1="%d" y1="%d" x2="%d" y2="%d"%s/>)", x1, x2, y1, y2,
+    addFormatted(R"(<line x1="%d" y1="%d" x2="%d" y2="%d"%s></line>)", x1, x2, y1, y2,
                  width);
   };
   for (int i = -widthExtra / 2; i < width - (widthExtra / 2); i++) {
@@ -114,7 +113,7 @@ void OverviewWriter::startDrawing(int width, int height) {
   addRaw(R"(</g>)");
   // Grid labels
   addRaw(R"(<g font-size="1" fill="black" stroke="none")"
-         R"(text-anchor="middle">)");
+         R"( text-anchor="middle">)");
   for (int i = -widthExtra / 2; i < width - (widthExtra / 2); i++) {
     if (i % 10 == 0) {
       addFormatted(R"(<text x="%d" y="%d" dy="-0.5">%d%s</text>)", i,
@@ -158,7 +157,7 @@ void OverviewWriter::addPath(const Path& path, std::string color, bool dashed) {
   for (auto const& p : path) {
     m_outputStream << p.X.dbl() << "," << -p.Y.dbl() << " ";
   }
-  m_outputStream << "\"/>" << std::endl;
+  m_outputStream << "\"></polyline>" << std::endl;
 }
 
 void OverviewWriter::addAnnotation(const DebugAnnotation& annotation) {
@@ -180,9 +179,9 @@ void OverviewWriter::addAnnotation(const DebugAnnotation& annotation) {
 
 void OverviewWriter::addCode(std::function<void(std::ofstream&)> emitter) {
   assert(m_outputStream.is_open());
-  addRaw("<code><pre>");
+  addRaw("<pre>");
   emitter(m_outputStream);
-  addRaw("</pre></code>");
+  addRaw("</pre>");
 }
 
 }  // namespace MonkeyCAM
