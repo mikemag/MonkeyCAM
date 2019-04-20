@@ -12,7 +12,7 @@
     "node": "=8.15.0"
   },
   "scripts": {
-    "start-testhost": "node testhost.js"
+    "start": "node testhost.js"
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
