@@ -43,7 +43,7 @@ const Path& FlatBezier::generate(Point endPoint, Point transitionPoint) {
   MCFixed flatEndY = -m_flatWidth / 2;
   // Note: flatEndY is negative because the 'bottom' half of the board is drawn
   //       first (i.e. in negative Y-space)
-  if (flatEndY >= transitionPoint.Y) {
+  if (flatEndY <= transitionPoint.Y) {
     throw std::runtime_error(
         "Error in generating \"Flat\" end: \"flat width\" is wider "
         "than nose/tail width");
