@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const Datastore = require('@google-cloud/datastore');
-const ds = Datastore({ projectId: 'monkeycam-web-app' });
-const PubSub = require(`@google-cloud/pubsub`);
+const { Datastore } = require('@google-cloud/datastore');
+const ds = new Datastore({ projectId: 'monkeycam-web-app' });
+const { PubSub } = require('@google-cloud/pubsub');
 
 const STATE_UNKNOWN = 0;
 const STATE_CREATED = 1;
@@ -252,13 +252,12 @@ class MonkeyCAMJob {
     console.log(`Saved ${jobEntity.key.path} to data store.`, this);
 
     try {
-      const pubsub = PubSub({ projectId: 'monkeycam-web-app' });
+      const pubsub = new PubSub({ projectId: 'monkeycam-web-app' });
       const job_queue_topic = pubsub.topic(jobQueueTopic);
-      const job_queue_publisher = job_queue_topic.publisher();
       const dataBuffer = Buffer.from(
         JSON.stringify({ id: this.key.id, inputsId: this.inputsId })
       );
-      const messageId = await job_queue_publisher.publish(dataBuffer);
+      const messageId = await job_queue_topic.publish(dataBuffer);
       console.log(
         'Published message id ' + messageId + ' to topic ' + jobQueueTopic
       );

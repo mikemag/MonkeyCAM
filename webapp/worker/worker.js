@@ -12,9 +12,9 @@ const archiver = require('archiver');
 const fse = require('fs-extra');
 const path = require('path');
 const spawn = require('child_process').spawn;
-const Storage = require('@google-cloud/storage');
-const gcs = Storage({ projectId: 'monkeycam-web-app' });
-const PubSub = require(`@google-cloud/pubsub`);
+const { Storage } = require('@google-cloud/storage');
+const gcs = new Storage({ projectId: 'monkeycam-web-app' });
+const { PubSub } = require(`@google-cloud/pubsub`);
 
 const nconf = require('./config');
 const mcj = require('./MonkeyCAMJob');
@@ -142,7 +142,7 @@ async function runMonkeyCAM(jobDir, inputs, progressId) {
           progressMax = obj.progressMax;
         }
         if (obj.progress) {
-          progress = obj.progress / progressMax * 100.0;
+          progress = (obj.progress / progressMax) * 100.0;
         }
         if (obj.version) {
           results['monkeyCAMVersion'] = obj.version;
@@ -167,8 +167,8 @@ async function runMonkeyCAM(jobDir, inputs, progressId) {
     });
     monkeyCamProcess.stdio[3].pipe(jsonStream).pipe(resultStream);
 
-    monkeyCamProcess.on('close', async (code, signal) => {
-      console.log('Done');
+    monkeyCamProcess.on('exit', async (code, signal) => {
+      console.log('In exit callback...');
       clearInterval(timerId);
       console.log('Waiting for JSON output to flush');
       await fd3Finished; // Wait for the json output to flush completely.
@@ -190,6 +190,22 @@ async function runMonkeyCAM(jobDir, inputs, progressId) {
           message: `Process exited with code ${code}`
         };
       }
+      resolve(results);
+    });
+
+    monkeyCamProcess.on('error', async err => {
+      console.log('In error callback...');
+      console.log(err);
+      clearInterval(timerId);
+      console.log('Saving...');
+      await mcj.MonkeyCAMJobProgress.save(progressId, progress);
+      const code = err['code'];
+      results['exitCode'] = code;
+      results['signal'] = '';
+      results['error'] = {
+        kind: 'Unknown Fatal Error',
+        message: `Process failed to start with code ${code}`
+      };
       resolve(results);
     });
   });
@@ -255,7 +271,7 @@ async function uploadFile(jobDir, persistentKey, dateString, boardName) {
 }
 
 function startListeningForJobs(jobQueueSubscription) {
-  const pubsub = PubSub({ projectId: 'monkeycam-web-app' });
+  const pubsub = new PubSub({ projectId: 'monkeycam-web-app' });
   const subscription = pubsub.subscription(jobQueueSubscription);
   subscription.on('error', function(err) {
     console.log(err);
