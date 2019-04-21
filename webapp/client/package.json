@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "http-proxy-middleware": "^0.19.1",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.0",
     "react-circular-progressbar": "^0.5.0",
@@ -21,30 +22,18 @@
     "react-timeago": "^3.4.3"
   },
   "devDependencies": {
-    "react-scripts": "^1.1.4"
-  },
-  "proxy": {
-    "/addJob": {
-      "target": "http://localhost:3003/",
-      "ws": true
-    },
-    "/getJobStatus": {
-      "target": "http://localhost:3003/",
-      "ws": true
-    },
-    "/getJobFullResults": {
-      "target": "http://localhost:3003/",
-      "ws": true
-    },
-    "/getJobInputs": {
-      "target": "http://localhost:3003/",
-      "ws": true
-    }
+    "react-scripts": "2.1.8"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
