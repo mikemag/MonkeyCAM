@@ -10,7 +10,7 @@ import { Button, Grid, Row, Col, Panel, Table, Alert } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import Spinner from 'react-spinkit';
 import TimeAgo from 'react-timeago';
-import { BadJobNotice } from './CommonComponents';
+import { BadJobNotice, cfURLRoot } from './CommonComponents';
 
 class JobExecutionDetails extends Component {
   render() {
@@ -153,37 +153,31 @@ class JobResultsPage extends Component {
   }
 
   async getJobBasicResults(jobId) {
-    let res = await fetch(
-      'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobStatus',
-      {
-        accept: 'application/json',
-        method: 'POST',
-        body: JSON.stringify({
-          jobid: jobId
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    let res = await fetch(cfURLRoot + '/getJobStatus', {
+      accept: 'application/json',
+      method: 'POST',
+      body: JSON.stringify({
+        jobid: jobId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    );
+    });
     res = await checkStatus(res);
     return res.json();
   }
 
   async getJobFullResults(jobId) {
-    let res = await fetch(
-      'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobFullResults',
-      {
-        accept: 'application/json',
-        method: 'POST',
-        body: JSON.stringify({
-          jobid: jobId
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+    let res = await fetch(cfURLRoot + '/getJobFullResults', {
+      accept: 'application/json',
+      method: 'POST',
+      body: JSON.stringify({
+        jobid: jobId
+      }),
+      headers: {
+        'Content-Type': 'application/json'
       }
-    );
+    });
     res = await checkStatus(res);
     return res.json();
   }

@@ -31,41 +31,37 @@ import 'codemirror/addon/lint/lint.js';
 import 'codemirror/addon/lint/json-lint.js';
 import 'codemirror/addon/selection/active-line.js';
 
+import { cfURLRoot } from './CommonComponents';
+
 async function addJob(boardConfig, bindingConfig, machineConfig, bindingDist) {
-  const res = await fetch(
-    'https://us-central1-monkeycam-web-app.cloudfunctions.net/addJob',
-    {
-      accept: 'application/json',
-      method: 'POST',
-      body: JSON.stringify({
-        boardConfig: boardConfig,
-        bindingConfig: bindingConfig,
-        machineConfig: machineConfig,
-        bindingDist: bindingDist
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+  const res = await fetch(cfURLRoot + '/addJob', {
+    accept: 'application/json',
+    method: 'POST',
+    body: JSON.stringify({
+      boardConfig: boardConfig,
+      bindingConfig: bindingConfig,
+      machineConfig: machineConfig,
+      bindingDist: bindingDist
+    }),
+    headers: {
+      'Content-Type': 'application/json'
     }
-  );
+  });
   checkStatus(res);
   return res.json();
 }
 
 async function loadInputs(inputsid) {
-  let res = await fetch(
-    'https://us-central1-monkeycam-web-app.cloudfunctions.net/getJobInputs',
-    {
-      accept: 'application/json',
-      method: 'POST',
-      body: JSON.stringify({
-        jobInputsId: inputsid
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+  let res = await fetch(cfURLRoot + '/getJobInputs', {
+    accept: 'application/json',
+    method: 'POST',
+    body: JSON.stringify({
+      jobInputsId: inputsid
+    }),
+    headers: {
+      'Content-Type': 'application/json'
     }
-  );
+  });
   checkStatus(res);
   return res.json();
 }

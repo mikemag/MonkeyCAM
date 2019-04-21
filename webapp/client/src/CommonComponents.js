@@ -8,7 +8,14 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 
-export class BadJobNotice extends React.Component {
+var development = process.env.NODE_ENV === 'development';
+var cfURLRoot = 'https://us-central1-monkeycam-web-app.cloudfunctions.net';
+
+if (development) {
+  cfURLRoot = 'http://localhost:3000';
+}
+
+class BadJobNotice extends React.Component {
   render() {
     return (
       <Alert bsStyle="info" className="text-left">
@@ -21,3 +28,5 @@ export class BadJobNotice extends React.Component {
     );
   }
 }
+
+export { BadJobNotice, cfURLRoot };
