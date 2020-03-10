@@ -111,6 +111,18 @@ during pressing.
 
 This program uses a straight cutter, typically 0.250”.
 
+See [Edge Groove Parameters](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Configuration_Guide.md#edge-groove-parameters)
+and [Sidewall Overhang](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Configuration_Guide.md#sidewall-overhang)
+for more details.
+
+The `edge groove edge width` is the width of your edge material, including the tines,
+and essentially represents how much of the groove will be inside of the final edge of the 
+board. The `sidewall overhang` is how much sidewall material to leave outside the final 
+edge of the board, to allow for imprecision during layup. These are added together to form 
+the total edge groove width and tweaking them will give you a trench of whatever width 
+you'd like along the final board edge, with however much of it you like inside/outside 
+the final edge.
+
 
 ## Insert Holes
 

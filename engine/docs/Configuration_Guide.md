@@ -802,7 +802,8 @@ Each of these effects the [Edge Groove program](G-Code_Program_Guide.md#edge-gro
 
 "edge groove tool": `tool number`
 
-The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut the edge groove.
+The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to 
+cut the edge groove.
 
 #### Edge Groove Depth
 
@@ -815,9 +816,9 @@ core to accommodate the edges.
 
 "edge groove edge width": `number`
 
-The width, in inches, of the edge groove. This should match the width
-of your edge stock plus a little extra for some play when aligning the
-core to the base.
+The width, in inches, of your edge stock including the tines, plus a little extra for some 
+play when aligning the core to the base. This parameter is combined with `sidewall overhang` 
+to form the total width of the edge groove.
 
 #### Edge Groove Overlap Percentage
 
@@ -909,7 +910,11 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 "sidewall overhang": `number`
 
-The amount, in inches, of sidewall which will remain past the edges, outside the final board shape. Leave a few mm to account for core-to-base alignment error.
+The amount, in inches, of sidewall which will remain past the edges, outside the final board 
+shape. Leave a few mm to account for core-to-base alignment error.
+
+This parameter is combined with `edge groove edge width` to form the total width
+of the edge groove used in the [Edge Groove program](G-Code_Program_Guide.md#edge-groove).
 
 ### Nose Tail Spacers Parameters
 
