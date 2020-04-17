@@ -15,6 +15,7 @@
  */
 
 #include "basic-math.h"
+
 #include <cmath>
 
 namespace MonkeyCAM {

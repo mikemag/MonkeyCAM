@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <vector>
+
 #include "point.h"
 
 namespace MonkeyCAM {

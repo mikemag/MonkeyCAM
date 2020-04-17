@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+
 #include "paths.h"
 
 namespace MonkeyCAM {

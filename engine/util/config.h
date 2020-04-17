@@ -19,6 +19,7 @@
 
 #include <optional>
 #include <stack>
+
 #include "json.hpp"
 using json = nlohmann::json;
 #include "activity-emitter.h"

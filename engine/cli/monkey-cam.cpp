@@ -15,6 +15,7 @@
  */
 
 #include <sys/stat.h>
+
 #include <cassert>
 #include <iostream>
 #include <optional>

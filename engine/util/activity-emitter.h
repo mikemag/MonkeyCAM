@@ -18,6 +18,7 @@
 #define incl_activity_emitter_H_
 
 #include <optional>
+
 #include "json.hpp"
 using json = nlohmann::json;
 

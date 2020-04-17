@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "gcode-writer.h"
+
 #include <time.h>
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -22,7 +25,6 @@
 
 #include "MonkeyCAMConfig.h"
 #include "activity-emitter.h"
-#include "gcode-writer.h"
 using ae = MonkeyCAM::ActivityEmitter;
 #include "json.hpp"
 using json = nlohmann::json;

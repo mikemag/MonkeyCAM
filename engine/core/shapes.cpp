@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "shapes.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -21,7 +23,6 @@
 #include <utility>
 
 #include "shape-parts.h"
-#include "shapes.h"
 
 namespace MonkeyCAM {
 
@@ -232,10 +233,9 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
         "True center guide", "Guideline to mark true center of the board.",
         "orange", true}};
     MCFixed trueCenterX = (m_noseLength + m_effectiveEdge + m_tailLength) / 2;
-    a.addSvgFormat(
-        R"(<path d="M%f %f L%f %f"></path>)", trueCenterX.dbl(),
-        (-waistHalfWidth + 5).dbl(), trueCenterX.dbl(),
-        (waistHalfWidth - 5).dbl());
+    a.addSvgFormat(R"(<path d="M%f %f L%f %f"></path>)", trueCenterX.dbl(),
+                   (-waistHalfWidth + 5).dbl(), trueCenterX.dbl(),
+                   (waistHalfWidth - 5).dbl());
     return a;
   });
   dps.addAnnotation([&] {
@@ -264,9 +264,9 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       }
       a.addSvgCircle(Point(eeCenterX - (*m_refStance / 2) + setback, 0), 0.5);
       a.addSvgCircle(Point(eeCenterX + (*m_refStance / 2) + setback, 0), 0.5);
-      a.addSvgFormat(
-          R"(<path d="M%f %f L%f %f"></path>)", (eeCenterX + setback).dbl(), -4.0,
-          (eeCenterX + setback).dbl(), 4.0);
+      a.addSvgFormat(R"(<path d="M%f %f L%f %f"></path>)",
+                     (eeCenterX + setback).dbl(), -4.0,
+                     (eeCenterX + setback).dbl(), 4.0);
       return a;
     });
   }
@@ -285,9 +285,9 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
       }
       a.addSvgCircle(Point(eeCenterX - (m_bindingDist / 2) + setback, 0), 0.5);
       a.addSvgCircle(Point(eeCenterX + (m_bindingDist / 2) + setback, 0), 0.5);
-      a.addSvgFormat(
-          R"(<path d="M%f %f L%f %f"></path>)", (eeCenterX + setback).dbl(), -4.0,
-          (eeCenterX + setback).dbl(), 4.0);
+      a.addSvgFormat(R"(<path d="M%f %f L%f %f"></path>)",
+                     (eeCenterX + setback).dbl(), -4.0,
+                     (eeCenterX + setback).dbl(), 4.0);
       return a;
     });
   }

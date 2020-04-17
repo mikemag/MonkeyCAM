@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include "point.h"
+
 #include <climits>
 #include <cmath>
 
 #include "basic-math.h"
-#include "point.h"
 
 namespace MonkeyCAM {
 

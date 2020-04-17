@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+
 #include "basic-math.h"
 #include "paths.h"
 

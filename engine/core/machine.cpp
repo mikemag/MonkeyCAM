@@ -15,10 +15,11 @@
  */
 
 #include "machine.h"
-#include "config.h"
 
 #include <map>
 #include <string>
+
+#include "config.h"
 
 namespace MonkeyCAM {
 

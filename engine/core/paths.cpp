@@ -15,9 +15,12 @@
  */
 
 #include "paths.h"
+
 #include <stdarg.h>
+
 #include <algorithm>
 #include <cassert>
+
 #include "clipper.hpp"
 
 namespace MonkeyCAM {

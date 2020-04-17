@@ -17,6 +17,7 @@
 #include "overview-writer.h"
 
 #include <stdarg.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -30,8 +31,8 @@ OverviewWriter::OverviewWriter(std::string filename, std::string name)
   assert(m_outputStream.is_open());
   m_outputStream << "<!DOCTYPE html>" << std::endl;
   m_outputStream << "<html lang=\"en\">" << std::endl;
-  m_outputStream << "<head><meta charset=\"UTF-8\"><title>Overview of " << name << "</title>"
-                 << std::endl;
+  m_outputStream << "<head><meta charset=\"UTF-8\"><title>Overview of " << name
+                 << "</title>" << std::endl;
   m_outputStream
       << "<style>"
          R"(body {font-family:"arial";})"
@@ -101,8 +102,8 @@ void OverviewWriter::startDrawing(int width, int height) {
   // Grid
   auto gridLine = [&](int i, int x1, int x2, int y1, int y2) {
     const char* width = i % 10 == 0 ? " stroke-width=\"0.075\"" : "";
-    addFormatted(R"(<line x1="%d" y1="%d" x2="%d" y2="%d"%s></line>)", x1, x2, y1, y2,
-                 width);
+    addFormatted(R"(<line x1="%d" y1="%d" x2="%d" y2="%d"%s></line>)", x1, x2,
+                 y1, y2, width);
   };
   for (int i = -widthExtra / 2; i < width - (widthExtra / 2); i++) {
     gridLine(i, i, -height / 2, i, height / 2);

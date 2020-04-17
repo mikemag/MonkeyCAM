@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "insert-pack.h"
+
 #include <algorithm>
 #include <vector>
-
-#include "insert-pack.h"
 
 namespace MonkeyCAM {
 
