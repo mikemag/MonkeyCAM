@@ -68,14 +68,14 @@ Config::Config(const string configName, const string fileName)
 /* static */ void Config::validateIsArray(const json& j) {
   if (!j.is_array()) {
     throw json::type_error::create(
-        302, "type must be array, but is " + string(j.type_name()));
+      302, "type must be array, but is " + string(j.type_name()), &j);
   }
 }
 
 /* static */ void Config::validateIsObject(const json& j) {
   if (!j.is_object()) {
     throw json::type_error::create(
-        302, "type must be object, but is " + string(j.type_name()));
+      302, "type must be object, but is " + string(j.type_name()), &j);
   }
 }
 
