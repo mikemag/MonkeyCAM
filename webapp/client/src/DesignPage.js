@@ -32,6 +32,8 @@ import 'codemirror/addon/lint/json-lint.js';
 import 'codemirror/addon/selection/active-line.js';
 
 import { cfURLRoot } from './CommonComponents';
+import kofi_button_blue_png from './media/kofi_button_blue.png';
+
 
 async function addJob(boardConfig, bindingConfig, machineConfig, bindingDist) {
   const res = await fetch(cfURLRoot + '/addJob', {
@@ -632,6 +634,21 @@ class DesignPage extends Component {
                   Start with a sample splitboard
                 </Button>
               </div>
+            </div>
+            <hr />
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={8} smOffset={2}>
+            <div className="text-center">
+              <p>You can help pay for server costs with a small donation.</p>
+              <a href="https://ko-fi.com/mikemag" target="_blank">
+                <img
+                    style={{ maxWidth: '200px' }}
+                    src={kofi_button_blue_png}
+                    alt="Support me on Ko-fi"
+                />
+              </a>
             </div>
             <hr />
           </Col>
