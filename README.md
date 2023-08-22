@@ -23,6 +23,13 @@ More information about ski and snowboard construction can be found at
 [Monkey Wiki](http://www.happymonkeysnowboards.com/MonkeyWiki) and
 [SkiBuilders.com](http://www.skibuilders.com/).
 
+## Donate
+
+You can help offset the server costs for running [MonkeyCAM.org](https://www.monkeycam.org) with a small donation. 
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H5OG3E0)
+
+
 ## Documentation
 
 See the [MonkeyCAM v4.0 User’s Guide](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
