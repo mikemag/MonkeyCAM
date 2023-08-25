@@ -268,15 +268,15 @@ function startListeningForJobs(jobQueueSubscription) {
     // been able to isolate the cause or necessarily detect it. I've got logging in place, and am exiting on sub
     // close and error, but will there still be issues? So, send some "self-heartbeat" messages on a regular interval,
     // and bail when they fail.
-    setInterval(async () => sendHeartbeatMessage(), 1 * 60 * 1000);
-
+    const necessaryHeartbeatInterval = 1 * 60 * 1000; // nb: ensure this is longer than the max job time!
     setInterval(async () => {
         const d = Date.now() - lastHeartbeatTime;
-        if (d > 5 * 1000) {
+        if (d > necessaryHeartbeatInterval) {
             console.log('Missing heartbeat, exiting: ' + d / 1000 + 's');
             process.exit(0);
         }
-    }, 3 * 60 * 1000); // nb: ensure this is longer than the max job time!
+        sendHeartbeatMessage();
+    }, 1 * 60 * 1000);
 }
 
 async function sendHeartbeatMessage() {
