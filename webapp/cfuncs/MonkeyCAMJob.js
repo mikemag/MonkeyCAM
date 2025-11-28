@@ -7,7 +7,6 @@
 
 const { Datastore } = require('@google-cloud/datastore');
 const ds = new Datastore({ projectId: 'monkeycam-web-app' });
-const { PubSub } = require('@google-cloud/pubsub');
 
 const STATE_UNKNOWN = 0;
 const STATE_CREATED = 1;
@@ -252,6 +251,7 @@ class MonkeyCAMJob {
     console.log(`Saved ${jobEntity.key.path} to data store.`, this);
 
     try {
+      const { PubSub } = require('@google-cloud/pubsub');
       const pubsub = new PubSub({ projectId: 'monkeycam-web-app' });
       const job_queue_topic = pubsub.topic(jobQueueTopic);
       const dataBuffer = Buffer.from(

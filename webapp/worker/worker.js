@@ -6,40 +6,66 @@
  */
 
 const archiver = require('archiver');
+const express = require('express');
 const fse = require('fs-extra');
 const path = require('path');
 const spawn = require('child_process').spawn;
 const {Storage} = require('@google-cloud/storage');
 const gcs = new Storage({projectId: 'monkeycam-web-app'});
-const {PubSub} = require(`@google-cloud/pubsub`);
 
 const nconf = require('./config');
 const mcj = require('./MonkeyCAMJob');
 
 const stream = require('stream');
 
-let jobQueueSubscription = 'MonkeyCAM-Job-Queue-sub';
-let jobQueueTopic = 'MonkeyCAM-Job-Queue';
+const PORT = process.env.PORT || 8080;
 
 console.log(process.env)
 console.log(process.argv)
 console.log(process.versions)
 
-let development = process.env.NODE_ENV !== 'production';
+const app = express();
+app.use(express.json());
 
-if (development) {
-    console.log('Development mode');
-    jobQueueSubscription = 'MonkeyCAM-Job-Queue-Test-sub';
-    jobQueueTopic = 'MonkeyCAM-Job-Queue-Test';
-} else {
-    console.log('Production mode');
-}
+app.post('/pubsub', async (req, res) => {
+    const pubSubMessage = req.body && req.body.message;
+    if (!pubSubMessage || !pubSubMessage.data) {
+        console.log('No valid Pub/Sub message received');
+        res.status(400).send('No Pub/Sub message provided');
+        return;
+    }
 
-let lastHeartbeatTime = Date.now();
+    let messageArgs = null;
+    const messageId = pubSubMessage.messageId || 'unknown';
+    try {
+        const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString();
+        messageArgs = JSON.parse(decodedData);
+    } catch (err) {
+        console.log('Failed to decode or parse message', err);
+        res.status(400).send('Invalid Pub/Sub message format');
+        return;
+    }
 
-const pubsub = new PubSub({projectId: 'monkeycam-web-app'});
+    try {
+        const result = await processMonkeyCAMJob(messageArgs, messageId);
+        if (result.retry) {
+            res.status(500).send('Temporary failure');
+            return;
+        }
+        res.status(200).send();
+    } catch (err) {
+        console.log('Unexpected failure processing job', err);
+        res.status(500).send('Processing error');
+    }
+});
 
-startListeningForJobs(jobQueueSubscription);
+app.get('/', (req, res) => {
+    res.status(200).send('OK');
+});
+
+app.listen(PORT, () => {
+    console.log(`Worker listening for Pub/Sub push messages on port ${PORT}`);
+});
 
 
 function sleep(ms) {
@@ -245,60 +271,9 @@ async function uploadFile(jobDir, persistentKey, dateString, boardName) {
     return `https://storage.googleapis.com/${bucket.name}/${file.name}`;
 }
 
-function startListeningForJobs(jobQueueSubscription) {
-    const subscription = pubsub.subscription(jobQueueSubscription);
-
-    subscription.on('error', (err) => {
-        console.log('Subscription error: ' + JSON.stringify(err));
-        process.exit(0);
-    });
-
-    subscription.on('close', () => {
-        console.log('Subscription closed unexpectedly, exiting');
-        process.exit(0);
-    });
-
-    subscription.on('debug', msg => console.log('Subscription debug: ' + msg.message));
-
-    subscription.on('message', processMonkeyCAMJob);
-
-    console.log('Listening for jobs on subscription ' + jobQueueSubscription);
-
-    // Backstop, just in case the pubsub queue stalls forever. This has happened intermittently, and I've so far not
-    // been able to isolate the cause or necessarily detect it. I've got logging in place, and am exiting on sub
-    // close and error, but will there still be issues? So, send some "self-heartbeat" messages on a regular interval,
-    // and bail when they fail.
-    const necessaryHeartbeatInterval = 1 * 60 * 1000; // nb: ensure this is longer than the max job time!
-    setInterval(async () => {
-        const d = Date.now() - lastHeartbeatTime;
-        if (d > necessaryHeartbeatInterval) {
-            console.log('Missing heartbeat, exiting: ' + d / 1000 + 's');
-            process.exit(0);
-        }
-        sendHeartbeatMessage();
-    }, 1 * 60 * 1000);
-}
-
-async function sendHeartbeatMessage() {
-    try {
-        const job_queue_topic = pubsub.topic(jobQueueTopic);
-        const messageId = await job_queue_topic.publishMessage({json: {id: 'heartbeat'}})
-        console.log('Heartbeat sent, message id ' + messageId + ' to topic ' + jobQueueTopic);
-    } catch (err) {
-        console.log('Heartbeat send error: ' + JSON.stringify(err));
-    }
-}
-
-async function processMonkeyCAMJob(message) {
-    console.log(`Received job message ${message.id}`);
-    let messageArgs = JSON.parse(message.data);
+async function processMonkeyCAMJob(messageArgs, messageId) {
+    console.log(`Received job message ${messageId}`);
     console.log(messageArgs);
-
-    lastHeartbeatTime = Date.now(); // all messages count as heartbeats
-    if (messageArgs.id === 'heartbeat') {
-        message.ack();
-        return;
-    }
 
     const persistentKey = messageArgs.id;
     console.log('Draining id ' + persistentKey);
@@ -313,8 +288,7 @@ async function processMonkeyCAMJob(message) {
         );
         if (job.state != mcj.STATE_RUNNING) {
             console.log('Processing job: failed to transition to running', job.state);
-            message.ack();
-            return;
+            return {retry: false};
         }
 
         const inputs = await mcj.MonkeyCAMJobInputs.get(job.inputsId);
@@ -341,8 +315,7 @@ async function processMonkeyCAMJob(message) {
                 monkeyCAMResults: results,
                 finishedAt: Date.now()
             });
-            message.ack();
-            return;
+            return {retry: false};
         }
 
         await mcj.MonkeyCAMJob.updateJobState(persistentKey, mcj.STATE_SAVING, {
@@ -371,8 +344,7 @@ async function processMonkeyCAMJob(message) {
             overviewPublicURL: overviewPublicURL,
             zipPublicURL: zipPublicURL
         });
-        message.ack();
-        return;
+        return {retry: false};
     } catch (err) {
         console.log(`Failure processing job ${persistentKey}`, err);
         if (job) {
@@ -392,8 +364,7 @@ async function processMonkeyCAMJob(message) {
                     `Backoff ${backoffMS}ms after failed job, attempt #${attemptCount}`
                 );
                 await sleep(backoffMS);
-                message.nack();
-                return;
+                return {retry: true};
             }
         }
 
@@ -403,6 +374,6 @@ async function processMonkeyCAMJob(message) {
             failureReason: 'Failure running MonkeyCAM: ' + err.message,
             finishedAt: Date.now()
         });
-        message.ack();
+        return {retry: false};
     }
 }
