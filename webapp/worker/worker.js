@@ -9,6 +9,7 @@ const archiver = require('archiver');
 const express = require('express');
 const fse = require('fs-extra');
 const path = require('path');
+const os = require('os');
 const spawn = require('child_process').spawn;
 const {Storage} = require('@google-cloud/storage');
 const gcs = new Storage({projectId: 'monkeycam-web-app'});
@@ -278,6 +279,8 @@ async function processMonkeyCAMJob(messageArgs, messageId) {
     const persistentKey = messageArgs.id;
     console.log('Draining id ' + persistentKey);
     let job = null;
+    let jobDir = null;
+    let response = null;
     try {
         job = await mcj.MonkeyCAMJob.updateJobState(
             persistentKey,
@@ -293,7 +296,13 @@ async function processMonkeyCAMJob(messageArgs, messageId) {
 
         const inputs = await mcj.MonkeyCAMJobInputs.get(job.inputsId);
 
-        const jobDir = `./jobs/${persistentKey}`; // @TODO: tmpfs
+        const baseTmpDir = path.join(os.tmpdir(), 'monkeycam-jobs');
+        const safeMessageId = (messageId || Date.now())
+            .toString()
+            .replace(/[^a-zA-Z0-9_-]/g, '-');
+        jobDir = path.join(baseTmpDir, `${persistentKey}-${safeMessageId}`);
+        console.log(`Using job directory ${jobDir}`);
+        await fse.ensureDir(baseTmpDir);
         await setupJobDir(
             jobDir,
             inputs.boardConfig,
@@ -344,7 +353,7 @@ async function processMonkeyCAMJob(messageArgs, messageId) {
             overviewPublicURL: overviewPublicURL,
             zipPublicURL: zipPublicURL
         });
-        return {retry: false};
+        response = {retry: false};
     } catch (err) {
         console.log(`Failure processing job ${persistentKey}`, err);
         if (job) {
@@ -364,7 +373,7 @@ async function processMonkeyCAMJob(messageArgs, messageId) {
                     `Backoff ${backoffMS}ms after failed job, attempt #${attemptCount}`
                 );
                 await sleep(backoffMS);
-                return {retry: true};
+                response = {retry: true};
             }
         }
 
@@ -374,6 +383,17 @@ async function processMonkeyCAMJob(messageArgs, messageId) {
             failureReason: 'Failure running MonkeyCAM: ' + err.message,
             finishedAt: Date.now()
         });
-        return {retry: false};
+        response = {retry: false};
+    } finally {
+        if (jobDir) {
+            try {
+                await fse.remove(jobDir);
+                console.log(`Cleaned up job directory ${jobDir}`);
+            } catch (cleanupErr) {
+                console.log(`Failed to cleanup job directory ${jobDir}`, cleanupErr);
+            }
+        }
     }
+
+    return response || {retry: false};
 }
