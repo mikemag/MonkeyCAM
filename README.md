@@ -129,6 +129,23 @@ The web app currently depends on the following packages:
 - See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
 - The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
 
+## Building the Linux engine with Docker
+
+You can build the native engine on macOS (or any machine with Docker) without installing a local toolchain. The `engine/Dockerfile` produces a small runtime image and makes it easy to copy the compiled binary back to your host:
+
+```
+docker build --platform=linux/amd64 -t monkeycam-engine-builder -f engine/Dockerfile .
+docker create --name monkeycam-build monkeycam-engine-builder
+docker cp monkeycam-build:/opt/monkeycam ./monkeycam-dist
+docker rm monkeycam-build
+```
+
+The `./monkeycam-dist/bin` directory will contain the `MonkeyCAM` binary and supporting files. You can also run the binary inside the image directly:
+
+```
+docker run --rm monkeycam-engine-builder --help
+```
+
 ## Contributing
 
 If you're a software developer who is into ski and snowboard
