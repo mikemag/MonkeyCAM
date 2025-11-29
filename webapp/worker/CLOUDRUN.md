@@ -25,7 +25,7 @@ gcloud run deploy monkeycam-worker \
   --project monkeycam-web-app \
   --region us-central1 \
   --platform managed \
-  --no-allow-unauthenticated \
+  --allow-unauthenticated \
   --max-instances=1 \
   --service-account monkeycam-web-app@appspot.gserviceaccount.com \
   --set-env-vars monkeycamPath=/app/bin/linux
