@@ -22,7 +22,7 @@
     "react-timeago": "^3.4.3"
   },
   "devDependencies": {
-    "react-scripts": "2.1.8"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
