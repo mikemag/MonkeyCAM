@@ -5,26 +5,32 @@ set(MonkeyCAM_VERSION_MAJOR 4)
 set(MonkeyCAM_VERSION_MINOR 0)
 set(MonkeyCAM_VERSION_PATCH 7)
 
-execute_process(
-        COMMAND git rev-parse --abbrev-ref HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_BRANCH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (NOT DEFINED GIT_BRANCH OR "${GIT_BRANCH}" STREQUAL "")
+    execute_process(
+            COMMAND git rev-parse --abbrev-ref HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_BRANCH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif ()
 
-execute_process(
-        COMMAND git log -1 --format=%h
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_HASH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (NOT DEFINED GIT_COMMIT_HASH OR "${GIT_COMMIT_HASH}" STREQUAL "")
+    execute_process(
+            COMMAND git log -1 --format=%h
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif ()
 
-execute_process(
-        COMMAND git log -1 --format=%cD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_COMMIT_DATE
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (NOT DEFINED GIT_COMMIT_DATE OR "${GIT_COMMIT_DATE}" STREQUAL "")
+    execute_process(
+            COMMAND git log -1 --format=%cD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT_DATE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif ()
 
 set(MonkeyCAM_VERSION ${MonkeyCAM_VERSION_MAJOR}.${MonkeyCAM_VERSION_MINOR}.${MonkeyCAM_VERSION_PATCH}-${GIT_BRANCH}-${GIT_COMMIT_HASH})
 

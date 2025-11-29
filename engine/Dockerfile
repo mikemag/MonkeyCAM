@@ -10,6 +10,10 @@
 FROM ubuntu:22.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG GIT_BRANCH
+ARG GIT_COMMIT_HASH
+ARG GIT_COMMIT_DATE
+
 # Install build dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -28,7 +32,10 @@ COPY LICENSE README.md /src/
 # Configure and build the engine
 RUN cmake -S engine -B build \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_INSTALL_PREFIX=/opt/monkeycam
+    -DCMAKE_INSTALL_PREFIX=/opt/monkeycam \
+    -DGIT_BRANCH="${GIT_BRANCH}" \
+    -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
+    -DGIT_COMMIT_DATE="${GIT_COMMIT_DATE}"
 RUN cmake --build build --config Debug
 
 # Install the built artifacts into a predictable location
