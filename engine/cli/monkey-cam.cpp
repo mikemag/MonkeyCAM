@@ -370,7 +370,7 @@ void readJson(const string filename, json& config, const string configName) {
   }
 };
 
-int main(int argc, char* argv[]) {
+void printBanner() {
   printf(
       "MonkeyCAM v%d.%d.%d %s@%s, "
       "Copyright (C) 2013-2017 Michael M. Magruder\n",
@@ -381,13 +381,17 @@ int main(int argc, char* argv[]) {
       "is\nNO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
       "PARTICULAR PURPOSE.\n");
   printf("\n");
+}
 
+int main(int argc, char* argv[]) {
   std::optional<int> jsonOutputFD;
   string boardDef = "";
   string machineDef = "";
   string bindingDef = "";
   double bindingDist = 0;
   string outdir = "";
+  bool showHelp = false;
+  bool showVersion = false;
   for (int i = 1; i < argc; ++i) {
     if ((string(argv[i]) == "--board") && (i + 1 < argc)) {
       boardDef = string(argv[++i]);
@@ -401,7 +405,22 @@ int main(int argc, char* argv[]) {
       outdir = string(argv[++i]);
     } else if ((string(argv[i]) == "--jsonOutputFD") && (i + 1 < argc)) {
       jsonOutputFD = std::atoi(argv[++i]);
+    } else if (string(argv[i]) == "--help") {
+      showHelp = true;
+    } else if (string(argv[i]) == "--version") {
+      showVersion = true;
     }
+  }
+
+  printBanner();
+
+  if (showVersion) {
+    return 0;
+  }
+
+  if (showHelp) {
+    usage(argv[0]);
+    return 0;
   }
 
   ae::initialize(jsonOutputFD);
