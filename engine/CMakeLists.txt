@@ -33,13 +33,10 @@ configure_file(
         "${PROJECT_SOURCE_DIR}/util/MonkeyCAMConfig.h"
 )
 
-set(CMAKE_INSTALL_PREFIX "Dist-${MonkeyCAM_VERSION}")
-
 add_subdirectory(util)
 add_subdirectory(clipper)
 add_subdirectory(core)
 add_subdirectory(cli)
-#add_subdirectory(test)
 
 install(FILES "${PROJECT_BINARY_DIR}/../LICENSE" DESTINATION .)
 install(FILES "${PROJECT_BINARY_DIR}/../README.md" DESTINATION .)
