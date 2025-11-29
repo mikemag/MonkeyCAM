@@ -1,0 +1,12 @@
+# Exclude repository metadata
+.git
+.gitignore
+
+# Build artifacts and logs
+**/node_modules
+npm-debug.log*
+*.log
+
+# Unneeded platforms/binaries for the container
+bin/osx
+bin/linux/README.md
