@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.22)
 project(MonkeyCAM)
 
 set(MonkeyCAM_VERSION_MAJOR 4)
