@@ -1,6 +1,6 @@
-# MonkeyCAM v4.0 User's Guide
+# MonkeyCAM v4 User's Guide
 
-MonkeyCAM v4.0 is an open source CAD/CAM program for designing skis, snowboards and splitboards, and generating
+MonkeyCAM v4 is an open source CAD/CAM program for designing skis, snowboards and splitboards, and generating
 [G-code](http://en.wikipedia.org/wiki/G-code) programs to cut board
 parts with a [CNC
 machine](http://en.wikipedia.org/wiki/Numerical_control).
@@ -37,7 +37,7 @@ together to create the parts necessary to build a ski or
 snowboard. This includes the core, base material, and nose/tail filler
 material.
 
-See the [MonkeyCAM v4.0 G-Code Program Guide](G-Code_Program_Guide.md)
+See the [MonkeyCAM v4 G-Code Program Guide](G-Code_Program_Guide.md)
 for more details.
 
 ## Configuration Files
@@ -51,5 +51,5 @@ inserts. The machine and tool definition file describes machining parameters
 used by various programs (rapid and various cutting heights and depths, raw
 material thicknesses, etc.) and parameters of each tool used.
 
-See the [MonkeyCAM v4.0 Configuration Guide](Configuration_Guide.md)
+See the [MonkeyCAM v4 Configuration Guide](Configuration_Guide.md)
 for more details.

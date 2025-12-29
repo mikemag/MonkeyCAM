@@ -1,4 +1,4 @@
-# MonkeyCAM v4.0 Configuration Guide
+# MonkeyCAM v4 Configuration Guide
 
 MonkeyCAM uses three configuration files, one to describe the
 board/ski, one to describe the binding inserts (optional, no inserts
@@ -10,7 +10,7 @@ file describes machining parameters used by various programs (rapid
 and various cutting heights and depths, raw material thicknesses,
 etc.) and parameters of each tool used.
 
-See the [MonkeyCAM v4.0 User’s Guide](Users_Guide.md) for an overview.
+See the [MonkeyCAM v4 User’s Guide](Users_Guide.md) for an overview.
 
 ## File Format
 
@@ -27,6 +27,7 @@ simply. The following example shows three parameters and their values:
 "name": "Sample-snowboard",
 "nose length": 18,
 "effective edge length": 136,
+ "tail length": "140mm",
 ```
 
 The string before the `:` is the name of the parameter, in this case

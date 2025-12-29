@@ -37,6 +37,7 @@ RUN cmake -S engine -B build \
     -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}" \
     -DGIT_COMMIT_DATE="${GIT_COMMIT_DATE}"
 RUN cmake --build build --config Debug
+RUN g++ --version
 
 # Install the built artifacts into a predictable location
 RUN cmake --install build
