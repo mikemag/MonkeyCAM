@@ -17,6 +17,7 @@
 #ifndef incl_config_H_
 #define incl_config_H_
 
+#include <functional>
 #include <optional>
 #include <stack>
 
@@ -26,6 +27,8 @@ using json = nlohmann::json;
 using ae = MonkeyCAM::ActivityEmitter;
 
 namespace MonkeyCAM {
+
+enum class LengthUnit { Centimeters, Millimeters, Inches };
 
 class Config {
  public:
@@ -107,6 +110,12 @@ class Config {
     }
   }
 
+  double getLength(const char* key, LengthUnit defaultUnit);
+  double getLength(const char* key, double defaultValue,
+                   LengthUnit defaultUnit);
+  std::optional<double> getOptionalLength(const char* key,
+                                          LengthUnit defaultUnit);
+
   class ObjectHolder {
    public:
     ObjectHolder(Config& config, const char* key)
@@ -158,6 +167,8 @@ class Config {
   };
 
  private:
+  double getLengthCommon(const char* key, LengthUnit defaultUnit);
+
   const std::string m_configName;
   const std::string m_fileName;
   json m_rootJson;

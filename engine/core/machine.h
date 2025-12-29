@@ -57,9 +57,9 @@ class Machine {
 
 #define MPT(_f, _t, _n) \
   const _t _f() const { return m_config.get<_t>(_n); }
-#define MPI(_f, _n)                                       \
-  const MCFixed _f() const {                              \
-    return MCFixed::fromInches(m_config.get<double>(_n)); \
+#define MPI(_f, _n)                                     \
+  const MCFixed _f() const {                            \
+    return m_config.getLength(_n, LengthUnit::Inches);  \
   }
 
   MPT(rapidSpeed, int, "rapid speed")

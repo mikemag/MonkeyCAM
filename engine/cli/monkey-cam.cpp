@@ -50,7 +50,8 @@ std::unique_ptr<ShapeEndPart> loadEndPart(Config& config) {
     return std::unique_ptr<ShapeEndPart>{
         new BasicBezier{endHandle, transitionHandle}};
   } else if (type == "Flat") {
-    auto flatWidth = config.get<double>("flat width");
+    auto flatWidth =
+        config.getLength("flat width", LengthUnit::Centimeters);
     auto endHandle = config.get<double>("end handle");
     auto transitionHandle = config.get<double>("transition handle");
 
@@ -70,9 +71,12 @@ std::unique_ptr<ShapeEdgePart> loadEdgePart(Config& config) {
 std::unique_ptr<InsertPack> loadSnowboardInserts(Config& config) {
   auto countNose = config.get<int>("count nose");
   auto countTail = config.get<int>("count tail");
-  auto offset = config.get("offset", 4.0);
-  auto hSpacing = config.get("horizontal spacing", 4.0);
-  auto vSpacing = config.get("vertical spacing", 4.0);
+  auto offset =
+      config.getLength("offset", 4.0, LengthUnit::Centimeters);
+  auto hSpacing = config.getLength("horizontal spacing", 4.0,
+                                   LengthUnit::Centimeters);
+  auto vSpacing = config.getLength("vertical spacing", 4.0,
+                                   LengthUnit::Centimeters);
   return std::unique_ptr<InsertPack>{new SnowboardInsertPack{
       countNose, countTail, offset, hSpacing, vSpacing}};
 }
@@ -84,8 +88,8 @@ std::unique_ptr<InsertPack> loadGenericInsert(Config& config,
   int pointNum = 0;
   for (const auto& point : points) {
     config.push(("[" + std::to_string(pointNum++) + "]").c_str(), point);
-    insertX.push_back(config.get<double>("x"));
-    insertY.push_back(config.get<double>("y"));
+    insertX.push_back(config.getLength("x", LengthUnit::Centimeters));
+    insertY.push_back(config.getLength("y", LengthUnit::Centimeters));
     config.pop();
   }
 
@@ -98,13 +102,19 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
   Config::ObjectHolder h(boardConfig, "board");
   auto name = boardConfig.get<std::string>("name");
   auto isSplitboard = boardConfig.get<bool>("splitboard", false);
-  auto noseLength = boardConfig.get<double>("nose length");
-  auto eeLength = boardConfig.get<double>("effective edge length");
-  auto tailLength = boardConfig.get<double>("tail length");
-  auto sidecutRadius = boardConfig.get<double>("sidecut radius");
-  auto waistWidth = boardConfig.get<double>("waist width");
-  auto taper = boardConfig.get<double>("taper");
-  auto spacerWidth = boardConfig.get<double>("nose and tail spacer width");
+  auto noseLength = boardConfig.getLength("nose length",
+                                          LengthUnit::Centimeters);
+  auto eeLength = boardConfig.getLength("effective edge length",
+                                        LengthUnit::Centimeters);
+  auto tailLength = boardConfig.getLength("tail length",
+                                          LengthUnit::Centimeters);
+  auto sidecutRadius = boardConfig.getLength("sidecut radius",
+                                             LengthUnit::Centimeters);
+  auto waistWidth = boardConfig.getLength("waist width",
+                                          LengthUnit::Centimeters);
+  auto taper = boardConfig.getLength("taper", LengthUnit::Centimeters);
+  auto spacerWidth = boardConfig.getLength(
+      "nose and tail spacer width", LengthUnit::Centimeters);
 
   std::unique_ptr<ShapeEndPart> nose;
   {
@@ -124,16 +134,16 @@ std::unique_ptr<BoardShape> loadBoard(Config& boardConfig,
     tail = loadEndPart(boardConfig);
   }
 
-  std::optional<MCFixed> setback(
-      boardConfig.getOptional<double>("stance setback"));
-  std::optional<MCFixed> noseEdgeExt(
-      boardConfig.getOptional<double>("nose edge extension"));
-  std::optional<MCFixed> tailEdgeExt(
-      boardConfig.getOptional<double>("tail edge extension"));
+  std::optional<MCFixed> setback(boardConfig.getOptionalLength(
+      "stance setback", LengthUnit::Centimeters));
+  std::optional<MCFixed> noseEdgeExt(boardConfig.getOptionalLength(
+      "nose edge extension", LengthUnit::Centimeters));
+  std::optional<MCFixed> tailEdgeExt(boardConfig.getOptionalLength(
+      "tail edge extension", LengthUnit::Centimeters));
 
   // Inserts in board def file (retained for backwards compatibility)
-  std::optional<MCFixed> refStance(
-      boardConfig.getOptional<double>("reference stance width"));
+  std::optional<MCFixed> refStance(boardConfig.getOptionalLength(
+      "reference stance width", LengthUnit::Centimeters));
 
   std::unique_ptr<InsertPack> nosePack;
   {
@@ -208,9 +218,12 @@ BoardProfile::End loadProfileEnd(Config& config) {
 
 BoardProfile loadProfile(Config& config, BoardShape& shape) {
   Config::ObjectHolder p(config, "profile");
-  auto noseThickness = config.get<double>("nose thickness");
-  auto centerThickness = config.get<double>("center thickness");
-  auto tailThickness = config.get<double>("tail thickness");
+  auto noseThickness = config.getLength("nose thickness",
+                                        LengthUnit::Centimeters);
+  auto centerThickness = config.getLength("center thickness",
+                                          LengthUnit::Centimeters);
+  auto tailThickness = config.getLength("tail thickness",
+                                        LengthUnit::Centimeters);
   BoardProfile::End noseEnd;
   {
     Config::ObjectHolder pe(config, "nose taper");
