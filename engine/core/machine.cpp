@@ -29,6 +29,12 @@ namespace MonkeyCAM {
 Machine::Machine(Config& config) : m_config(config) {
   auto machine = m_config.get<json>("machine", Config::validateIsObject);
   m_config.push("machine", machine);
+  auto units = m_config.get<std::string>("gcode units", std::string("in"));
+  if (units == "mm") {
+    m_gcodeUnits = GCodeUnits::Millimeters;
+  } else {
+    m_gcodeUnits = GCodeUnits::Inches;
+  }
   auto tools = m_config.get<json>("tools", Config::validateIsArray);
   m_config.push("tools", tools);
 

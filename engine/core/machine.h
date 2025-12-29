@@ -25,6 +25,8 @@
 
 namespace MonkeyCAM {
 
+enum class GCodeUnits { Inches, Millimeters };
+
 //------------------------------------------------------------------------------
 // Tool
 //
@@ -51,6 +53,7 @@ class Machine {
   Machine(Config& config);
 
   const Tool& tool(int id) const { return m_tools.at(id); }
+  GCodeUnits gcodeUnits() const { return m_gcodeUnits; }
 
 #define MPT(_f, _t, _n) \
   const _t _f() const { return m_config.get<_t>(_n); }
@@ -107,6 +110,7 @@ class Machine {
  private:
   Config& m_config;
   /*const*/ std::map<int, const Tool> m_tools;
+  GCodeUnits m_gcodeUnits;
 };
 
 }  // namespace MonkeyCAM

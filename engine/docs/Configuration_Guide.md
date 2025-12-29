@@ -643,6 +643,17 @@ will be rare for you to change this file.
     }
 }
 ```
+
+### Output Units
+
+#### G-Code Units
+"gcode units": `"in"` or `"mm"`
+
+Sets the output units for generated G-code. Use `"in"` for inches
+(the default) or `"mm"` for millimeters.
+MonkeyCAM converts its internal units to the selected units and
+emits `G20` (inches) or `G21` (millimeters) accordingly.
+
 ### Overall speeds and feeds
 
 All feed rates are emitted as `F` codes in the G-Code programs,

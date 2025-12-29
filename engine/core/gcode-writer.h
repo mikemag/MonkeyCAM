@@ -46,7 +46,8 @@ class GCodeWriter {
 
   // Feed speeds are in IPM, suitable for a Fxx.
   GCodeWriter(std::string filename, Tool const& tool, ZeroZ zeroHeight,
-              XYOrigin origin, int normalSpeed, MCFixed rapidHeight);
+              XYOrigin origin, int normalSpeed, MCFixed rapidHeight,
+              GCodeUnits units);
   GCodeWriter();
 
   void spindleOn();
@@ -82,6 +83,8 @@ class GCodeWriter {
 
   const Tool& tool() const { return m_tool; }
   const Point& currentPosition() const { return m_currentPosition; }
+  std::string formatLength(const MCFixed& value) const;
+  std::string formatLengthWithUnits(const MCFixed& value) const;
 
  private:
   typedef std::vector<std::string> GCodeLines;
@@ -94,6 +97,8 @@ class GCodeWriter {
   void startBlock();
   void endBlock();
   void updateCurrentPosition(Point p);
+  const char* unitsName() const;
+  const char* unitsSuffix() const;
 
   std::string m_filename;
   Tool m_tool;
@@ -101,6 +106,7 @@ class GCodeWriter {
   int m_defaultSpeed;
 
   MCFixed m_rapidHeight;
+  GCodeUnits m_units;
 
   ZeroZ m_zeroHeight;
   XYOrigin m_xyOrigin;

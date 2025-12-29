@@ -38,6 +38,18 @@ std::string MCFixed::str() const {
   return std::string(buff);
 }
 
+std::string MCFixed::mmStr() const {
+  int64_t scaled = m_data * 10;
+  int64_t a = std::abs(scaled / ScalingFactor);
+  int64_t b = std::abs(scaled % ScalingFactor);
+  const char* minus = "";
+  if ((scaled < 0) && ((a != 0) || (b != 0))) minus = "-";
+  char buff[100];
+  snprintf(buff, sizeof(buff), "%s%lld.%.*lld", minus, (long long)a, Precision,
+           (long long)b);
+  return std::string(buff);
+}
+
 std::string MCFixed::inchesStr() const {
   MCFixed x = *this / 2.54;
   int64_t a = std::abs(x.m_data / ScalingFactor);

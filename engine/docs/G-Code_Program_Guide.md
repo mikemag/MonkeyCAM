@@ -224,7 +224,7 @@ use, etc. All programs contain the following:
   board.)
 * A reminder that G54 is the work coordinates, and G55 is expected to
   be the machine coordinates.
-* A reminder that the units are in **inches**.
+* A reminder of the units (in or mm).
 * The cutter bounding box in G54, which tells you the maximum range
 the cutter will move in any axis. This is computed from the generated
 G-Code in a separate step from the math which generated it as a safety
@@ -243,6 +243,10 @@ point of the program, still at the rapid height. The spindle is turned
 on, followed by a short delay to let the spindle come up to speed,
 then the program starts with the first plunge into the part which
 includes the first setting of the feed rate.
+
+The first line selects output units: `G20` for inches or `G21` for
+millimeters. This is controlled by the machine configuration option
+`"gcode units"`.
 
 Every program assumes it is starting at G55 X0 Y0 Z0. This must be
 away from the part, and **above the rapid height**, typically at the
