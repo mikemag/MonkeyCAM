@@ -90,7 +90,7 @@ It has been available on the web at [MonkeyCAM.org](https://www.monkeycam.org) s
 ## Future Work
 
 There is no feature work planned. Below is a list of some ideas which were never completed.
-See [Contributing](#ontributing) if you'd like to help.
+See [Contributing](#contributing) if you'd like to help.
 
 - Engine
   - Target more G-code controllers with different formats and requirements.
