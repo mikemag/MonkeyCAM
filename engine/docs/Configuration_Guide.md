@@ -657,7 +657,7 @@ or `"in"`). When a unit suffix is omitted, values default to inches.
 }
 ```
 
-### Output Units
+### Machine Configuration
 
 #### G-Code Units
 "gcode units": `"in"` or `"mm"`
