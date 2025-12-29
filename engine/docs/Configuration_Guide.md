@@ -667,6 +667,14 @@ Sets the output units for generated G-code. Use `"in"` for inches
 MonkeyCAM converts its internal units to the selected units and
 emits `G20` (inches) or `G21` (millimeters) accordingly.
 
+#### XY Rotation
+"rotate x/y axes": `"none"` | `"counter-clockwise"` | `"clockwise"`
+
+Rotates the X/Y coordinates when emitting G-code. Use `"none"` for the
+default orientation, `"counter-clockwise"` for a -90° rotation, or
+`"clockwise"` for a 90° rotation. This is useful when your machine's
+long and short axes are configured opposite of the MonkeyCAM defaults.
+
 ### Overall speeds and feeds
 
 All feed rates are emitted as `F` codes in the G-Code programs,

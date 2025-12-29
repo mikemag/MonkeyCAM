@@ -2,6 +2,7 @@
   "machine":
   {
     "gcode units": "in",
+    "rotate x/y axes": "none",
 
     "rapid speed": 100,
     "normal speed": 80,

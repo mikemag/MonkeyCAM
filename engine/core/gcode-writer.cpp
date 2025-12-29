@@ -36,12 +36,13 @@ using std::vector;
 
 GCodeWriter::GCodeWriter(string filename, Tool const& tool, ZeroZ zeroHeight,
                          XYOrigin origin, int normalSpeed, MCFixed rapidHeight,
-                         GCodeUnits units)
+                         GCodeUnits units, XYRotation xyRotation)
     : m_filename(filename),
       m_tool(tool),
       m_defaultSpeed(normalSpeed),
       m_rapidHeight(rapidHeight),
       m_units(units),
+      m_xyRotation(xyRotation),
       m_zeroHeight(zeroHeight),
       m_xyOrigin(origin),
       m_incremental(false),
@@ -54,7 +55,8 @@ GCodeWriter::GCodeWriter(string filename, Tool const& tool, ZeroZ zeroHeight,
 }
 
 // Empty writer which can be used as a placeholder for 'nothing'.
-GCodeWriter::GCodeWriter() : m_units(GCodeUnits::Inches) {}
+GCodeWriter::GCodeWriter()
+    : m_units(GCodeUnits::Inches), m_xyRotation(XYRotation::None) {}
 
 // Simple word-wrapped comments
 void GCodeWriter::headerComment(string s, int indent) {
@@ -169,6 +171,11 @@ void GCodeWriter::headerBlock() {
                  m_xyOrigin == LowerLeft
                      ? "the lower left of the table"
                      : "the left side of the table, Y is center of the part");
+  if (m_xyRotation == XYRotation::CounterClockwise) {
+    headerComment("* XY axes are rotated counter-clockwise.");
+  } else if (m_xyRotation == XYRotation::Clockwise) {
+    headerComment("* XY axes are rotated clockwise.");
+  }
   headerComment(
       "* Requires G54 to be the part work coordinate offsets "
       "[WCO]. [0, 0] is the center of the nose, with the board "
@@ -228,29 +235,34 @@ void GCodeWriter::spindleOff() { line("M05"); }
 // moves to the point adjusted to the rapid height.
 void GCodeWriter::rapidToPoint(Point p) {
   if (p.Z != m_rapidHeight) p.Z = m_rapidHeight;
+  Point output = outputPoint(p);
   if (!m_firstMovement && (m_currentPosition.Z != m_rapidHeight)) {
     Point c = m_currentPosition;
     c.Z = m_rapidHeight;
-    lineF("G00 X%s Y%s Z%s", formatLength(c.X).c_str(),
-          formatLength(c.Y).c_str(), formatLength(c.Z).c_str());
+    Point outputCurrent = outputPoint(c);
+    lineF("G00 X%s Y%s Z%s", formatLength(outputCurrent.X).c_str(),
+          formatLength(outputCurrent.Y).c_str(),
+          formatLength(outputCurrent.Z).c_str());
     updateCurrentPosition(c);
   }
   if (p != m_currentPosition) {
-    lineF("G00 X%s Y%s Z%s", formatLength(p.X).c_str(),
-          formatLength(p.Y).c_str(), formatLength(p.Z).c_str());
+    lineF("G00 X%s Y%s Z%s", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str());
   }
   updateCurrentPosition(p);
   m_firstMovement = false;
 }
 
 void GCodeWriter::feedToPoint(Point p, int feedRate) {
+  Point output = outputPoint(p);
   if (feedRate == -1) feedRate = m_defaultSpeed;
   if (feedRate != m_currentSpeed) {
-    lineF("G01 X%s Y%s Z%s F%d", formatLength(p.X).c_str(),
-          formatLength(p.Y).c_str(), formatLength(p.Z).c_str(), feedRate);
+    lineF("G01 X%s Y%s Z%s F%d", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str(),
+          feedRate);
   } else {
-    lineF("G01 X%s Y%s Z%s", formatLength(p.X).c_str(),
-          formatLength(p.Y).c_str(), formatLength(p.Z).c_str());
+    lineF("G01 X%s Y%s Z%s", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str());
   }
   updateCurrentPosition(p);
   m_currentSpeed = feedRate;
@@ -331,19 +343,21 @@ void GCodeWriter::updateCurrentPosition(Point p) {
   } else {
     m_currentPosition += p;
   }
-  m_lowerBoundingBox.X = std::min(m_currentPosition.X, m_lowerBoundingBox.X);
-  m_lowerBoundingBox.Y = std::min(m_currentPosition.Y, m_lowerBoundingBox.Y);
-  m_lowerBoundingBox.Z = std::min(m_currentPosition.Z, m_lowerBoundingBox.Z);
-  m_upperBoundingBox.X = std::max(m_currentPosition.X, m_upperBoundingBox.X);
-  m_upperBoundingBox.Y = std::max(m_currentPosition.Y, m_upperBoundingBox.Y);
-  m_upperBoundingBox.Z = std::max(m_currentPosition.Z, m_upperBoundingBox.Z);
+  Point output = outputPoint(m_currentPosition);
+  m_lowerBoundingBox.X = std::min(output.X, m_lowerBoundingBox.X);
+  m_lowerBoundingBox.Y = std::min(output.Y, m_lowerBoundingBox.Y);
+  m_lowerBoundingBox.Z = std::min(output.Z, m_lowerBoundingBox.Z);
+  m_upperBoundingBox.X = std::max(output.X, m_upperBoundingBox.X);
+  m_upperBoundingBox.Y = std::max(output.Y, m_upperBoundingBox.Y);
+  m_upperBoundingBox.Z = std::max(output.Z, m_upperBoundingBox.Z);
 }
 
 // A clockwise arc, 2d only (z is ignored).
 void GCodeWriter::emitClockwiseArc(Point dest, MCFixed radius) {
   assert(dest.Z == 0);
-  lineF("G02 X%s Y%s Z0.0000 R%s", formatLength(dest.X).c_str(),
-        formatLength(dest.Y).c_str(), formatLength(radius).c_str());
+  Point output = outputPoint(dest);
+  lineF("G02 X%s Y%s Z0.0000 R%s", formatLength(output.X).c_str(),
+        formatLength(output.Y).c_str(), formatLength(radius).c_str());
   updateCurrentPosition(dest);
 }
 
@@ -421,6 +435,16 @@ void GCodeWriter::write(string directory) const {
   o << "\r\n";
   for (const auto& l : m_lines) o << l << "\r\n";
   o.close();
+}
+
+Point GCodeWriter::outputPoint(Point p) const {
+  if (m_xyRotation == XYRotation::CounterClockwise) {
+    return Point(-p.Y, p.X, p.Z);
+  }
+  if (m_xyRotation == XYRotation::Clockwise) {
+    return Point(p.Y, -p.X, p.Z);
+  }
+  return p;
 }
 
 std::string GCodeWriter::formatLength(const MCFixed& value) const {

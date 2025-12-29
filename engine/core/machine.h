@@ -26,6 +26,7 @@
 namespace MonkeyCAM {
 
 enum class GCodeUnits { Inches, Millimeters };
+enum class XYRotation { None, CounterClockwise, Clockwise };
 
 //------------------------------------------------------------------------------
 // Tool
@@ -104,6 +105,18 @@ class Machine {
   MPI(edgeTrenchExtension, "edge trench extension")
   MPI(splitboardCenterTrenchWidth, "splitboard center trench width")
   MPI(splitboardCenterGap, "splitboard center gap")
+
+  XYRotation xyRotation() const {
+    auto rotation =
+        m_config.get<std::string>("rotate x/y axes", std::string("none"));
+    if (rotation == "counter-clockwise") {
+      return XYRotation::CounterClockwise;
+    }
+    if (rotation == "clockwise") {
+      return XYRotation::Clockwise;
+    }
+    return XYRotation::None;
+  }
 #undef MPT
 #undef MPI
 
