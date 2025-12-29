@@ -3,12 +3,12 @@
   {
     "name": "Sample-splitboard",
     "splitboard": true,
-    "nose length": 18,
-    "effective edge length": 136,
-    "tail length": 14,
-    "sidecut radius": 1100,
-    "waist width": 24.6,
-    "taper": 0.4,
+    "nose length": "18cm",
+    "effective edge length": "136cm",
+    "tail length": "14cm",
+    "sidecut radius": "1100cm",
+    "waist width": "24.6cm",
+    "taper": "4mm",
     "nose shape":
     {
       "type": "Basic Bezier",
@@ -25,15 +25,15 @@
       "end handle": 0.50,
       "transition handle": 0.75
     },
-    "reference stance width": 52,
-    "stance setback": 2,
-    "nose and tail spacer width": 2
+    "reference stance width": "52cm",
+    "stance setback": "2cm",
+    "nose and tail spacer width": "2cm"
   },
   "profile":
   {
-    "nose thickness": 0.2,
-    "center thickness": 0.79,
-    "tail thickness": 0.2,
+    "nose thickness": "2mm",
+    "center thickness": "7.9mm",
+    "tail thickness": "2mm",
     "nose taper":
     {
       "taper start": 0.45,
