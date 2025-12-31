@@ -10,29 +10,28 @@ import Spinner from 'react-spinkit';
 
 import {
   Button,
-  Glyphicon,
-  Panel,
-  Grid,
+  Card,
+  Container,
   Row,
   Col,
   Alert,
-  Form,
-  FormGroup,
-  ControlLabel,
-  FormControl
+  Form
 } from 'react-bootstrap';
 
-import CodeMirror from 'react-codemirror';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/edit/closebrackets.js';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint.css';
+import 'codemirror/addon/hint/show-hint.css';
+import 'codemirror/mode/javascript/javascript.js';
+import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/lint/lint.js';
-import 'codemirror/addon/lint/json-lint.js';
-import 'codemirror/addon/selection/active-line.js';
+import 'codemirror/addon/hint/javascript-hint';
+import { JSHINT } from 'jshint';
+window.JSHINT = JSHINT;
 
 import { cfURLRoot } from './CommonComponents';
 import kofi_button_blue_png from './media/kofi_button_blue.png';
+import withRouter from './withRouter';
 
 
 async function addJob(boardConfig, bindingConfig, machineConfig, bindingDist) {
@@ -393,29 +392,37 @@ class JSONEditor extends Component {
     this.state = {
       code: (props.jsonDoc && JSON.stringify(props.jsonDoc, null, 2)) || ''
     };
+    this.editor = null;
     this.updateCode = this.updateCode.bind(this);
+    this.handleEditorDidMount = this.handleEditorDidMount.bind(this);
   }
 
   updateCode(newCode) {
     this.setState({ code: newCode });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.jsonDoc !== this.props.jsonDoc) {
+  componentDidUpdate(prevProps) {
+    if (this.props.jsonDoc !== prevProps.jsonDoc) {
       const c =
-        (nextProps.jsonDoc && JSON.stringify(nextProps.jsonDoc, null, 2)) || '';
+        (this.props.jsonDoc && JSON.stringify(this.props.jsonDoc, null, 2)) ||
+        '';
       console.log('JSONDoc setting state');
       this.setState({
         code: c
       });
 
-      // This CodeMirror React component is odd... it's not picking up changes in its value prop.
-      this.refs.editor.getCodeMirror().setValue(c);
+      if (this.editor) {
+        this.editor.setValue(c);
+      }
     }
   }
 
+  handleEditorDidMount(editor) {
+    this.editor = editor;
+  }
+
   getEditorContents() {
-    return this.refs.editor.getCodeMirror().getValue();
+    return this.editor ? this.editor.getValue() : this.state.code;
   }
 
   render() {
@@ -427,18 +434,18 @@ class JSONEditor extends Component {
       matchBrackets: true,
       autoCloseBrackets: true,
       gutters: ['CodeMirror-lint-markers'],
-      lint: this.state.code.trim(),
+      lint: true,
       styleActiveLine: true
     };
     return (
-      <Panel className="json-editor-panel">
+      <div className="json-editor-panel">
         <CodeMirror
-          ref="editor"
           value={this.state.code}
-          onChange={this.updateCode}
+          editorDidMount={this.handleEditorDidMount}
+          onChange={(editor, data, value) => {}}
           options={options}
         />
-      </Panel>
+      </div>
     );
   }
 }
@@ -464,6 +471,9 @@ class DesignPage extends Component {
     this.handleLoadSampleSplitboard = this.handleLoadSampleSplitboard.bind(
       this
     );
+    this.boardEditorRef = React.createRef();
+    this.bindingEditorRef = React.createRef();
+    this.machineEditorRef = React.createRef();
   }
 
   handleRunMonkeyCAM = e => {
@@ -471,14 +481,14 @@ class DesignPage extends Component {
       this.setState({ isLaunching: true, configErrors: '' });
       // Good hint on getting lint state out of CodeMirror:
       // https://stackoverflow.com/questions/41534824/codemirror-get-linting-result-from-outside-of-the-editor
-      const bc = JSON.parse(this.refs.boardEditor.getEditorContents());
-      const bic = JSON.parse(this.refs.bindingEditor.getEditorContents());
-      const mc = JSON.parse(this.refs.machineEditor.getEditorContents());
+      const bc = JSON.parse(this.boardEditorRef.current.getEditorContents());
+      const bic = JSON.parse(this.bindingEditorRef.current.getEditorContents());
+      const mc = JSON.parse(this.machineEditorRef.current.getEditorContents());
       const bd = this.state.bindingDist;
       addJob(bc, bic, mc, bd)
         .then(result => {
           console.log('Result=', result);
-          this.props.history.push(`/jobactivity/${result.jobId}`);
+          this.props.navigate(`/jobactivity/${result.jobId}`);
         })
         .catch(e => {
           this.setState({
@@ -544,9 +554,10 @@ class DesignPage extends Component {
   componentDidMount() {
     window.scrollTo(0, 0);
 
-    if (this.props.match.params.inputsid) {
+    const { inputsid } = this.props.params;
+    if (inputsid) {
       this.setState({ isLoadingInputs: true, loadingInputsErrors: '' });
-      loadInputs(this.props.match.params.inputsid)
+      loadInputs(inputsid)
         .then(result => {
           this.setState({
             isLoadingInputs: false,
@@ -560,9 +571,7 @@ class DesignPage extends Component {
           this.setState({
             isLoadingInputs: false,
             loadingInputsErrors:
-              `Failed to fetch configs from storage for id ${
-                this.props.match.params.inputsid
-              }:` + e
+              `Failed to fetch configs from storage for id ${inputsid}:` + e
           });
         });
     }
@@ -575,33 +584,38 @@ class DesignPage extends Component {
     const goPanelHeader = <h3>Step 4: Go!</h3>;
     let invalidConfig = null;
     if (this.state.configErrors) {
-      invalidConfig = <Alert bsStyle="danger">{this.state.configErrors}</Alert>;
+      invalidConfig = (
+        <Alert variant="danger">{this.state.configErrors}</Alert>
+      );
     }
 
     if (this.state.isLoadingInputs) {
       return (
-        <Grid>
+        <Container>
           <Row>
-            <Col sm={10} smOffset={1}>
+            <Col sm={{ span: 10, offset: 1 }}>
               <div className="text-info text-center">
                 <p>Loading existing inputs</p>
                 <Spinner
                   id="spinner"
-                  color="inherit"
                   name="three-bounce"
                   fadeIn="none"
                 />
               </div>
             </Col>
           </Row>
-        </Grid>
+        </Container>
       );
     }
 
+    const bindingDistValidation = this.getCMValidationState();
+    const isBindingDistValid = bindingDistValidation === 'success';
+    const isBindingDistInvalid = bindingDistValidation === 'error';
+
     return (
-      <Grid>
+      <Container>
         <Row>
-          <Col sm={10} smOffset={1}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <div>
               <p>
                 Enter your board, binding, and machine definitions here in JSON
@@ -613,21 +627,21 @@ class DesignPage extends Component {
               </p>
               <div className="text-center">
                 <Button
-                  bsStyle="primary"
+                  variant="primary"
                   style={{ margin: 5 }}
                   onClick={this.handleLoadSampleSnowboard}
                 >
                   Start with a sample snowboard
                 </Button>
                 <Button
-                  bsStyle="primary"
+                  variant="primary"
                   style={{ margin: 5 }}
                   onClick={this.handleLoadSampleSki}
                 >
                   Start with a sample ski
                 </Button>
                 <Button
-                  bsStyle="primary"
+                  variant="primary"
                   style={{ margin: 5 }}
                   onClick={this.handleLoadSampleSplitboard}
                 >
@@ -639,14 +653,18 @@ class DesignPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smOffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <div className="text-center">
               <p>You can help pay for server costs with a small donation.</p>
-              <a href="https://ko-fi.com/mikemag" target="_blank">
+              <a
+                href="https://ko-fi.com/mikemag"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <img
-                    style={{ maxWidth: '200px' }}
-                    src={kofi_button_blue_png}
-                    alt="Support me on Ko-fi"
+                  style={{ maxWidth: '200px' }}
+                  src={kofi_button_blue_png}
+                  alt="Support me on Ko-fi"
                 />
               </a>
             </div>
@@ -655,77 +673,93 @@ class DesignPage extends Component {
         </Row>
         <Row>
           <Col sm={6}>
-            <Panel header={boardPanelHeader}>
-              <JSONEditor ref="boardEditor" jsonDoc={this.state.boardConfig} />
-            </Panel>
+            <Card className="mb-3 mc-panel">
+              <Card.Header>{boardPanelHeader}</Card.Header>
+              <Card.Body>
+                <JSONEditor
+                  ref={this.boardEditorRef}
+                  jsonDoc={this.state.boardConfig}
+                />
+              </Card.Body>
+            </Card>
           </Col>
           <Col sm={6}>
-            <Panel header={bindingPanelHeader}>
-              <JSONEditor
-                ref="bindingEditor"
-                jsonDoc={this.state.bindingConfig}
-              />
-              <Form onSubmit={this.handleBindingDistSubmit}>
-                <FormGroup
-                  controlId="formBasicText"
-                  validationState={this.getCMValidationState()}
-                >
-                  <ControlLabel>Binding distance, for skis</ControlLabel>
-                  <FormControl
-                    type="text"
-                    value={this.state.bindingDist}
-                    placeholder="Enter binding distance in cm"
-                    onChange={this.handleBindingDistChange}
-                  />
-                  <FormControl.Feedback />
-                </FormGroup>
-              </Form>
-            </Panel>
+            <Card className="mb-3 mc-panel">
+              <Card.Header>{bindingPanelHeader}</Card.Header>
+              <Card.Body>
+                <JSONEditor
+                  ref={this.bindingEditorRef}
+                  jsonDoc={this.state.bindingConfig}
+                />
+                <br/>
+                <Form onSubmit={this.handleBindingDistSubmit}>
+                  <Form.Group controlId="bindingDistance">
+                    <Form.Label column={1}><b>Binding distance, for skis</b></Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={this.state.bindingDist}
+                      placeholder="Enter binding distance in cm"
+                      onChange={this.handleBindingDistChange}
+                      isValid={isBindingDistValid}
+                      isInvalid={isBindingDistInvalid}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      Binding distance must be a positive number.
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Form>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={6}>
-            <Panel header={machinePanelHeader}>
-              <JSONEditor
-                ref="machineEditor"
-                jsonDoc={this.state.machineConfig}
-              />
-            </Panel>
+            <Card className="mb-3 mc-panel">
+              <Card.Header>{machinePanelHeader}</Card.Header>
+              <Card.Body>
+                <JSONEditor
+                  ref={this.machineEditorRef}
+                  jsonDoc={this.state.machineConfig}
+                />
+              </Card.Body>
+            </Card>
           </Col>
           <Col sm={6}>
-            <Panel header={goPanelHeader}>
-              <Row>
-                <Col sm={12}>
-                  <div className="run-monkeycam">
-                    <Button
-                      bsStyle="primary"
-                      disabled={this.state.isLaunching}
-                      onClick={this.handleRunMonkeyCAM}
-                    >
-                      <Glyphicon glyph="send" /> Run MonkeyCAM
-                    </Button>
-                    {this.state.isLaunching && (
-                      <div className="text-info">
-                        <Spinner
-                          id="spinner"
-                          color="inherit"
-                          name="three-bounce"
-                          fadeIn="none"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col sm={12}>{invalidConfig}</Col>
-              </Row>
-            </Panel>
+            <Card className="mb-3 mc-panel">
+              <Card.Header>{goPanelHeader}</Card.Header>
+              <Card.Body>
+                <Row>
+                  <Col sm={12}>
+                    <div className="run-monkeycam">
+                      <Button
+                        variant="primary"
+                        disabled={this.state.isLaunching}
+                        onClick={this.handleRunMonkeyCAM}
+                      >
+                        Run MonkeyCAM
+                      </Button>
+                      {this.state.isLaunching && (
+                        <div className="text-info">
+                          <Spinner
+                            id="spinner"
+                            name="three-bounce"
+                            fadeIn="none"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col sm={12}>{invalidConfig}</Col>
+                </Row>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }
 
-export default DesignPage;
+export default withRouter(DesignPage);

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 const title = <h3>How to use MonkeyCAM</h3>;
 class DocsPage extends Component {
@@ -16,110 +16,115 @@ class DocsPage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={12}>
-            <Panel header={title} bsStyle="primary">
-              <p>
-                MonkeyCAM is an open source CAD/CAM program for designing skis,
-                snowboards and splitboards, and generating G-code programs to
-                cut board parts with a CNC machine. It takes configuration files
-                to describe the ski or snowboard shape via a small set of
-                parameters and generates the following nine G-code programs:
-              </p>
-              <ul>
-                <li>
-                  <strong>Base cutout</strong>
-                </li>
-                <li>
-                  Core:
-                  <ul>
-                    <li>
-                      <strong>Guide holes</strong> to allow the core to be
-                      removed and flipped between programs
-                    </li>
-                    <li>
-                      <strong>Alignment marks</strong> to transfer key design
-                      points to the bottom of the core
-                    </li>
-                    <li>
-                      <strong>Edge relief</strong> to leave room for steel edges
-                    </li>
-                    <li>
-                      <strong>Insert holes</strong> for standard snowboard
-                      inserts (T-nuts) in a variety of patterns
-                    </li>
-                    <li>
-                      <strong>Top profile</strong> to impart the taper to the
-                      core
-                    </li>
-                    <li>
-                      <strong>Core cutout</strong>, allowing for sidewall
-                      overhang and nose/tail spacers
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Nose and tail spacers</strong> which match the core
-                </li>
-                <li>
-                  <strong>Edge trenches</strong> to enable inlay of different
-                  edge wood and/or sidewall material along the effective edge of
-                  the core
-                </li>
-              </ul>
-              <p>For splitboards, it also generates one more program:</p>
-              <ul>
-                <li>
-                  <strong>Center trench</strong> to enable inlay of sidewall
-                  material along the center of the core
-                </li>
-              </ul>
+            <Card className="mb-3 mc-panel-primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
+                <p>
+                  MonkeyCAM is an open source CAD/CAM program for designing
+                  skis, snowboards and splitboards, and generating G-code
+                  programs to cut board parts with a CNC machine. It takes
+                  configuration files to describe the ski or snowboard shape
+                  via a small set of parameters and generates the following
+                  nine G-code programs:
+                </p>
+                <ul>
+                  <li>
+                    <strong>Base cutout</strong>
+                  </li>
+                  <li>
+                    Core:
+                    <ul>
+                      <li>
+                        <strong>Guide holes</strong> to allow the core to be
+                        removed and flipped between programs
+                      </li>
+                      <li>
+                        <strong>Alignment marks</strong> to transfer key design
+                        points to the bottom of the core
+                      </li>
+                      <li>
+                        <strong>Edge relief</strong> to leave room for steel
+                        edges
+                      </li>
+                      <li>
+                        <strong>Insert holes</strong> for standard snowboard
+                        inserts (T-nuts) in a variety of patterns
+                      </li>
+                      <li>
+                        <strong>Top profile</strong> to impart the taper to the
+                        core
+                      </li>
+                      <li>
+                        <strong>Core cutout</strong>, allowing for sidewall
+                        overhang and nose/tail spacers
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>Nose and tail spacers</strong> which match the core
+                  </li>
+                  <li>
+                    <strong>Edge trenches</strong> to enable inlay of different
+                    edge wood and/or sidewall material along the effective edge
+                    of the core
+                  </li>
+                </ul>
+                <p>For splitboards, it also generates one more program:</p>
+                <ul>
+                  <li>
+                    <strong>Center trench</strong> to enable inlay of sidewall
+                    material along the center of the core
+                  </li>
+                </ul>
 
-              <p>
-                MonkeyCAM also generates an overview HTML file which shows
-                diagrams for all of the generated shapes and programs. Using
-                this it is very easy to iterate on a design and make fine
-                adjustments.
-              </p>
+                <p>
+                  MonkeyCAM also generates an overview HTML file which shows
+                  diagrams for all of the generated shapes and programs. Using
+                  this it is very easy to iterate on a design and make fine
+                  adjustments.
+                </p>
 
-              <h3>Configuration Files</h3>
-              <p>
-                MonkeyCAM uses two configuration files, one to describe the
-                board and one to describe the details of how to machine the
-                board. The board definition file describes the shape of the
-                board, the thickness and taper of the core, placement of
-                inserts, etc. The machine and tool definition file describes
-                machining parameters used by various programs (rapid and various
-                cutting heights and depths, raw material thicknesses, etc.) and
-                parameters of each tool used.
-              </p>
-              <p>
-                See the{' '}
-                <a href="https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Configuration_Guide.md">
-                  MonkeyCAM v4.0 Configuration Guide
-                </a>{' '}
-                for more details.
-              </p>
+                <h3>Configuration Files</h3>
+                <p>
+                  MonkeyCAM uses two configuration files, one to describe the
+                  board and one to describe the details of how to machine the
+                  board. The board definition file describes the shape of the
+                  board, the thickness and taper of the core, placement of
+                  inserts, etc. The machine and tool definition file describes
+                  machining parameters used by various programs (rapid and
+                  various cutting heights and depths, raw material thicknesses,
+                  etc.) and parameters of each tool used.
+                </p>
+                <p>
+                  See the{' '}
+                  <a href="https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Configuration_Guide.md">
+                    MonkeyCAM v4.0 Configuration Guide
+                  </a>{' '}
+                  for more details.
+                </p>
 
-              <h3>G-Code Programs</h3>
-              <p>
-                The G-Code programs generated by MonkeyCAM are designed to work
-                together to create the parts necessary to build a ski or
-                snowboard. This includes the core, base material, and nose/tail
-                filler material.
-              </p>
-              <p>
-                See the{' '}
-                <a href="https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/G-Code_Program_Guide.md">
-                  MonkeyCAM v4.0 G-Code Program Guide
-                </a>{' '}
-                for more details.
-              </p>
-            </Panel>
+                <h3>G-Code Programs</h3>
+                <p>
+                  The G-Code programs generated by MonkeyCAM are designed to
+                  work together to create the parts necessary to build a ski or
+                  snowboard. This includes the core, base material, and
+                  nose/tail filler material.
+                </p>
+                <p>
+                  See the{' '}
+                  <a href="https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/G-Code_Program_Guide.md">
+                    MonkeyCAM v4.0 G-Code Program Guide
+                  </a>{' '}
+                  for more details.
+                </p>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }

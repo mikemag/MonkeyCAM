@@ -5,23 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/css/bootstrap-theme.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/eclipse.css';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import sw from './registerServiceWorker';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <BrowserRouter>
     <App />
-  </BrowserRouter>,
-  document.getElementById('root')
+  </BrowserRouter>
 );
 
 // @TODO: hrm, service workers and cache control are in a right pain in

@@ -12,13 +12,13 @@ var development = process.env.NODE_ENV === 'development';
 var cfURLRoot = 'https://us-central1-monkeycam-web-app.cloudfunctions.net';
 
 if (development) {
-  cfURLRoot = 'http://localhost:3000';
+  // cfURLRoot = 'http://localhost:3000';
 }
 
 class BadJobNotice extends React.Component {
   render() {
     return (
-      <Alert bsStyle="info" className="text-left">
+      <Alert variant="info" className="text-left">
         All server errors, slow jobs, and failed jobs are automatically logged
         and reviewed frequently by the developers. Please feel free to report
         this problem to{' '}

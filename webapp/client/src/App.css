@@ -8,6 +8,8 @@
 .App {
   margin: 16px;
   font-size: 16px;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #333;
 }
 
 html {
@@ -19,8 +21,9 @@ html {
   height: 25em;
 }
 
-.json-editor-panel .panel-body {
+.json-editor-panel {
   padding: 0px;
+  border: 1px solid #ddd;
 }
 
 .run-monkeycam {
@@ -51,6 +54,88 @@ html {
 .carousel-control.left,
 .carousel-control.right {
   background-image: none;
+}
+
+a {
+  color: #337ab7;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  color: #23527c;
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.navbar {
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.navbar .nav-link {
+  text-decoration: none;
+}
+
+.navbar .nav-link.active {
+  background-color: #e7e7e7;
+  border-radius: 4px;
+}
+
+.mc-panel {
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.mc-panel .card-header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  font-weight: 600;
+}
+
+.mc-panel .card-header h3 {
+  margin: 0;
+  font-size: 1.0rem;
+}
+
+.mc-panel .sk-spinner {
+  color: #337ab7;
+}
+
+.mc-panel-primary {
+  border: 1px solid #337ab7;
+  font-size: 1.0rem;
+}
+
+.mc-panel-primary .card-header {
+  background-color: #337ab7;
+  border-bottom: 1px solid #337ab7;
+  color: #fff;
+}
+
+.mc-panel-primary .card-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.mc-panel-primary .sk-spinner {
+  color: #337ab7;
+}
+
+.home-panel .card-header {
+  padding: 16px 24px;
 }
 
 /*

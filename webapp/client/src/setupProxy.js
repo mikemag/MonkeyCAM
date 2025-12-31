@@ -5,29 +5,33 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const proxy = require('http-proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
   app.use(
-    proxy('/addJob', {
+    '/addJob',
+    createProxyMiddleware({
       target: 'http://localhost:3003/',
       ws: true
     })
   );
   app.use(
-    proxy('/getJobStatus', {
+    '/getJobStatus',
+    createProxyMiddleware({
       target: 'http://localhost:3003/',
       ws: true
     })
   );
   app.use(
-    proxy('/getJobFullResults', {
+    '/getJobFullResults',
+    createProxyMiddleware({
       target: 'http://localhost:3003/',
       ws: true
     })
   );
   app.use(
-    proxy('/getJobInputs', {
+    '/getJobInputs',
+    createProxyMiddleware({
       target: 'http://localhost:3003/',
       ws: true
     })

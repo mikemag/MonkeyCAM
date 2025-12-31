@@ -10,7 +10,7 @@ import { Alert } from 'react-bootstrap';
 
 const LoginPage = () => (
   <div>
-    <Alert bsStyle="success">
+    <Alert variant="success">
       <p>
         <strong>Login is not yet implemented!</strong> Eventually we'll let you
         create an account and save ski and board designs, machine definitions,

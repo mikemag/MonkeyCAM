@@ -6,11 +6,12 @@
  */
 
 import React, { Component } from 'react';
-import { Button, Grid, Row, Col, Panel, Table, Alert } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
+import { Button, Card, Container, Row, Col, Table, Alert } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import Spinner from 'react-spinkit';
 import TimeAgo from 'react-timeago';
 import { BadJobNotice, cfURLRoot } from './CommonComponents';
+import withRouter from './withRouter';
 
 class JobExecutionDetails extends Component {
   render() {
@@ -91,11 +92,14 @@ class JobExecutionDetails extends Component {
     if (tableRows.length > 0) {
       const title = <h3 className="text-center">Job Execution Details</h3>;
       return (
-        <Panel header={title}>
-          <Table striped condensed>
-            <tbody>{tableRows}</tbody>
-          </Table>
-        </Panel>
+        <Card className="mb-3">
+          <Card.Header>{title}</Card.Header>
+          <Card.Body>
+            <Table striped size="sm">
+              <tbody>{tableRows}</tbody>
+            </Table>
+          </Card.Body>
+        </Card>
       );
     } else {
       return null;
@@ -184,13 +188,13 @@ class JobResultsPage extends Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const jobId = this.props.match.params.jobId;
+    const jobId = this.props.params.jobId;
     // @TODO: get basic and full in parallel ;) Or just make one damn call which includes both.
     this.getJobBasicResults(jobId)
       .then(result => {
         console.log('Basic results', result);
         if (result.state !== 'Completed' && result.state !== 'Failed') {
-          this.props.history.replace(`/jobactivity/${jobId}`);
+          this.props.navigate(`/jobactivity/${jobId}`, { replace: true });
           return;
         }
         this.setState({ hasBasicResults: true, basicResults: result });
@@ -229,16 +233,16 @@ class JobResultsPage extends Component {
           return (
             <tr key={index} className="text-left">
               <td>{file.filename}</td>
-              <td className="text-right">{file.lineCount}</td>
+              <td className="text-end">{file.lineCount}</td>
             </tr>
           );
         });
         ncFileTable = (
-          <Table striped condensed>
+          <Table striped size="sm">
             <thead>
               <tr>
                 <th>NC File Name</th>
-                <th className="text-right">Line Count</th>
+                <th className="text-end">Line Count</th>
               </tr>
             </thead>
             <tbody>{tableRows}</tbody>
@@ -248,26 +252,29 @@ class JobResultsPage extends Component {
 
       if (this.state.basicResults.state === 'Completed') {
         resultsDesc = (
-          <div className="text-center">
-            <p>
-              Generated {this.state.fullResults.ncFiles.length} G-code programs
-              for board '{this.state.fullResults.boardName}'.
-            </p>
-            <Button
-              bsStyle="primary"
-              style={{ margin: 5 }}
-              href={this.state.fullResults.overviewHTMLFileLink}
-              target="_blank"
-            >
-              Results Overview
-            </Button>
-            <Button
-              bsStyle="primary"
-              style={{ margin: 5 }}
-              href={this.state.fullResults.allFilesLink}
-            >
-              Download .zip of all files
-            </Button>
+          <div>
+            <div className="text-center">
+              <p>
+                Generated {this.state.fullResults.ncFiles.length} G-code programs
+                for board '{this.state.fullResults.boardName}'.
+              </p>
+              <Button
+                variant="primary"
+                style={{ margin: 5 }}
+                href={this.state.fullResults.overviewHTMLFileLink}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Results Overview
+              </Button>
+              <Button
+                variant="primary"
+                style={{ margin: 5 }}
+                href={this.state.fullResults.allFilesLink}
+              >
+                Download .zip of all files
+              </Button>
+            </div>
             <p />
             {ncFileTable}
           </div>
@@ -275,7 +282,7 @@ class JobResultsPage extends Component {
       } else {
         errorDesc = (
           <div>
-            <Alert bsStyle="danger" className="text-left">
+            <Alert variant="danger" className="text-left">
               <h4>Failed to generate G-code programs</h4>
               <JobErrorDetails
                 error={
@@ -291,10 +298,10 @@ class JobResultsPage extends Component {
 
       const retryLink = `/design/${this.state.basicResults.inputsId}`;
       retryDesc = (
-        <div className="text-right">
-          <LinkContainer to={retryLink}>
-            <Button bsStyle="primary">Change Design and Run Again</Button>
-          </LinkContainer>
+        <div className="text-end">
+          <Button as={Link} to={retryLink} variant="primary">
+            Change Design and Run Again
+          </Button>
         </div>
       );
     }
@@ -305,7 +312,6 @@ class JobResultsPage extends Component {
         <div className="text-info text-center">
           <Spinner
             id="spinner"
-            color="inherit"
             name="three-bounce"
             fadeIn="none"
           />
@@ -317,7 +323,7 @@ class JobResultsPage extends Component {
     if (this.state.serverError) {
       serverError = (
         <div className="text-info text-center">
-          <Alert bsStyle="danger">
+          <Alert variant="danger">
             The server returned an error: {this.state.serverError.message}
           </Alert>
         </div>
@@ -326,29 +332,32 @@ class JobResultsPage extends Component {
 
     const title = <h3 className="text-center">MonkeyCAM Results</h3>;
     return (
-      <Grid>
+      <Container>
         <Row>
-          <Col sm={8} smOffset={2}>
-            <Panel header={title} bsStyle="primary">
-              {spinnerRow}
-              {resultsDesc}
-              {errorDesc}
-              {serverError}
-              {retryDesc}
-            </Panel>
+          <Col sm={{ span: 8, offset: 2 }}>
+            <Card className="mb-3 mc-panel-primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
+                {spinnerRow}
+                {resultsDesc}
+                {errorDesc}
+                {serverError}
+                {retryDesc}
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smOffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <JobExecutionDetails
               basicResults={this.state.basicResults}
               fullResults={this.state.fullResults}
             />
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }
 
-export default JobResultsPage;
+export default withRouter(JobResultsPage);

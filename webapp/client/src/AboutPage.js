@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 const title = <h3>About MonkeyCAM</h3>;
 class AboutPage extends Component {
@@ -16,88 +16,93 @@ class AboutPage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={12}>
-            <Panel header={title} bsStyle="primary">
-              <h3>What is this?</h3>
-              <p>
-                MonkeyCAM is an{' '}
-                <a href="https://github.com/mikemag/MonkeyCAM">open source</a>{' '}
-                CAD/CAM program for designing skis, snowboards and splitboards,
-                and generating{' '}
-                <a href="http://en.wikipedia.org/wiki/G-code">G-code</a>{' '}
-                programs to cut board parts with a{' '}
-                <a href="http://en.wikipedia.org/wiki/Numerical_control">
-                  CNC machine
-                </a>. The{' '}
-                <a href="http://en.wikipedia.org/wiki/Computer-aided_design">
-                  CAD
+            <Card className="mb-3 mc-panel-primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
+                <h3>What is this?</h3>
+                <p>
+                  MonkeyCAM is an{' '}
+                  <a href="https://github.com/mikemag/MonkeyCAM">open source</a>{' '}
+                  CAD/CAM program for designing skis, snowboards and
+                  splitboards, and generating{' '}
+                  <a href="http://en.wikipedia.org/wiki/G-code">G-code</a>{' '}
+                  programs to cut board parts with a{' '}
+                  <a href="http://en.wikipedia.org/wiki/Numerical_control">
+                    CNC machine
+                  </a>
+                  . The{' '}
+                  <a href="http://en.wikipedia.org/wiki/Computer-aided_design">
+                    CAD
+                  </a>{' '}
+                  portion of MonkeyCAM is quite limited, and is specifically
+                  designed to aid the design of skis and snowboards only. The{' '}
+                  <a href="http://en.wikipedia.org/wiki/Computer-aided_manufacturing">
+                    CAM
+                  </a>{' '}
+                  portion is slightly more general, but again is specialized to
+                  ski and snowboard manufacture.
+                </p>
+                <p>
+                  Currently, MonkeyCAM is a command-line program which isn't
+                  very ease to use. This site makes it a bit easier to use
+                  since you don't have to download it and figure out how to use
+                  the command line. This will further improve over time with a
+                  better user interface, and nicer visualization of the
+                  results.
+                </p>
+                <h3>Building skis and snowboards</h3>
+                <p>
+                  This tool assumes you already know how to build skis and
+                  snowboards, and understand CNC machines. More information
+                  about ski and snowboard construction can be found at{' '}
+                  <a href="http://www.happymonkeysnowboards.com/MonkeyWiki">
+                    Monkey Wiki
+                  </a>{' '}
+                  and <a href="http://www.skibuilders.com/">SkiBuilders.com</a>.
+                </p>
+                <h3>Why is this site so slow??</h3>
+                <p>It's free :)</p>
+                <p>
+                  But seriously, this site has been implemented in a way which
+                  ensures all of the hosting and server processing stays under
+                  the Google Free Tier limits for Google App Engine and Compute
+                  Engine. In particular, much of the API back-end is actually
+                  implemented with Google Cloud Functions, which are quite slow
+                  when they are infrequently used.
+                </p>
+                <p>
+                  If usage of this site picks up it can be easily changed to be
+                  a) faster and b) more scalable.
+                </p>
+                <h3>Current issues and feature requests</h3>
+                See the{' '}
+                <a href="https://github.com/mikemag/MonkeyCAM/issues">
+                  Github issues page
                 </a>{' '}
-                portion of MonkeyCAM is quite limited, and is specifically
-                designed to aid the design of skis and snowboards only. The{' '}
-                <a href="http://en.wikipedia.org/wiki/Computer-aided_manufacturing">
-                  CAM
-                </a>{' '}
-                portion is slightly more general, but again is specialized to
-                ski and snowboard manufacture.
-              </p>
-              <p>
-                Currently, MonkeyCAM is a command-line program which isn't very
-                ease to use. This site makes it a bit easier to use since you
-                don't have to download it and figure out how to use the command
-                line. This will further improve over time with a better user
-                interface, and nicer visualization of the results.
-              </p>
-              <h3>Building skis and snowboards</h3>
-              <p>
-                This tool assumes you already know how to build skis and
-                snowboards, and understand CNC machines. More information about
-                ski and snowboard construction can be found at{' '}
-                <a href="http://www.happymonkeysnowboards.com/MonkeyWiki">
-                  Monkey Wiki
-                </a>{' '}
-                and <a href="http://www.skibuilders.com/">SkiBuilders.com</a>.
-              </p>
-              <h3>Why is this site so slow??</h3>
-              <p>It's free :)</p>
-              <p>
-                But seriously, this site has been implemented in a way which
-                ensures all of the hosting and server processing stays under the
-                Google Free Tier limits for Google App Engine and Compute
-                Engine. In particular, much of the API back-end is actually
-                implemented with Google Cloud Functions, which are quite slow
-                when they are infrequently used.
-              </p>
-              <p>
-                If usage of this site picks up it can be easily changed to be a)
-                faster and b) more scalable.
-              </p>
-              <h3>Current issues and feature requests</h3>
-              See the{' '}
-              <a href="https://github.com/mikemag/MonkeyCAM/issues">
-                Github issues page
-              </a>{' '}
-              for a list of known issues, current feature requests, and to file
-              bugs or ask for other features.
-              <h3>License</h3>
-              <p>
-                The G-code programs generated by MonkeyCAM are license-free;
-                they may be used for any purpose.
-              </p>
-              <h3>Disclaimer</h3>
-              <p>
-                The G-Code programs from MonkeyCAM are provided on an "AS IS"
-                BASIS WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-                express or implied. You should inspect these programs very
-                carefully to confirm you understand their operation. YOU ARE
-                RESPONSIBLE FOR ENSURING THESE PROGRAMS WILL NOT DAMAGE YOUR
-                MACHINE OR MATERIALS.
-              </p>
-            </Panel>
+                for a list of known issues, current feature requests, and to
+                file bugs or ask for other features.
+                <h3>License</h3>
+                <p>
+                  The G-code programs generated by MonkeyCAM are license-free;
+                  they may be used for any purpose.
+                </p>
+                <h3>Disclaimer</h3>
+                <p>
+                  The G-Code programs from MonkeyCAM are provided on an "AS IS"
+                  BASIS WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+                  express or implied. You should inspect these programs very
+                  carefully to confirm you understand their operation. YOU ARE
+                  RESPONSIBLE FOR ENSURING THESE PROGRAMS WILL NOT DAMAGE YOUR
+                  MACHINE OR MATERIALS.
+                </p>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }
