@@ -82,157 +82,157 @@ function checkStatus(response) {
 }
 
 const sampleSnowboardConfig = {
-  board: {
-    name: 'Sample-snowboard',
-    'nose length': 18,
-    'effective edge length': 136,
-    'tail length': 14,
-    'sidecut radius': 1100,
-    'waist width': 24.6,
-    taper: 0.4,
-    'nose shape': {
-      type: 'Basic Bezier',
-      'end handle': 0.5,
-      'transition handle': 0.75
+  "board": {
+    "name": "Sample-snowboard",
+    "nose length": "18cm",
+    "effective edge length": "136cm",
+    "tail length": "14cm",
+    "sidecut radius": "1100cm",
+    "waist width": "24.6cm",
+    "taper": "4mm",
+    "nose shape": {
+      "type": "Basic Bezier",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'edge shape': {
-      type: 'Basic Arc'
+    "edge shape": {
+      "type": "Basic Arc"
     },
-    'tail shape': {
-      type: 'Basic Bezier',
-      'end handle': 0.5,
-      'transition handle': 0.75
+    "tail shape": {
+      "type": "Basic Bezier",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'reference stance width': 52,
-    'stance setback': 2,
-    'nose and tail spacer width': 2
+    "reference stance width": "52cm",
+    "stance setback": "2cm",
+    "nose and tail spacer width": "2cm"
   },
-  profile: {
-    'nose thickness': 0.2,
-    'center thickness': 0.79,
-    'tail thickness': 0.2,
-    'nose taper': {
-      'taper start': 0.45,
-      'start handle': 0.7,
-      'end handle': 0.8,
-      'taper end': 1.0
+  "profile": {
+    "nose thickness": "2mm",
+    "center thickness": "7.9mm",
+    "tail thickness": "2mm",
+    "nose taper": {
+      "taper start": 0.45,
+      "start handle": 0.7,
+      "end handle": 0.8,
+      "taper end": 1
     },
-    'tail taper': {
-      'taper start': 0.51,
-      'start handle': 0.68,
-      'end handle': 0.85,
-      'taper end': 1.0
+    "tail taper": {
+      "taper start": 0.51,
+      "start handle": 0.68,
+      "end handle": 0.85,
+      "taper end": 1
     }
   }
 };
 
 const sampleSkiConfig = {
-  board: {
-    name: 'Sample-ski',
-    'nose length': 11,
-    'effective edge length': 161,
-    'tail length': 6.5,
-    'sidecut radius': 2250,
-    'waist width': 9.3,
-    taper: 1.4,
-    'nose shape': {
-      type: 'Basic Bezier',
-      'end handle': 0.5,
-      'transition handle': 0.75
+  "board": {
+    "name": "Sample-ski",
+    "nose length": "11cm",
+    "effective edge length": "161cm",
+    "tail length": "6.5cm",
+    "sidecut radius": "2250cm",
+    "waist width": "9.3cm",
+    "taper": "1.4cm",
+    "nose shape": {
+      "type": "Basic Bezier",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'edge shape': {
-      type: 'Basic Arc'
+    "edge shape": {
+      "type": "Basic Arc"
     },
-    'tail shape': {
-      type: 'Flat',
-      'flat width': 8.0,
-      'end handle': 0.5,
-      'transition handle': 0.75
+    "tail shape": {
+      "type": "Flat",
+      "flat width": "8.0cm",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'stance setback': 6,
-    'nose and tail spacer width': 2,
-    'tail edge extension': 2
+    "stance setback": "6cm",
+    "nose and tail spacer width": "2cm",
+    "tail edge extension": "2cm"
   },
-  profile: {
-    'nose thickness': 0.2,
-    'center thickness': 0.79,
-    'tail thickness': 0.2,
-    'nose taper': {
-      'taper start': 0.45,
-      'start handle': 0.7,
-      'end handle': 0.8,
-      'taper end': 1.0
+  "profile": {
+    "nose thickness": "2mm",
+    "center thickness": "7.9mm",
+    "tail thickness": "2mm",
+    "nose taper": {
+      "taper start": 0.45,
+      "start handle": 0.7,
+      "end handle": 0.8,
+      "taper end": 1
     },
-    'tail taper': {
-      'taper start': 0.51,
-      'start handle': 0.68,
-      'end handle': 0.85,
-      'taper end': 1.0
+    "tail taper": {
+      "taper start": 0.51,
+      "start handle": 0.68,
+      "end handle": 0.85,
+      "taper end": 1
     }
   }
 };
 
 const sampleSplitboardConfig = {
-  board: {
-    name: 'Sample-splitboard',
-    splitboard: true,
-    'nose length': 18,
-    'effective edge length': 136,
-    'tail length': 14,
-    'sidecut radius': 1100,
-    'waist width': 24.6,
-    taper: 0.4,
-    'nose shape': {
-      type: 'Basic Bezier',
-      'end handle': 0.5,
-      'transition handle': 0.75
+  "board": {
+    "name": "Sample-splitboard",
+    "splitboard": true,
+    "nose length": "18cm",
+    "effective edge length": "136cm",
+    "tail length": "14cm",
+    "sidecut radius": "1100cm",
+    "waist width": "24.6cm",
+    "taper": "4mm",
+    "nose shape": {
+      "type": "Basic Bezier",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'edge shape': {
-      type: 'Basic Arc'
+    "edge shape": {
+      "type": "Basic Arc"
     },
-    'tail shape': {
-      type: 'Basic Bezier',
-      'end handle': 0.5,
-      'transition handle': 0.75
+    "tail shape": {
+      "type": "Basic Bezier",
+      "end handle": 0.5,
+      "transition handle": 0.75
     },
-    'reference stance width': 52,
-    'stance setback': 2,
-    'nose and tail spacer width': 2
+    "reference stance width": "52cm",
+    "stance setback": "2cm",
+    "nose and tail spacer width": "2cm"
   },
-  profile: {
-    'nose thickness': 0.2,
-    'center thickness': 0.79,
-    'tail thickness': 0.2,
-    'nose taper': {
-      'taper start': 0.45,
-      'start handle': 0.7,
-      'end handle': 0.8,
-      'taper end': 1.0
+  "profile": {
+    "nose thickness": "2mm",
+    "center thickness": "7.9mm",
+    "tail thickness": "2mm",
+    "nose taper": {
+      "taper start": 0.45,
+      "start handle": 0.7,
+      "end handle": 0.8,
+      "taper end": 1
     },
-    'tail taper': {
-      'taper start': 0.51,
-      'start handle': 0.68,
-      'end handle': 0.85,
-      'taper end': 1.0
+    "tail taper": {
+      "taper start": 0.51,
+      "start handle": 0.68,
+      "end handle": 0.85,
+      "taper end": 1
     }
   }
 };
 
 const sampleSnowboardBindingConfig = {
-  binding: {
-    'nose insert pack': {
-      'count nose': 1,
-      'count tail': 1,
-      offset: 4,
-      'horizontal spacing': 4,
-      'vertical spacing': 4
+  "binding": {
+    "nose insert pack": {
+      "count nose": 1,
+      "count tail": 1,
+      "offset": "4cm",
+      "horizontal spacing": "4cm",
+      "vertical spacing": "4cm"
     },
-    'tail insert pack': {
-      'count nose': 1,
-      'count tail': 1,
-      offset: 4,
-      'horizontal spacing': 4,
-      'vertical spacing': 4
+    "tail insert pack": {
+      "count nose": 1,
+      "count tail": 1,
+      "offset": "4cm",
+      "horizontal spacing": "4cm",
+      "vertical spacing": "4cm"
     }
   }
 };
@@ -300,91 +300,79 @@ const sampleSplitboardBindingConfig = {
 };
 
 const sampleMachineConfig = {
-  machine: {
-    'rapid speed': 100,
-    'normal speed': 80,
-
-    'bottom rapid height': 0.2,
-    'top rapid height': 0.6,
-
-    'core blank thickness': 0.42,
-
-    'base cutout tool': 2,
-    'base rapid height': 0.25,
-    'base cut thru height': -0.01,
-
-    'guide hole tool': 1,
-    'guide hole depth': -0.6,
-    'guide hole diameter': 0.503,
-    'guide hole offset': 0.5,
-
-    'alignment mark tool': 3,
-    'alignment mark offset': 0.5,
-    'alignment mark depth': -0.02,
-    'alignment mark deep depth': -0.15,
-
-    'edge groove tool': 1,
-    'edge groove depth': -0.03,
-    'edge groove edge width': 0.354,
-    'edge groove overlap percentage': 1.0,
-
-    'insert tool': 1,
-    'insert rim depth': -0.045,
-    'insert rim diameter': 0.75,
-    'insert hole diameter': 0.373,
-
-    'top profile tool': 4,
-    'top profile transition speed': 20,
-    'top profile deep speed': 50,
-    'top profile overlap percentage': 0.5,
-    'top profile lead-in length': 4.0,
-    'top profile roughing': false,
-    'top profile roughing max cut depth': 0.2,
-    'top profile roughing offset': 0.02,
-    'top profile roughing fuzz': 0.02,
-
-    'core cutout tool': 1,
-    'core cutout passes': 2,
-
-    'spacer end overhang': 1,
-    'spacer side overhang': 0.5,
-
-    'sidewall overhang': 0.118,
-
-    'edge trench width': 1.2894,
-    'edge trench extension': 3,
-
-    'splitboard center gap': 0.1,
-    'splitboard center trench width': 0.5,
-
-    tools: [
-      {
-        id: 1,
-        name: 'Quarter Inch Upcut Spiral',
-        diameter: 0.247,
-        'G-code #': 1
-      },
-      {
-        id: 2,
-        name: 'Quarter Inch Straight',
-        diameter: 0.25,
-        'G-code #': 1
-      },
-      {
-        id: 3,
-        name: 'Quarter Inch V',
-        diameter: 0.25,
-        'G-code #': 1
-      },
-      {
-        id: 4,
-        name: '1.5 Inch Straight',
-        diameter: 1.496,
-        'G-code #': 1
-      }
-    ]
-  }
-};
+    "machine": {
+      "gcode units": "in",
+      "rotate x/y axes": "none",
+      "rapid speed": 100,
+      "normal speed": 80,
+      "bottom rapid height": "0.200in",
+      "top rapid height": "0.600in",
+      "core blank thickness": "0.420in",
+      "base cutout tool": 2,
+      "base rapid height": "0.250in",
+      "base cut thru height": "-0.010in",
+      "guide hole tool": 1,
+      "guide hole depth": "-0.600in",
+      "guide hole diameter": "0.503in",
+      "guide hole offset": "0.5in",
+      "alignment mark tool": 3,
+      "alignment mark offset": "0.5in",
+      "alignment mark depth": "-0.020in",
+      "alignment mark deep depth": "-0.150in",
+      "edge groove tool": 1,
+      "edge groove depth": "-0.030in",
+      "edge groove edge width": "0.354in",
+      "edge groove overlap percentage": 1,
+      "insert tool": 1,
+      "insert rim depth": "-0.045in",
+      "insert rim diameter": "0.750in",
+      "insert hole diameter": "0.373in",
+      "top profile tool": 4,
+      "top profile transition speed": 20,
+      "top profile deep speed": 50,
+      "top profile overlap percentage": 0.5,
+      "top profile lead-in length": "4.0in",
+      "top profile roughing": false,
+      "top profile roughing max cut depth": "0.200in",
+      "top profile roughing offset": "0.020in",
+      "top profile roughing fuzz": "0.020in",
+      "core cutout tool": 1,
+      "core cutout passes": 2,
+      "spacer end overhang": "1in",
+      "spacer side overhang": "0.5in",
+      "sidewall overhang": "0.118in",
+      "edge trench width": "1.2894in",
+      "edge trench extension": "3in",
+      "splitboard center trench width": "0.5in",
+      "splitboard center gap": "0.100in",
+      "tools": [
+        {
+          "id": 1,
+          "name": "Quarter Inch Upcut Spiral",
+          "diameter": "0.247in",
+          "G-code #": 1
+        },
+        {
+          "id": 2,
+          "name": "Quarter Inch Straight",
+          "diameter": "0.250in",
+          "G-code #": 1
+        },
+        {
+          "id": 3,
+          "name": "Quarter Inch V",
+          "diameter": "0.250in",
+          "G-code #": 1
+        },
+        {
+          "id": 4,
+          "name": "1.5 Inch Straight",
+          "diameter": "1.496in",
+          "G-code #": 1
+        }
+      ]
+    }
+  };
 
 class JSONEditor extends Component {
   constructor(props) {
