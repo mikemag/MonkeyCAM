@@ -252,27 +252,29 @@ class JobResultsPage extends Component {
 
       if (this.state.basicResults.state === 'Completed') {
         resultsDesc = (
-          <div className="text-center">
-            <p>
-              Generated {this.state.fullResults.ncFiles.length} G-code programs
-              for board '{this.state.fullResults.boardName}'.
-            </p>
-            <Button
-              variant="primary"
-              style={{ margin: 5 }}
-              href={this.state.fullResults.overviewHTMLFileLink}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Results Overview
-            </Button>
-            <Button
-              variant="primary"
-              style={{ margin: 5 }}
-              href={this.state.fullResults.allFilesLink}
-            >
-              Download .zip of all files
-            </Button>
+          <div>
+            <div className="text-center">
+              <p>
+                Generated {this.state.fullResults.ncFiles.length} G-code programs
+                for board '{this.state.fullResults.boardName}'.
+              </p>
+              <Button
+                variant="primary"
+                style={{ margin: 5 }}
+                href={this.state.fullResults.overviewHTMLFileLink}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Results Overview
+              </Button>
+              <Button
+                variant="primary"
+                style={{ margin: 5 }}
+                href={this.state.fullResults.allFilesLink}
+              >
+                Download .zip of all files
+              </Button>
+            </div>
             <p />
             {ncFileTable}
           </div>
@@ -310,7 +312,6 @@ class JobResultsPage extends Component {
         <div className="text-info text-center">
           <Spinner
             id="spinner"
-            color="inherit"
             name="three-bounce"
             fadeIn="none"
           />

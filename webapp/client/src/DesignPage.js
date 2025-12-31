@@ -598,7 +598,6 @@ class DesignPage extends Component {
                 <p>Loading existing inputs</p>
                 <Spinner
                   id="spinner"
-                  color="inherit"
                   name="three-bounce"
                   fadeIn="none"
                 />
@@ -743,7 +742,6 @@ class DesignPage extends Component {
                         <div className="text-info">
                           <Spinner
                             id="spinner"
-                            color="inherit"
                             name="three-bounce"
                             fadeIn="none"
                           />

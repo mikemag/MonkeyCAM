@@ -54,7 +54,7 @@ function tsToDate(ts) {
 class JobStatus extends Component {
   loadingString = (
     <div className="text-info">
-      <Spinner id="spinner" color="inherit" name="three-bounce" fadeIn="none" />
+      <Spinner id="spinner" name="three-bounce" fadeIn="none" />
     </div>
   );
 

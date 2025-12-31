@@ -109,6 +109,10 @@ a:focus {
   font-size: 1.0rem;
 }
 
+.mc-panel .sk-spinner {
+  color: #337ab7;
+}
+
 .mc-panel-primary {
   border: 1px solid #337ab7;
   font-size: 1.0rem;
@@ -126,20 +130,12 @@ a:focus {
   font-size: 1.5rem;
 }
 
+.mc-panel-primary .sk-spinner {
+  color: #337ab7;
+}
+
 .home-panel .card-header {
   padding: 16px 24px;
-}
-
-.home-panel .card-body {
-  /*padding: 24px 32px;*/
-}
-
-.home-panel .card-body p {
-  /*margin-bottom: 16px;*/
-}
-
-.home-panel hr {
-  /*margin: 20px 0;*/
 }
 
 /*
