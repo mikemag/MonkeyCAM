@@ -593,7 +593,7 @@ class DesignPage extends Component {
       return (
         <Container>
           <Row>
-            <Col sm={10} smoffset={1}>
+            <Col sm={{ span: 10, offset: 1 }}>
               <div className="text-info text-center">
                 <p>Loading existing inputs</p>
                 <Spinner
@@ -616,7 +616,7 @@ class DesignPage extends Component {
     return (
       <Container>
         <Row>
-          <Col sm={10} smoffset={1}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <div>
               <p>
                 Enter your board, binding, and machine definitions here in JSON
@@ -654,7 +654,7 @@ class DesignPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smoffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <div className="text-center">
               <p>You can help pay for server costs with a small donation.</p>
               <a
@@ -674,9 +674,9 @@ class DesignPage extends Component {
         </Row>
         <Row>
           <Col sm={6}>
-            <Card className="mb-3">
+            <Card className="mb-3 mc-panel">
               <Card.Header>{boardPanelHeader}</Card.Header>
-              <Card.Body className="p-0">
+              <Card.Body>
                 <JSONEditor
                   ref={this.boardEditorRef}
                   jsonDoc={this.state.boardConfig}
@@ -685,38 +685,39 @@ class DesignPage extends Component {
             </Card>
           </Col>
           <Col sm={6}>
-            <Card className="mb-3">
+            <Card className="mb-3 mc-panel">
               <Card.Header>{bindingPanelHeader}</Card.Header>
               <Card.Body>
                 <JSONEditor
                   ref={this.bindingEditorRef}
                   jsonDoc={this.state.bindingConfig}
                 />
-              <Form onSubmit={this.handleBindingDistSubmit}>
-                <Form.Group controlId="bindingDistance">
-                  <Form.Label>Binding distance, for skis</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={this.state.bindingDist}
-                    placeholder="Enter binding distance in cm"
-                    onChange={this.handleBindingDistChange}
-                    isValid={isBindingDistValid}
-                    isInvalid={isBindingDistInvalid}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Binding distance must be a positive number.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Form>
+                <br/>
+                <Form onSubmit={this.handleBindingDistSubmit}>
+                  <Form.Group controlId="bindingDistance">
+                    <Form.Label column={1}><b>Binding distance, for skis</b></Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={this.state.bindingDist}
+                      placeholder="Enter binding distance in cm"
+                      onChange={this.handleBindingDistChange}
+                      isValid={isBindingDistValid}
+                      isInvalid={isBindingDistInvalid}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      Binding distance must be a positive number.
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                </Form>
               </Card.Body>
             </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={6}>
-            <Card className="mb-3">
+            <Card className="mb-3 mc-panel">
               <Card.Header>{machinePanelHeader}</Card.Header>
-              <Card.Body className="p-0">
+              <Card.Body>
                 <JSONEditor
                   ref={this.machineEditorRef}
                   jsonDoc={this.state.machineConfig}
@@ -725,35 +726,35 @@ class DesignPage extends Component {
             </Card>
           </Col>
           <Col sm={6}>
-            <Card className="mb-3">
+            <Card className="mb-3 mc-panel">
               <Card.Header>{goPanelHeader}</Card.Header>
               <Card.Body>
-              <Row>
-                <Col sm={12}>
-                  <div className="run-monkeycam">
-                    <Button
-                      variant="primary"
-                      disabled={this.state.isLaunching}
-                      onClick={this.handleRunMonkeyCAM}
-                    >
-                      Run MonkeyCAM
-                    </Button>
-                    {this.state.isLaunching && (
-                      <div className="text-info">
-                        <Spinner
-                          id="spinner"
-                          color="inherit"
-                          name="three-bounce"
-                          fadeIn="none"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col sm={12}>{invalidConfig}</Col>
-              </Row>
+                <Row>
+                  <Col sm={12}>
+                    <div className="run-monkeycam">
+                      <Button
+                        variant="primary"
+                        disabled={this.state.isLaunching}
+                        onClick={this.handleRunMonkeyCAM}
+                      >
+                        Run MonkeyCAM
+                      </Button>
+                      {this.state.isLaunching && (
+                        <div className="text-info">
+                          <Spinner
+                            id="spinner"
+                            color="inherit"
+                            name="three-bounce"
+                            fadeIn="none"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col sm={12}>{invalidConfig}</Col>
+                </Row>
               </Card.Body>
             </Card>
           </Col>

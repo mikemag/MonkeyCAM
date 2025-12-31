@@ -247,7 +247,7 @@ class JobStatus extends Component {
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smOffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             {this.state.alertArea}
           </Col>
         </Row>
@@ -274,17 +274,20 @@ class JobExecutionPage extends Component {
     return (
       <Container>
         <Row>
-          <Col sm={8} smOffset={2}>
-            <Card className="mb-3" border="primary">
+          <Col sm={{ span: 8, offset: 2 }}>
+            <Card className="mb-3 mc-panel-primary">
               <Card.Header>{title}</Card.Header>
               <Card.Body>
-                <JobStatus jobId={this.props.params.jobId} navigate={this.props.navigate} />
+                <JobStatus
+                  jobId={this.props.params.jobId}
+                  navigate={this.props.navigate}
+                />
               </Card.Body>
             </Card>
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smOffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <div className="text-end">
               <Button variant="primary" onClick={this.handleCancelJob}>
                 Cancel Job

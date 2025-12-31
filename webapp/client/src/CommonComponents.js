@@ -12,7 +12,7 @@ var development = process.env.NODE_ENV === 'development';
 var cfURLRoot = 'https://us-central1-monkeycam-web-app.cloudfunctions.net';
 
 if (development) {
-  cfURLRoot = 'http://localhost:3000';
+  // cfURLRoot = 'http://localhost:3000';
 }
 
 class BadJobNotice extends React.Component {

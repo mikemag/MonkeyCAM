@@ -333,8 +333,8 @@ class JobResultsPage extends Component {
     return (
       <Container>
         <Row>
-          <Col sm={8} smOffset={2}>
-            <Card className="mb-3" border="primary">
+          <Col sm={{ span: 8, offset: 2 }}>
+            <Card className="mb-3 mc-panel-primary">
               <Card.Header>{title}</Card.Header>
               <Card.Body>
                 {spinnerRow}
@@ -347,7 +347,7 @@ class JobResultsPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col sm={8} smOffset={2}>
+          <Col sm={{ span: 8, offset: 2 }}>
             <JobExecutionDetails
               basicResults={this.state.basicResults}
               fullResults={this.state.fullResults}

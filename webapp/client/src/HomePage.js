@@ -26,46 +26,47 @@ class HomePage extends Component {
   render() {
     return (
       <Container>
-        <Row>
-          <Col sm={8} smOffset={2}>
-            <Card className="mb-3" border="primary">
+        <Row className="justify-content-md-center">
+          <Col sm={7}>
+            <Card className="mb-3 mc-panel-primary home-panel">
               <Card.Header>{title}</Card.Header>
               <Card.Body>
-              <p className="text-center">
-                <a href="https://github.com/mikemag/MonkeyCAM">MonkeyCAM</a> is
-                an open source CAD/CAM program for designing skis, snowboards
-                and splitboards, and then instantly generating all of the{' '}
-                <a href="http://en.wikipedia.org/wiki/G-code">G-Code</a>{' '}
-                programs needed to cut the key parts with a{' '}
-                <a href="http://en.wikipedia.org/wiki/Numerical_control">
-                  CNC machine
-                </a>.
-              </p>
-              <p className="text-center">
-                This site runs MonkeyCAM for you in the cloud.
-              </p>
-              <hr />
-              <h3 className="text-center">
-                <Link to="/design">Design</Link>
-              </h3>
-              <p className="text-center">
-                Get started by providing your board design and machine
-                configuration
-              </p>
-              <hr />
-              <h3 className="text-center">
-                <Link to="/tour">Tour</Link>
-              </h3>
-              <p className="text-center">
-                See an example of what MonkeyCAM can do
-              </p>
-              <hr />
-              <h3 className="text-center">
-                <Link to="/docs">Docs</Link>
-              </h3>
-              <p className="text-center">
-                Read up on how to use MonkeyCAM and the programs it generates
-              </p>
+                <p className="text-center">
+                  <a href="https://github.com/mikemag/MonkeyCAM">MonkeyCAM</a> is
+                  an open source CAD/CAM program for designing skis, snowboards
+                  and splitboards, and then instantly generating all of the{' '}
+                  <a href="http://en.wikipedia.org/wiki/G-code">G-Code</a>{' '}
+                  programs needed to cut the key parts with a{' '}
+                  <a href="http://en.wikipedia.org/wiki/Numerical_control">
+                    CNC machine
+                  </a>
+                  .
+                </p>
+                <p className="text-center">
+                  This site runs MonkeyCAM for you in the cloud.
+                </p>
+                <hr />
+                <h3 className="text-center">
+                  <Link to="/design">Design</Link>
+                </h3>
+                <p className="text-center">
+                  Get started by providing your board design and machine
+                  configuration
+                </p>
+                <hr />
+                <h3 className="text-center">
+                  <Link to="/tour">Tour</Link>
+                </h3>
+                <p className="text-center">
+                  See an example of what MonkeyCAM can do
+                </p>
+                <hr />
+                <h3 className="text-center">
+                  <Link to="/docs">Docs</Link>
+                </h3>
+                <p className="text-center">
+                  Read up on how to use MonkeyCAM and the programs it generates
+                </p>
               </Card.Body>
             </Card>
           </Col>
