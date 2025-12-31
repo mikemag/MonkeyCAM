@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { Grid, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 
 const AppFooter = () => (
-  <Grid className="footer navbar navbar-default">
+  <footer className="footer bg-light border-top py-2">
+    <Container>
     <Row>
       <Col className="text-center" xs={6} sm={4}>
         <a href="https://github.com/mikemag/MonkeyCAM/issues">Report a bug</a>
@@ -25,7 +26,8 @@ const AppFooter = () => (
         on SkiBuilders
       </Col>
     </Row>
-  </Grid>
+    </Container>
+  </footer>
 );
 
 export default AppFooter;

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel, Thumbnail } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 import example_input_png from './media/Example_Input.png';
 import example_results_png from './media/Example_Results.png';
@@ -20,10 +20,12 @@ class TourPage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={12}>
-            <Panel header="How does it work?" bsStyle="primary">
+            <Card className="mb-3" border="primary">
+              <Card.Header>How does it work?</Card.Header>
+              <Card.Body>
               <Row>
                 <Col sm={12}>
                   <h3 className="text-center">
@@ -34,25 +36,31 @@ class TourPage extends Component {
               </Row>
               <Row>
                 <Col sm={4}>
-                  <Panel>
+                  <Card className="mb-3">
+                    <Card.Body>
                     <h4>1. Design</h4>
                     Enter your board design, binding layout, and CNC
                     machine/materials config, then hit Run MonkeyCAM.
-                  </Panel>
+                    </Card.Body>
+                  </Card>
                 </Col>
                 <Col sm={4}>
-                  <Panel>
+                  <Card className="mb-3">
+                    <Card.Body>
                     <h4>2. Download</h4>
                     Confirm your design with the Results Overview, then download
                     a .zip of all the G-Code files.
-                  </Panel>
+                    </Card.Body>
+                  </Card>
                 </Col>
                 <Col sm={4}>
-                  <Panel>
+                  <Card className="mb-3">
+                    <Card.Body>
                     <h4>3. Build!</h4>
                     Cut the core, base, and nose/tail fill with your CNC machine
                     and get building!
-                  </Panel>
+                    </Card.Body>
+                  </Card>
                 </Col>
               </Row>
               <Row>
@@ -71,12 +79,14 @@ class TourPage extends Component {
                   <br />
                 </Col>
               </Row>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={10} smOffset={1}>
-            <Panel>
+            <Card className="mb-3">
+              <Card.Body>
               <img
                 style={{ maxWidth: '100%' }}
                 src={example_input_png}
@@ -92,19 +102,21 @@ class TourPage extends Component {
                 When you're ready, hit Run MonkeyCAM. The results will be ready
                 in seconds.
               </p>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={10} smOffset={1}>
-            <Panel>
-              <center>
-                <img
-                  style={{ maxWidth: '100%' }}
-                  src={example_results_png}
-                  alt="Example MonkeyCAM Results"
-                />
-              </center>
+            <Card className="mb-3">
+              <Card.Body>
+                <div className="text-center">
+                  <img
+                    style={{ maxWidth: '100%' }}
+                    src={example_results_png}
+                    alt="Example MonkeyCAM Results"
+                  />
+                </div>
               <img
                 width={'100%'}
                 src={example_overview_svg}
@@ -122,26 +134,30 @@ class TourPage extends Component {
                 the G-Code files. These are kept in permanent storage at Google,
                 so you can always go back and get them again.
               </p>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={10} smOffset={1}>
-            <Thumbnail style={{ maxWidth: '100%' }} src={example_core_jpg}>
-              <h3>Build!</h3>
-              <p>
-                You get G-Code programs to cut the base, nose & tail spacers,
-                and the core. Cut the parts with your CNC machine, and they'll
-                all fit together perfectly!
-              </p>
-              <p>
-                You'll be able to spend your time building boards and riding
-                them.
-              </p>
-            </Thumbnail>
+            <Card className="mb-3">
+              <Card.Img src={example_core_jpg} alt="Example core build" />
+              <Card.Body>
+                <h3>Build!</h3>
+                <p>
+                  You get G-Code programs to cut the base, nose & tail spacers,
+                  and the core. Cut the parts with your CNC machine, and they'll
+                  all fit together perfectly!
+                </p>
+                <p>
+                  You'll be able to spend your time building boards and riding
+                  them.
+                </p>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }

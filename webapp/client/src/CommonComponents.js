@@ -18,7 +18,7 @@ if (development) {
 class BadJobNotice extends React.Component {
   render() {
     return (
-      <Alert bsStyle="info" className="text-left">
+      <Alert variant="info" className="text-left">
         All server errors, slow jobs, and failed jobs are automatically logged
         and reviewed frequently by the developers. Please feel free to report
         this problem to{' '}

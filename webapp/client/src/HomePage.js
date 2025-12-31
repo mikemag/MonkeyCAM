@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 const title = (
@@ -25,10 +25,12 @@ class HomePage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={8} smOffset={2}>
-            <Panel header={title} bsStyle="primary">
+            <Card className="mb-3" border="primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
               <p className="text-center">
                 <a href="https://github.com/mikemag/MonkeyCAM">MonkeyCAM</a> is
                 an open source CAD/CAM program for designing skis, snowboards
@@ -64,10 +66,11 @@ class HomePage extends Component {
               <p className="text-center">
                 Read up on how to use MonkeyCAM and the programs it generates
               </p>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }

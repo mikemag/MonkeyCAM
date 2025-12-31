@@ -6,40 +6,38 @@
  */
 
 import React from 'react';
-import { Navbar } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { Nav, NavItem } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
+import { Container, Nav, Navbar } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
 
 const AppHeader = () => (
-  <Navbar fixedTop fluid>
-    <Navbar.Header>
-      <Navbar.Brand>
-        <Link to="/">MonkeyCAM</Link>
+  <Navbar bg="light" expand="lg" fixed="top" className="shadow-sm">
+    <Container fluid>
+      <Navbar.Brand as={NavLink} to="/">
+        MonkeyCAM
       </Navbar.Brand>
-      <Navbar.Toggle />
-    </Navbar.Header>
-    <Navbar.Collapse>
-      <Nav>
-        <LinkContainer to="/design">
-          <NavItem eventKey={1}>Design</NavItem>
-        </LinkContainer>
-        <LinkContainer to="/tour">
-          <NavItem eventKey={1}>Tour</NavItem>
-        </LinkContainer>
-        <LinkContainer to="/docs">
-          <NavItem eventKey={1}>Docs</NavItem>
-        </LinkContainer>
-        <LinkContainer to="/about">
-          <NavItem eventKey={1}>About</NavItem>
-        </LinkContainer>
-      </Nav>
-      <Nav pullRight>
-        <LinkContainer to="/login">
-          <NavItem eventKey={1}>Login</NavItem>
-        </LinkContainer>
-      </Nav>
-    </Navbar.Collapse>
+      <Navbar.Toggle aria-controls="monkeycam-navbar" />
+      <Navbar.Collapse id="monkeycam-navbar">
+        <Nav className="me-auto">
+          <Nav.Link as={NavLink} to="/design">
+            Design
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/tour">
+            Tour
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/docs">
+            Docs
+          </Nav.Link>
+          <Nav.Link as={NavLink} to="/about">
+            About
+          </Nav.Link>
+        </Nav>
+        <Nav>
+          <Nav.Link as={NavLink} to="/login">
+            Login
+          </Nav.Link>
+        </Nav>
+      </Navbar.Collapse>
+    </Container>
   </Navbar>
 );
 

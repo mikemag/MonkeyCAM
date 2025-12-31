@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 const title = <h3>How to use MonkeyCAM</h3>;
 class DocsPage extends Component {
@@ -16,10 +16,12 @@ class DocsPage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={12}>
-            <Panel header={title} bsStyle="primary">
+            <Card className="mb-3" border="primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
               <p>
                 MonkeyCAM is an open source CAD/CAM program for designing skis,
                 snowboards and splitboards, and generating G-code programs to
@@ -116,10 +118,11 @@ class DocsPage extends Component {
                 </a>{' '}
                 for more details.
               </p>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }

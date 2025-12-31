@@ -6,11 +6,12 @@
  */
 
 import React, { Component } from 'react';
-import { Alert, Button, Grid, Row, Col, Panel, Table } from 'react-bootstrap';
-import CircularProgressbar from 'react-circular-progressbar';
+import { Alert, Button, Card, Container, Row, Col, Table } from 'react-bootstrap';
+import { CircularProgressbar } from 'react-circular-progressbar';
 import Spinner from 'react-spinkit';
 import TimeAgo from 'react-timeago';
 import { BadJobNotice, cfURLRoot } from './CommonComponents';
+import withRouter from './withRouter';
 
 async function getJobStatus(jobId) {
   let res = await fetch(cfURLRoot + '/getJobStatus', {
@@ -114,7 +115,7 @@ class JobStatus extends Component {
       updatePollingInterval = true;
       newState.alertArea = (
         <div>
-          <Alert bsStyle="danger">
+          <Alert variant="danger">
             Too many server errors in a row. Please refresh the page to check on
             the status at a later time.
           </Alert>
@@ -126,7 +127,7 @@ class JobStatus extends Component {
       updatePollingInterval = true;
       newState.alertArea = (
         <div>
-          <Alert bsStyle="danger">
+          <Alert variant="danger">
             The job is taking much longer than expected. Please refresh the page
             to check on the status at a later time.
           </Alert>
@@ -137,7 +138,7 @@ class JobStatus extends Component {
       newState.pollDelay = 10000;
       newState.alertArea = (
         <div>
-          <Alert bsStyle="warning">
+          <Alert variant="warning">
             This is taking quite a bit longer than usual, there may be a problem
             with the servers.
           </Alert>
@@ -147,7 +148,7 @@ class JobStatus extends Component {
     } else if (newState.pollCount > 30 || jobAge > 30) {
       newState.pollDelay = 2000;
       newState.alertArea = (
-        <Alert bsStyle="warning">
+        <Alert variant="warning">
           This is taking longer than usual, please be patient.
         </Alert>
       );
@@ -175,7 +176,7 @@ class JobStatus extends Component {
       if (completed) {
         clearInterval(this.timerID);
         await sleep(1500); // Give the user a chance to see the job completed.
-        this.props.history.replace(`/results/${this.props.jobId}`);
+        this.props.navigate(`/results/${this.props.jobId}`, { replace: true });
       }
     }, pollDelay);
   }
@@ -196,9 +197,11 @@ class JobStatus extends Component {
           <Col sm={4}>
             <div className="job-status-progress center-block">
               <CircularProgressbar
-                percentage={this.state.progress | 0}
-                initialAnimation
-                classForPercentage={pct => (pct < 100 ? '' : 'complete')}
+                value={this.state.progress | 0}
+                text={`${this.state.progress | 0}%`}
+                className={
+                  (this.state.progress | 0) < 100 ? '' : 'complete'
+                }
               />
             </div>
           </Col>
@@ -269,29 +272,29 @@ class JobExecutionPage extends Component {
     const title = <h3 className="text-center">MonkeyCAM Job Status</h3>;
 
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={8} smOffset={2}>
-            <Panel header={title} bsStyle="primary">
-              <JobStatus
-                jobId={this.props.match.params.jobId}
-                history={this.props.history}
-              />
-            </Panel>
+            <Card className="mb-3" border="primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
+                <JobStatus jobId={this.props.params.jobId} navigate={this.props.navigate} />
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
           <Col sm={8} smOffset={2}>
-            <div className="text-right">
-              <Button bsStyle="primary" onClick={this.handleCancelJob}>
+            <div className="text-end">
+              <Button variant="primary" onClick={this.handleCancelJob}>
                 Cancel Job
               </Button>
             </div>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }
 
-export default JobExecutionPage;
+export default withRouter(JobExecutionPage);

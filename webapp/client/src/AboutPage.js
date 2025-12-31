@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 const title = <h3>About MonkeyCAM</h3>;
 class AboutPage extends Component {
@@ -16,10 +16,12 @@ class AboutPage extends Component {
 
   render() {
     return (
-      <Grid>
+      <Container>
         <Row>
           <Col sm={12}>
-            <Panel header={title} bsStyle="primary">
+            <Card className="mb-3" border="primary">
+              <Card.Header>{title}</Card.Header>
+              <Card.Body>
               <h3>What is this?</h3>
               <p>
                 MonkeyCAM is an{' '}
@@ -94,10 +96,11 @@ class AboutPage extends Component {
                 RESPONSIBLE FOR ENSURING THESE PROGRAMS WILL NOT DAMAGE YOUR
                 MACHINE OR MATERIALS.
               </p>
-            </Panel>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
-      </Grid>
+      </Container>
     );
   }
 }

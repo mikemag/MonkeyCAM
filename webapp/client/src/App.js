@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import './App.css';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import AboutPage from './AboutPage';
 import AppFooter from './AppFooter';
@@ -25,16 +25,17 @@ class App extends Component {
     return (
       <div className="App">
         <AppHeader />
-        <Switch>
-          <Route exact path="/" component={HomePage} />
-          <Route path="/about" component={AboutPage} />
-          <Route path="/design/:inputsid?" component={DesignPage} />
-          <Route path="/docs" component={DocsPage} />
-          <Route path="/login" component={LoginPage} />
-          <Route path="/jobactivity/:jobId" component={JobExecutionPage} />
-          <Route path="/results/:jobId" component={JobResultsPage} />
-          <Route path="/tour" component={TourPage} />
-        </Switch>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/design" element={<DesignPage />} />
+          <Route path="/design/:inputsid" element={<DesignPage />} />
+          <Route path="/docs" element={<DocsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/jobactivity/:jobId" element={<JobExecutionPage />} />
+          <Route path="/results/:jobId" element={<JobResultsPage />} />
+          <Route path="/tour" element={<TourPage />} />
+        </Routes>
         <AppFooter />
       </div>
     );
