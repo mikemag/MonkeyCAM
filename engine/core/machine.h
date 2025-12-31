@@ -25,6 +25,9 @@
 
 namespace MonkeyCAM {
 
+enum class GCodeUnits { Inches, Millimeters };
+enum class XYRotation { None, CounterClockwise, Clockwise };
+
 //------------------------------------------------------------------------------
 // Tool
 //
@@ -51,12 +54,13 @@ class Machine {
   Machine(Config& config);
 
   const Tool& tool(int id) const { return m_tools.at(id); }
+  GCodeUnits gcodeUnits() const { return m_gcodeUnits; }
 
 #define MPT(_f, _t, _n) \
   const _t _f() const { return m_config.get<_t>(_n); }
-#define MPI(_f, _n)                                       \
-  const MCFixed _f() const {                              \
-    return MCFixed::fromInches(m_config.get<double>(_n)); \
+#define MPI(_f, _n)                                     \
+  const MCFixed _f() const {                            \
+    return m_config.getLength(_n, LengthUnit::Inches);  \
   }
 
   MPT(rapidSpeed, int, "rapid speed")
@@ -101,12 +105,25 @@ class Machine {
   MPI(edgeTrenchExtension, "edge trench extension")
   MPI(splitboardCenterTrenchWidth, "splitboard center trench width")
   MPI(splitboardCenterGap, "splitboard center gap")
+
+  XYRotation xyRotation() const {
+    auto rotation =
+        m_config.get<std::string>("rotate x/y axes", std::string("none"));
+    if (rotation == "counter-clockwise") {
+      return XYRotation::CounterClockwise;
+    }
+    if (rotation == "clockwise") {
+      return XYRotation::Clockwise;
+    }
+    return XYRotation::None;
+  }
 #undef MPT
 #undef MPI
 
  private:
   Config& m_config;
   /*const*/ std::map<int, const Tool> m_tools;
+  GCodeUnits m_gcodeUnits;
 };
 
 }  // namespace MonkeyCAM

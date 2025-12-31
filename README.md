@@ -1,6 +1,6 @@
-# MonkeyCAM v4.0
+# MonkeyCAM v4
 
-MonkeyCAM v4.0 is an open source CAD/CAM program for designing skis
+MonkeyCAM v4 is an open source CAD/CAM program for designing skis
 and snowboards, and generating
 [G-code](http://en.wikipedia.org/wiki/G-code) programs to cut board
 parts with a [CNC
@@ -32,7 +32,7 @@ You can help offset the server costs for running [MonkeyCAM.org](https://www.mon
 
 ## Documentation
 
-See the [MonkeyCAM v4.0 User’s Guide](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
+See the [MonkeyCAM v4 User’s Guide](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
 for an overview of how to use and configure MonkeyCAM.
 
 ## License
@@ -49,10 +49,7 @@ The G-code programs **generated** by MonkeyCAM are license-free.
 The current version of MonkeyCAM is always live at [MonkeyCAM.org](https://www.monkeycam.org), where you can use it without having to download it.
 
 See the [Releases page](https://github.com/mikemag/MonkeyCAM/releases)
-for the last engine release, which includes release notes and links to
-download binaries. **Note that engine binaries are not released with
-every new feature, nor for every platform, and may be well behind what
-is available at MonkeyCAM.org.**
+for the last engine release notes. Releases no longer contain binaries.
 
 ## Features and Current Status
 
@@ -83,22 +80,23 @@ There is no interactive user interface. Configuration is done via three
 text files, and all results are either G-Code programs, or the HTML
 overview which can be easily used to refine the board shape.
 
+## History
+
+MonkeyCAM was started in 2003 by [Mike Magruder](https://github.com/mikemag) for [Happy
+Monkey Snowboards, Inc.](http://www.happymonkeysnowboards.com/). Older, private versions were built from
+2003 to 2012. The open source version here was released in 2013. 
+It has been available on the web at [MonkeyCAM.org](https://www.monkeycam.org) since 2017.
+
 ## Future Work
 
-MonkeyCAM v4.0 is a work in-progress. It is a port of MonkeyCAM v1-v3,
-developed by [Mike Magruder](https://github.com/mikemag) for [Happy
-Monkey Snowboards, Inc.](http://www.happymonkeysnowboards.com/) from
-2003 to 2012. The valuable parts of the MonkeyCAM v3 backend (shape
-and G-code generation) have been almost completely ported. The old UI
-has been discarded.
-
-My plan for work includes, roughly in order:
+There is no feature work planned. Below is a list of some ideas which were never completed.
+See [Contributing](#contributing) if you'd like to help.
 
 - Engine
   - Target more G-code controllers with different formats and requirements.
   - More options for effective edge, nose, and tail. (MonkeyCAM v3, for
     instance, had 6 tail options.)
-  - Port the code to soften the transition between edge and
+  - Soften the transition between edge and
     nose/tail. (You can work around this with a sandblock and two min of
     your time for now.)
   - Read the overall board shape from other CAD programs (DXF at least).
@@ -116,22 +114,21 @@ My plan for work includes, roughly in order:
 
 MonkeyCAM engine currently depends on the following packages:
 
-- Mac build: Mac OSX 10.14.4 Mojave with the system compiler, Apple LLVM version 10.0.1 (clang-1001.0.46.3).
-- Ubuntu build: ubuntu 16.04 LTS with the default compiler, gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609.
-- Windows build: Windows 10.0, MinGW with GCC 4.9.3-1.
-- CMake 3.5.1. See http://www.cmake.org/ or install via something like Ports.
+- Mac build: Mac OSX 15.6.1 Sequoia with the system compiler, Apple clang version 17.0.0 (clang-1700.3.19.1).
+- Ubuntu build: ubuntu 22.04 LTS with gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0.
+- CMake 3.22 See http://www.cmake.org/ or install via something like Ports.
 - Clipper 5.1.6. See
   http://sourceforge.net/projects/polyclipping/. The C++ version is copied in the clipper directory.
 
 The web app currently depends on the following packages:
 
-- Node.js, v8.15.0 for the cloud functions, and v8.15.0 for the client and worker.
+- Node.js, v8.15.0 for the cloud functions and client, and 24.11.1 for the worker.
 - See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
 - The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
 
 ## Building the Linux engine with Docker
 
-You can build the native engine on macOS (or any machine with Docker) without installing a local toolchain. The `engine/Dockerfile` produces a small runtime image and makes it easy to copy the compiled binary back to your host:
+You can build the Linux AMD64 native engine on macOS (or any machine with Docker) without installing a local toolchain. The `engine/Dockerfile` produces a small runtime image and makes it easy to copy the compiled binary back to your host:
 
 ```
 docker build --platform=linux/amd64 -t monkeycam-engine-builder -f engine/Dockerfile .

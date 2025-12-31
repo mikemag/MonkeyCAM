@@ -46,6 +46,7 @@ struct MCFixed {
     return static_cast<double>(m_data) / static_cast<double>(ScalingFactor);
   }
   std::string str() const;
+  std::string mmStr() const;
   std::string inchesStr() const;
   static std::string strWithSuffix(const std::optional<MCFixed>& mcf) {
     if (mcf) {

@@ -1,4 +1,4 @@
-# MonkeyCAM v4.0 Configuration Guide
+# MonkeyCAM v4 Configuration Guide
 
 MonkeyCAM uses three configuration files, one to describe the
 board/ski, one to describe the binding inserts (optional, no inserts
@@ -10,7 +10,7 @@ file describes machining parameters used by various programs (rapid
 and various cutting heights and depths, raw material thicknesses,
 etc.) and parameters of each tool used.
 
-See the [MonkeyCAM v4.0 User’s Guide](Users_Guide.md) for an overview.
+See the [MonkeyCAM v4 User’s Guide](Users_Guide.md) for an overview.
 
 ## File Format
 
@@ -27,6 +27,7 @@ simply. The following example shows three parameters and their values:
 "name": "Sample-snowboard",
 "nose length": 18,
 "effective edge length": 136,
+ "tail length": "140mm",
 ```
 
 The string before the `:` is the name of the parameter, in this case
@@ -40,7 +41,7 @@ The values may be strings or numbers as defined here.
 | Datatype | Definition |
 |:---:| --- |
 | `"string"` | a sequence of zero or more characters, delimted with double-quotation marks. |
-| `number` | a signed decimal number that may contain a fractional part. May denote inches or centimeters, depending on the parameter. |
+| `number` | a signed decimal number that may contain a fractional part. For length parameters, units are inferred based on the section defaults. |
 
 Furthermore, we define a `percentage` as a number from `0.0` to `1.0`.
 
@@ -78,6 +79,10 @@ Note that you do not specify the width of the nose and tail, it is
 computed from the combination of the waist width, effective edge
 length, sidecut radius, and taper.
 
+All length parameters in the board and profile sections accept either
+raw `numbers` or `strings` with unit suffixes (`"cm"`, `"mm"`, or `"in"`).
+When a unit suffix is omitted, values default to **centimeters**.
+
 
 #### Name
 "name": `string`
@@ -94,46 +99,46 @@ and if missing will be assumed to be `false`.
 
 
 #### Nose Length
-"nose length": `number`
+"nose length": `number` | `string`
 
-The length, in centimeters, of the nose from the tip of the board to
+The length (default cm) of the nose from the tip of the board to
 the start of the effective edge.
 
 
 #### Effective Edge Length
-"effective edge length": `number`
+"effective edge length": `number` | `string`
 
-The length, in centimeters, of the effective edge of the board. This
+The length (default cm) of the effective edge of the board. This
 is the length of the board between the nose and tail. The sidecut will
 be made along this length.
 
 
 #### Tail length
-"tail length": `number`
+"tail length": `number` | `string`
 
-The length, in centimeters, of the tail from the end of the board to
+The length (default cm) of the tail from the end of the board to
 the end of the effective edge.
 
 
 #### Sidecut Radius
-"sidecut radius": `number`
+"sidecut radius": `number` | `string`
 
-The radius, in centimeters, of a circle which will be used to form the
+The radius (default cm) of a circle which will be used to form the
 sidecut along the effective edge.
 
 
 #### Waist Width
-"waist width": `number`
+"waist width": `number` | `string`
 
-The width, in centimeters, of the waist of the board. The waist is
+The width (default cm) of the waist of the board. The waist is
 located at the center of the effective edge. Note that because of the
 taper, this is not necessarily the narrowest part of the board.
 
 
 #### Taper
-"taper": `number`
+"taper": `number` | `string`
 
-The taper, in centimeters, of the board from nose to tail. The tail
+The taper (default cm) of the board from nose to tail. The tail
 will be narrower than the nose by this amount.
 
 
@@ -221,11 +226,11 @@ See the specification for the Nose Shape for details; the tail is the
 same.
 
 #### Stance Setback
-"stance setback": `number`
+"stance setback": `number` | `string`
 
 *Optional.*
 
-The setback, in centimeters, which defines how much the reference
+The setback (default cm) which defines how much the reference
 stance of a board, or boot center of a ski, is shifted away from the
 center of the effective edge towards the tail. A value of `0` keeps the
 reference stance centered over the center of the effective edge. A positive
@@ -233,26 +238,26 @@ value shifts the reference stance towards the tail. Optional. If omitted a
 value of `0` is assumed.
 
 #### Nose and Tail Spacer Width
-"nose and tail spacer width": `number`
+"nose and tail spacer width": `number` | `string`
 
-Specifies the width, in centimeters, of the nose and tail spacer. The
+Specifies the width (default cm) of the nose and tail spacer. The
 core at the nose and tail, starting at the ends of the effective edge,
 will be inset by this amount.
 
 
 #### Nose Edge Extension
-"nose edge extension": `number`
+"nose edge extension": `number` | `string`
 
-Specifies the length, in centimeters, of the edge past the end of the
+Specifies the length (default cm) of the edge past the end of the
 effective edge towards the nose of the board. Optional. If omitted the
 edge wraps around the entire nose of the board. If `0.0`, the edge
 ends right at the end of the effective edge.
 
 
 #### Tail Edge Extension
-"tail edge extension": `number`
+"tail edge extension": `number` | `string`
 
-Specifies the length, in centimeters, of the edge past the end of the
+Specifies the length (default cm) of the edge past the end of the
 effective edge towards the tail of the board. Optional. If omitted the
 edge wraps around the entire tail of the board. If `0.0`, the edge
 ends right at the end of the effective edge.
@@ -270,24 +275,24 @@ transition.
 
 
 #### Nose Thickness
-"nose thickness": `number`
+"nose thickness": `number` | `string`
 
-The thickness, in centimeters, of the nose. The entire nose right up
+The thickness (default cm) of the nose. The entire nose right up
 to the effective edge will be this thickness.
 
 
 #### Center Thickness
-"center thickness": `number`
+"center thickness": `number` | `string`
 
-The thickness, in centimeters, of the center of the board. How much of
+The thickness (default cm) of the center of the board. How much of
 the center is this thickness is determined by the nose and tail taper
 parameters.
 
 
 #### Tail Thickness
-"tail thickness": `number`
+"tail thickness": `number` | `string`
 
-The thickness, in centimeters, of the tail. The entire tail right up
+The thickness (default cm) of the tail. The entire tail right up
 to the effective edge will be this thickness.
 
 
@@ -343,12 +348,12 @@ the tail from the center of the effective edge.
 ```
 
 #### Reference Stance Width
-"reference stance width": `number`
+"reference stance width": `number` | `string`
 
 *Optional. Replaced by '--binding-distance' keyword on command line but
 retained for backwards compatibility. To be removed in future version.*
 
-The width, in centimeters, between the center insert group in each
+The width (default cm) between the center insert group in each
 pack. By default, these groups are centered at the waist of the board,
 i.e., the center of the effective edge.
 
@@ -373,6 +378,10 @@ Omit for skis or boards with no inserts.*
 
 The binding definition configuration file contains a single section
 which describes parameters relating to binding insert positioning.
+
+All length parameters in the binding configuration accept either raw
+numbers or strings with unit suffixes (`"cm"`, `"mm"`, or `"in"`). When
+a unit suffix is omitted, values default to centimeters.
 
 ```
 {
@@ -429,10 +438,10 @@ defined. Additional groups are specified with the other parameters.
 reference group towards the nose of the board. Likewise, `count tail`
 specifies the number of additional groups to add towards the tail.
 
-`offset` indicates, in centimeters, how far apart the center of each
+`offset` indicates (default cm) how far apart the center of each
 group is.
 
-`horizontal spacing` indicates, in centimeters, how far apart the
+`horizontal spacing` indicates (default cm) how far apart the
 inserts within a group are from nose-to-tail, while `vertical spacing`
 indicates, again in centimeters, how far apart they are from
 side-to-side. (Think about looking at a board from above, with the
@@ -554,10 +563,10 @@ use `nose`.
 
 "toe":
 \[
-  {"x": `number`,   "y": `number`},
-  {"x": `number`,   "y": `number`},
+  {"x": `number` | `string`,   "y": `number` | `string`},
+  {"x": `number` | `string`,   "y": `number` | `string`},
   ...
-  {"x": `number`,   "y": `number`}
+  {"x": `number` | `string`,   "y": `number` | `string`}
 \]
 
 *Optional.*
@@ -576,7 +585,7 @@ be specified relative to the toe (and hence should be part of the
 #### Center
 "center":
 \[
-  {"x": `number`,   "y": `number`},
+  {"x": `number` | `string`,   "y": `number` | `string`},
   ...
 \]
 
@@ -598,7 +607,7 @@ use `tail`.
 
 "heel":
 \[
-  {"x": `number`,   "y": `number`},
+  {"x": `number` | `string`,   "y": `number` | `string`},
   ...
 \]
 
@@ -635,6 +644,10 @@ related to the machining or assembly process is represented here. If
 your manufacturing process and materials are fairly consistent then it
 will be rare for you to change this file.
 
+All length parameters in the machine configuration and tool definitions
+accept either raw numbers or strings with unit suffixes (`"cm"`, `"mm"`,
+or `"in"`). When a unit suffix is omitted, values default to inches.
+
 ```
 {
     “machine”:
@@ -643,6 +656,25 @@ will be rare for you to change this file.
     }
 }
 ```
+
+### Machine Configuration
+
+#### G-Code Units
+"gcode units": `"in"` or `"mm"`
+
+Sets the output units for generated G-code. Use `"in"` for inches
+(the default) or `"mm"` for millimeters.
+MonkeyCAM converts its internal units to the selected units and
+emits `G20` (inches) or `G21` (millimeters) accordingly.
+
+#### XY Rotation
+"rotate x/y axes": `"none"` | `"counter-clockwise"` | `"clockwise"`
+
+Rotates the X/Y coordinates when emitting G-code. Use `"none"` for the
+default orientation, `"counter-clockwise"` for a -90° rotation, or
+`"clockwise"` for a 90° rotation. This is useful when your machine's
+long and short axes are configured opposite of the MonkeyCAM defaults.
+
 ### Overall speeds and feeds
 
 All feed rates are emitted as `F` codes in the G-Code programs,
@@ -670,9 +702,9 @@ assuming the table or part top is at `Z = 0`, and positive values of
 
 #### Bottom Rapid Height
 
-"bottom rapid height": `number`
+"bottom rapid height": `number` | `string`
 
-The height, in inches, at which the cutter will move during all rapid
+The height (default in) at which the cutter will move during all rapid
 motions via `G00` when working the bottom of the board. All programs
 which work on the bottom of the board use `Z = 0` at the top of the
 core blank, thus this is the height above the core blank for all rapid
@@ -680,9 +712,9 @@ moves.
 
 #### Top Rapid Height
 
-"top rapid height": `number`
+"top rapid height": `number` | `string`
 
-The height, in inches, at which the cutter will move during all rapid
+The height (default in) at which the cutter will move during all rapid
 motions via `G00` when working the top of the board. All programs
 which work on the top of the board use `Z = 0` at the top of the
 table, thus this is the height above the table for all rapid moves and
@@ -692,9 +724,9 @@ must be sufficient to clear the core.
 
 #### Core Blank Thickness
 
-"core blank thickness": `number`
+"core blank thickness": `number` | `string`
 
-The thickness, in inches, of the core blank. This does not have to be
+The thickness (default in) of the core blank. This does not have to be
 precise so long as it is **at least** as thick as your thickest core
 blank. A value larger than the true thickness of the core blank will
 cause some of the G-Code programs to be less efficient than they
@@ -712,9 +744,9 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 #### Base Rapid Height
 
-"base rapid height": `number`
+"base rapid height": `number` | `string`
 
-The height, in inches, at which the cutter will move during all rapid
+The height (default in) at which the cutter will move during all rapid
 motions via `G00` when working the base and nose/tail spacer
 material. All programs which work on the base use `Z = 0` at the top
 of the table, thus this is the height above the table for all rapid
@@ -722,9 +754,9 @@ moves and must be sufficient to clear the base.
 
 #### Base Cut Thru Height
 
-"base cut thru height": `number`
+"base cut thru height": `number` | `string`
 
-The depth, in inches, at which the cutter will descend to in order to
+The depth (default in) at which the cutter will descend to in order to
 cut thru the base material. This should be a negative number slightly
 less than `0` in order to ensure the cutter completely penetrates the
 base material, i.e., `-0.010` or so.
@@ -740,9 +772,9 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 #### Guide Hole Depth
 
-"guide hole depth": `number`
+"guide hole depth": `number` | `string`
 
-The depth, in inches, to which the guide holes will be cut thru the
+The depth (default in) to which the guide holes will be cut thru the
 core. Note that this program uses `Z = 0` as the top of the core
 blank, so this should be thicker than the core blank and thick enough
 to ensure a reasonable hole is left in the table top for alignment
@@ -750,17 +782,17 @@ pins.
 
 #### Guide Hole Diameter
 
-"guide hole diameter": `number`
+"guide hole diameter": `number` | `string`
 
-The diameter, in inches, of the guide holes. Make this slightly larger
+The diameter (default in) of the guide holes. Make this slightly larger
 than the true diameter of your alignment pins, i.e., `0.505` inches
 for half inch pins.
 
 #### Guide Hole Offset
 
-"guide hole offset": `number`
+"guide hole offset": `number` | `string`
 
-The offset, in inches, of the guide holes from the ends of the core.
+The offset (default in) of the guide holes from the ends of the core.
 
 ### Alignment Marks Parameters
 
@@ -774,23 +806,23 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 #### Alignment Mark Offset
 
-"alignment mark offset": `number`
+"alignment mark offset": `number` | `string`
 
-The offset, in inches, of all alignment marks from the edges of the
+The offset (default in) of all alignment marks from the edges of the
 core.
 
 #### Alignment Mark Depth
 
-"alignment mark depth": `number`
+"alignment mark depth": `number` | `string`
 
-The depth, in inches, of all alignment marks into the core. Typically
+The depth (default in) of all alignment marks into the core. Typically
 quite small, e.g. `-0.025`, but adjust based on personal preference.
 
 #### Alignment Mark Deep Depth
 
-"alignment mark deep depth": `number`
+"alignment mark deep depth": `number` | `string`
 
-The depth, in inches, of the extra-deep alignment marks near past the
+The depth (default in) of the extra-deep alignment marks near past the
 ends of the core that can be used to re-align the machine in the event
 of a horrible mistake.
 
@@ -807,16 +839,16 @@ cut the edge groove.
 
 #### Edge Groove Depth
 
-"edge groove depth": `number`
+"edge groove depth": `number` | `string`
 
-The depth, in inches, of the edge groove around the perimeter of the
+The depth (default in) of the edge groove around the perimeter of the
 core to accommodate the edges.
 
 #### Edge Groove Edge Width
 
-"edge groove edge width": `number`
+"edge groove edge width": `number` | `string`
 
-The width, in inches, of your edge stock including the tines, plus a little extra for some 
+The width (default in) of your edge stock including the tines, plus a little extra for some 
 play when aligning the core to the base. This parameter is combined with `sidewall overhang` 
 to form the total width of the edge groove.
 
@@ -839,21 +871,21 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 #### Insert Rim Depth
 
-"insert rim depth": `number`
+"insert rim depth": `number` | `string`
 
-The depth, in inches, of the outer edge of the insert holes.
+The depth (default in) of the outer edge of the insert holes.
 
 #### Insert Rim Diameter
 
-"insert rim diameter": `number`
+"insert rim diameter": `number` | `string`
 
-The diameter, in inches, of the rim of the insert holes.
+The diameter (default in) of the rim of the insert holes.
 
 #### Insert Hole Diameter
 
-"insert hole diameter": `number
+"insert hole diameter": `number` | `string`
 
-The diameter, in inches, of the barrel of the inserts.
+The diameter (default in) of the barrel of the inserts.
 
 ### Top Profile Parameters
 
@@ -890,9 +922,9 @@ profiling pass will overlap with the prior pass.
 
 #### Top Profile Lead-in Length
 
-"top profile lead-in length": `number`
+"top profile lead-in length": `number` | `string`
 
-The distance, in inches, over which the cutter will ramp into the core
+The distance (default in) over which the cutter will ramp into the core
 blank before reaching the full cutting depth. A longer lead-in may be
 appropriate for thicker core blanks, or larger cutters.
 
@@ -908,9 +940,9 @@ The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which 
 
 #### Sidewall Overhang
 
-"sidewall overhang": `number`
+"sidewall overhang": `number` | `string`
 
-The amount, in inches, of sidewall which will remain past the edges, outside the final board 
+The amount (default in) of sidewall which will remain past the edges, outside the final board 
 shape. Leave a few mm to account for core-to-base alignment error.
 
 This parameter is combined with `edge groove edge width` to form the total width
@@ -922,16 +954,16 @@ Each of these effects the [Nose Tail Spacers program](G-Code_Program_Guide.md#no
 
 #### Spacer End Overhang
 
-"spacer end overhang": `number`
+"spacer end overhang": `number` | `string`
 
-The minimum amount, in inches, of spacer material which will be left
+The minimum amount (default in) of spacer material which will be left
 past the ends of the final board shape.
 
 #### Spacer Side Overhang
 
-"spacer side overhang": `number`
+"spacer side overhang": `number` | `string`
 
-The minimum amount, in inches, of spacer material which will be left
+The minimum amount (default in) of spacer material which will be left
 past the sides of the final board shape.
 
 ### Edge Trench Parameters
@@ -940,9 +972,9 @@ Each of these effects the [Edge Trench program](G-Code_Program_Guide.md#edge-tre
 
 #### Edge Trench Width
 
-"edge trench width": `number`
+"edge trench width": `number` | `string`
 
-The width, in inches, of the edge trench. This should be the width of
+The width (default in) of the edge trench. This should be the width of
 your sidewall material, and of any additional stringers you want to
 lay down perfectly along the effective edge. Recognize that a portion
 of this trench will extend past the final board shape as determined by
@@ -950,9 +982,9 @@ the sidewall overhang.
 
 #### Edge Trench Extension
 
-"edge trench extension": `number`
+"edge trench extension": `number` | `string`
 
-The distance, in inches, the edge trench will extend past the ends of
+The distance (default in) the edge trench will extend past the ends of
 the effective edge. This distance needs to be sufficient to ensure
 sidewall and extra stringer material will fill the core a bit past
 where it will be shaped by the core cutout program, but not so long
@@ -969,9 +1001,9 @@ down the center to allow the board to be cut in half after pressing.
 
 #### Splitboard Center Gap
 
-"splitboard center gap": `number`
+"splitboard center gap": `number` | `string`
 
-The width, in inches, of the gap to leave down the center of the board
+The width (default in) of the gap to leave down the center of the board
 for the board to be split after layup. This should be the width of
 your bandsaw blade plus a little bit of slop for error to ensure the
 blade doesn't bind and dig into the metal center edges. You will
@@ -981,9 +1013,9 @@ layup.
 
 #### Splitboard Center Trench Width
 
-"splitboard center trench width": `number`
+"splitboard center trench width": `number` | `string`
 
-The width, in inches, of the center trench. This should be the width of
+The width (default in) of the center trench. This should be the width of
 your sidewall material, and of any additional stringers you want to
 lay down perfectly along the center of the splitboard.
 
@@ -1038,9 +1070,9 @@ the header block of the G-Code programs which use this tool.
 
 #### Diameter
 
-"diameter": `number`
+"diameter": `number` | `string`
 
-The diameter, in inches, of the tool. Be precise and measure carefully
+The diameter (default in) of the tool. Be precise and measure carefully
 with precision calipers. If you have a quarter-inch cutter which is
 really `0.247` inches in diameter, then enter that.
 

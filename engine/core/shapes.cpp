@@ -296,8 +296,12 @@ const Path& BoardShape::buildOverallPath(const Machine& machine) {
 
 const void BoardShape::addCoreCenterComment(GCodeWriter& g) {
   auto centerX = m_noseLength + (m_effectiveEdge / 2);
+  auto centerPoint = g.outputPoint(Point(centerX, 0, 0));
   g.headerComment("* Center of the board in G54:");
-  g.headerCommentF("    X=%s Y=0.0000 Z=0.0000", centerX.inchesStr().c_str());
+  g.headerCommentF("    X=%s Y=%s Z=%s",
+                   g.formatLength(centerPoint.X).c_str(),
+                   g.formatLength(centerPoint.Y).c_str(),
+                   g.formatLength(centerPoint.Z).c_str());
 }
 
 const Path BoardShape::spreadPathForSplitboards(const Path& p,
@@ -641,7 +645,7 @@ const GCodeWriter BoardShape::generateBaseCutout(const Machine& machine) {
   });
   GCodeWriter g(m_name + "-base-cutout.nc", tool, GCodeWriter::TableTop,
                 GCodeWriter::YIsPartCenter, machine.normalSpeed(),
-                machine.baseRapidHeight());
+                machine.baseRapidHeight(), machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.rapidToPoint(op[0]);
   g.spindleOn();
@@ -666,7 +670,8 @@ const GCodeWriter BoardShape::generateGuideHoles(const Machine& machine) {
   auto tool = machine.tool(machine.guideHoleTool());
   DebugPathSet& dps = addDebugPathSet("Guide Holes");
   GCodeWriter g(m_name + "-guide-holes.nc", tool, GCodeWriter::MaterialTop,
-                GCodeWriter::YIsPartCenter, machine.normalSpeed(), rapidHeight);
+                GCodeWriter::YIsPartCenter, machine.normalSpeed(), rapidHeight,
+                machine.gcodeUnits(), machine.xyRotation());
   g.comment(
       "Guide holes should be milled first so we can re-align the core if "
       "something goes wrong.");
@@ -775,7 +780,8 @@ const GCodeWriter BoardShape::generateCoreAlignmentMarks(
       "red"}};
   GCodeWriter g(m_name + "-core-alignment-marks.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.normalSpeed(), machine.bottomRapidHeight());
+                machine.normalSpeed(), machine.bottomRapidHeight(),
+                machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.spindleOn();
   for (auto& p : marks) {
@@ -914,7 +920,7 @@ const GCodeWriter BoardShape::generateCoreEdgeGroove(const Machine& machine) {
 
   GCodeWriter g(m_name + "-core-edge-groove.nc", tool, GCodeWriter::MaterialTop,
                 GCodeWriter::YIsPartCenter, machine.normalSpeed(),
-                machine.bottomRapidHeight());
+                machine.bottomRapidHeight(), machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.spindleOn();
   g.emitPathSets(groovePathSets, true, machine.bottomRapidHeight(), 0,
@@ -967,12 +973,14 @@ void emitInsert(GCodeWriter& g, const Machine& machine,
   auto insertCenterHoleDia = machine.insertHoleDiameter();
   auto insertCenterHoleDepth = -machine.coreBlankThickness();
   g.comment("A single insert");
-  g.commentF("  Outer rim diameter = %s\"", outerRimDia.inchesStr().c_str());
-  g.commentF("  Outer rim depth    = %s\"", outerRimDepth.inchesStr().c_str());
-  g.commentF("  Shaft diameter      = %s\"",
-             insertCenterHoleDia.inchesStr().c_str());
-  g.commentF("  Shaft depth         = %s\"",
-             insertCenterHoleDepth.inchesStr().c_str());
+  g.commentF("  Outer rim diameter = %s",
+             g.formatLengthWithUnits(outerRimDia).c_str());
+  g.commentF("  Outer rim depth    = %s",
+             g.formatLengthWithUnits(outerRimDepth).c_str());
+  g.commentF("  Shaft diameter      = %s",
+             g.formatLengthWithUnits(insertCenterHoleDia).c_str());
+  g.commentF("  Shaft depth         = %s",
+             g.formatLengthWithUnits(insertCenterHoleDepth).c_str());
   auto startPosition = g.currentPosition();
   if (heightAboveMaterial > 0) {
     g.feedToPoint(g.currentPosition() + Point(0, 0, -heightAboveMaterial));
@@ -994,7 +1002,7 @@ const GCodeWriter BoardShape::generateInsertHoles(const Machine& machine) {
   auto rapidHeight = machine.bottomRapidHeight();
   GCodeWriter g(m_name + "-core-insert-holes.nc", tool,
                 GCodeWriter::MaterialTop, GCodeWriter::YIsPartCenter,
-                machine.normalSpeed(), rapidHeight);
+                machine.normalSpeed(), rapidHeight, machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.spindleOn();
   for (auto& p : m_insertsPath) {
@@ -1032,20 +1040,6 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   assert(offsetPaths.size() == 1);
   auto overallOffset = offsetPaths[0];
   DebugPathSet& dps = addDebugPathSet("Top Profile");
-  dps.addDescription(
-      "<p>These are the paths which apply the thickness profile "
-      "to the top of the core. They are joined inside-out, with "
-      "a lead-in of %s\" to the beginning of each island. A "
-      "%s\" cutter is used with an overlap of %.2f&#37;.</p>",
-      machine.topProfileLeadinLength().inchesStr().c_str(),
-      tool.diameter.inchesStr().c_str(),
-      machine.topProfileOverlapPercentage() * 100.0);
-  if (roughing) {
-    dps.addDescription(
-        "<p>Roughing paths are included, which limit the depth "
-        "of cut to reduce cutter load. They are overlapped with "
-        "the final thickness profile here.</p>");
-  }
   dps.addPath([&] {
     return DebugPath{
         spreadPathForSplitboards(buildCorePath(machine), machine),
@@ -1248,10 +1242,23 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
     cutGroups.push_back(pathSets);
   }
   auto rapidHeight = machine.topRapidHeight();
-  ;
   GCodeWriter g(m_name + "-top-profile.nc", tool, GCodeWriter::TableTop,
                 GCodeWriter::YIsPartCenter, machine.topProfileDeepSpeed(),
-                rapidHeight);
+                rapidHeight, machine.gcodeUnits(), machine.xyRotation());
+  dps.addDescription(
+      "<p>These are the paths which apply the thickness profile "
+      "to the top of the core. They are joined inside-out, with "
+      "a lead-in of %s to the beginning of each island. A "
+      "%s cutter is used with an overlap of %.2f&#37;.</p>",
+      g.formatLengthWithUnits(machine.topProfileLeadinLength()).c_str(),
+      g.formatLengthWithUnits(tool.diameter).c_str(),
+      machine.topProfileOverlapPercentage() * 100.0);
+  if (roughing) {
+    dps.addDescription(
+        "<p>Roughing paths are included, which limit the depth "
+        "of cut to reduce cutter load. They are overlapped with "
+        "the final thickness profile here.</p>");
+  }
   addCoreCenterComment(g);
   g.spindleOn();
   for (auto& pathSets : cutGroups) {
@@ -1363,13 +1370,13 @@ const GCodeWriter BoardShape::generateNoseTailSpacerCutout(
 
   GCodeWriter g(m_name + "-nose-tail-spacers.nc", tool, GCodeWriter::TableTop,
                 GCodeWriter::YIsPartCenter, machine.normalSpeed(),
-                machine.baseRapidHeight());
+                machine.baseRapidHeight(), machine.gcodeUnits(), machine.xyRotation());
   auto materialLength =
       m_noseLength + m_tailLength + 2 + machine.spacerEndOverhang() * 2;
   addCoreCenterComment(g);
   g.headerComment();
-  g.headerCommentF("Spacer material length: %s\" [%scm]",
-                   materialLength.inchesStr().c_str(),
+  g.headerCommentF("Spacer material length: %s",
+                   g.formatLengthWithUnits(materialLength).c_str(),
                    materialLength.str().c_str());
   g.headerComment();
   g.rapidToPoint(onp[0]);
@@ -1520,7 +1527,7 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
 
   GCodeWriter g(m_name + "-edge-trench.nc", tool, GCodeWriter::TableTop,
                 GCodeWriter::YIsPartCenter, machine.normalSpeed(),
-                machine.topRapidHeight());
+                machine.topRapidHeight(), machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.rapidToPoint(t1[0]);
   g.spindleOn();
@@ -1598,7 +1605,8 @@ const GCodeWriter BoardShape::generateSplitboardCenterTrench(
 
   GCodeWriter g(m_name + "-splitboard-center-trench.nc", tool,
                 GCodeWriter::TableTop, GCodeWriter::YIsPartCenter,
-                machine.normalSpeed(), machine.topRapidHeight());
+                machine.normalSpeed(), machine.topRapidHeight(),
+                machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.rapidToPoint(cto[0]);
   g.spindleOn();
@@ -1663,7 +1671,7 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
 
   GCodeWriter g(m_name + "-top-cutout.nc", tool, GCodeWriter::TableTop,
                 GCodeWriter::YIsPartCenter, machine.normalSpeed(),
-                machine.topRapidHeight());
+                machine.topRapidHeight(), machine.gcodeUnits(), machine.xyRotation());
   addCoreCenterComment(g);
   g.rapidToPoint(profPath[0]);
   g.spindleOn();

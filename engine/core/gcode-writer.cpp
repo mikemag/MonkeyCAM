@@ -35,11 +35,14 @@ using std::string;
 using std::vector;
 
 GCodeWriter::GCodeWriter(string filename, Tool const& tool, ZeroZ zeroHeight,
-                         XYOrigin origin, int normalSpeed, MCFixed rapidHeight)
+                         XYOrigin origin, int normalSpeed, MCFixed rapidHeight,
+                         GCodeUnits units, XYRotation xyRotation)
     : m_filename(filename),
       m_tool(tool),
       m_defaultSpeed(normalSpeed),
       m_rapidHeight(rapidHeight),
+      m_units(units),
+      m_xyRotation(xyRotation),
       m_zeroHeight(zeroHeight),
       m_xyOrigin(origin),
       m_incremental(false),
@@ -52,7 +55,8 @@ GCodeWriter::GCodeWriter(string filename, Tool const& tool, ZeroZ zeroHeight,
 }
 
 // Empty writer which can be used as a placeholder for 'nothing'.
-GCodeWriter::GCodeWriter() {}
+GCodeWriter::GCodeWriter()
+    : m_units(GCodeUnits::Inches), m_xyRotation(XYRotation::None) {}
 
 // Simple word-wrapped comments
 void GCodeWriter::headerComment(string s, int indent) {
@@ -153,12 +157,12 @@ void GCodeWriter::headerBlock() {
       "See http://www.github.com/mikemag/MonkeyCAM for License and "
       "documentation.");
   headerComment();
-  headerCommentF("* Rapid height: %s\" [%scm]",
-                 m_rapidHeight.inchesStr().c_str(),
+  headerCommentF("* Rapid height: %s",
+                 formatLengthWithUnits(m_rapidHeight).c_str(),
                  m_rapidHeight.str().c_str());
-  headerCommentF("* Tool: T%d, %s, diameter %s\" [%scm]",
+  headerCommentF("* Tool: T%d, %s, diameter %s",
                  m_tool.gcodeToolNumber, m_tool.name.c_str(),
-                 m_tool.diameter.inchesStr().c_str(),
+                 formatLengthWithUnits(m_tool.diameter).c_str(),
                  m_tool.diameter.str().c_str());
   headerCommentF("* Height baseline [Z=0.0] is %s.",
                  m_zeroHeight == TableTop ? "the top of the table"
@@ -167,6 +171,11 @@ void GCodeWriter::headerBlock() {
                  m_xyOrigin == LowerLeft
                      ? "the lower left of the table"
                      : "the left side of the table, Y is center of the part");
+  if (m_xyRotation == XYRotation::CounterClockwise) {
+    headerComment("* XY axes are rotated counter-clockwise.");
+  } else if (m_xyRotation == XYRotation::Clockwise) {
+    headerComment("* XY axes are rotated clockwise.");
+  }
   headerComment(
       "* Requires G54 to be the part work coordinate offsets "
       "[WCO]. [0, 0] is the center of the nose, with the board "
@@ -177,7 +186,7 @@ void GCodeWriter::headerBlock() {
       "* Requires G55 to be the machine WCO, with Z above the rapid "
       "height.",
       2);
-  headerComment("* Units are inches", 2);
+  headerComment(std::string("* Units are ") + unitsName(), 2);
 }
 
 void GCodeWriter::line(string s) { m_lines.push_back(s); }
@@ -192,10 +201,9 @@ void GCodeWriter::lineF(const char* fmt, ...) {
 }
 
 void GCodeWriter::startBlock() {
-  line("G90 G20 G17 G40 G49");
+  lineF("G90 %s G17 G40 G49", m_units == GCodeUnits::Inches ? "G20" : "G21");
   lineF("G43 H1 T%d", m_tool.gcodeToolNumber);  // Tool length offset
-  lineF("G00 G54 X0 Y0 Z%s",
-        m_rapidHeight.inchesStr().c_str());  // NB: sets wco
+  lineF("G00 G54 X0 Y0 Z%s", formatLength(m_rapidHeight).c_str());
   line();
 }
 
@@ -208,12 +216,12 @@ void GCodeWriter::endBlock() {
 
   headerComment("* Cutter bounding box in G54:");
   headerCommentF("    X%s Y%s Z%s to X%s Y%s Z%s",
-                 m_lowerBoundingBox.X.inchesStr().c_str(),
-                 m_lowerBoundingBox.Y.inchesStr().c_str(),
-                 m_lowerBoundingBox.Z.inchesStr().c_str(),
-                 m_upperBoundingBox.X.inchesStr().c_str(),
-                 m_upperBoundingBox.Y.inchesStr().c_str(),
-                 m_upperBoundingBox.Z.inchesStr().c_str());
+                 formatLength(m_lowerBoundingBox.X).c_str(),
+                 formatLength(m_lowerBoundingBox.Y).c_str(),
+                 formatLength(m_lowerBoundingBox.Z).c_str(),
+                 formatLength(m_upperBoundingBox.X).c_str(),
+                 formatLength(m_upperBoundingBox.Y).c_str(),
+                 formatLength(m_upperBoundingBox.Z).c_str());
 }
 
 void GCodeWriter::spindleOn() {
@@ -227,29 +235,34 @@ void GCodeWriter::spindleOff() { line("M05"); }
 // moves to the point adjusted to the rapid height.
 void GCodeWriter::rapidToPoint(Point p) {
   if (p.Z != m_rapidHeight) p.Z = m_rapidHeight;
+  Point output = outputPoint(p);
   if (!m_firstMovement && (m_currentPosition.Z != m_rapidHeight)) {
     Point c = m_currentPosition;
     c.Z = m_rapidHeight;
-    lineF("G00 X%s Y%s Z%s", c.X.inchesStr().c_str(), c.Y.inchesStr().c_str(),
-          c.Z.inchesStr().c_str());
+    Point outputCurrent = outputPoint(c);
+    lineF("G00 X%s Y%s Z%s", formatLength(outputCurrent.X).c_str(),
+          formatLength(outputCurrent.Y).c_str(),
+          formatLength(outputCurrent.Z).c_str());
     updateCurrentPosition(c);
   }
   if (p != m_currentPosition) {
-    lineF("G00 X%s Y%s Z%s", p.X.inchesStr().c_str(), p.Y.inchesStr().c_str(),
-          p.Z.inchesStr().c_str());
+    lineF("G00 X%s Y%s Z%s", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str());
   }
   updateCurrentPosition(p);
   m_firstMovement = false;
 }
 
 void GCodeWriter::feedToPoint(Point p, int feedRate) {
+  Point output = outputPoint(p);
   if (feedRate == -1) feedRate = m_defaultSpeed;
   if (feedRate != m_currentSpeed) {
-    lineF("G01 X%s Y%s Z%s F%d", p.X.inchesStr().c_str(),
-          p.Y.inchesStr().c_str(), p.Z.inchesStr().c_str(), feedRate);
+    lineF("G01 X%s Y%s Z%s F%d", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str(),
+          feedRate);
   } else {
-    lineF("G01 X%s Y%s Z%s", p.X.inchesStr().c_str(), p.Y.inchesStr().c_str(),
-          p.Z.inchesStr().c_str());
+    lineF("G01 X%s Y%s Z%s", formatLength(output.X).c_str(),
+          formatLength(output.Y).c_str(), formatLength(output.Z).c_str());
   }
   updateCurrentPosition(p);
   m_currentSpeed = feedRate;
@@ -330,19 +343,21 @@ void GCodeWriter::updateCurrentPosition(Point p) {
   } else {
     m_currentPosition += p;
   }
-  m_lowerBoundingBox.X = std::min(m_currentPosition.X, m_lowerBoundingBox.X);
-  m_lowerBoundingBox.Y = std::min(m_currentPosition.Y, m_lowerBoundingBox.Y);
-  m_lowerBoundingBox.Z = std::min(m_currentPosition.Z, m_lowerBoundingBox.Z);
-  m_upperBoundingBox.X = std::max(m_currentPosition.X, m_upperBoundingBox.X);
-  m_upperBoundingBox.Y = std::max(m_currentPosition.Y, m_upperBoundingBox.Y);
-  m_upperBoundingBox.Z = std::max(m_currentPosition.Z, m_upperBoundingBox.Z);
+  Point output = outputPoint(m_currentPosition);
+  m_lowerBoundingBox.X = std::min(output.X, m_lowerBoundingBox.X);
+  m_lowerBoundingBox.Y = std::min(output.Y, m_lowerBoundingBox.Y);
+  m_lowerBoundingBox.Z = std::min(output.Z, m_lowerBoundingBox.Z);
+  m_upperBoundingBox.X = std::max(output.X, m_upperBoundingBox.X);
+  m_upperBoundingBox.Y = std::max(output.Y, m_upperBoundingBox.Y);
+  m_upperBoundingBox.Z = std::max(output.Z, m_upperBoundingBox.Z);
 }
 
 // A clockwise arc, 2d only (z is ignored).
 void GCodeWriter::emitClockwiseArc(Point dest, MCFixed radius) {
   assert(dest.Z == 0);
-  lineF("G02 X%s Y%s Z0.0000 R%s", dest.X.inchesStr().c_str(),
-        dest.Y.inchesStr().c_str(), radius.inchesStr().c_str());
+  Point output = outputPoint(dest);
+  lineF("G02 X%s Y%s Z0.0000 R%s", formatLength(output.X).c_str(),
+        formatLength(output.Y).c_str(), formatLength(radius).c_str());
   updateCurrentPosition(dest);
 }
 
@@ -367,7 +382,8 @@ void GCodeWriter::emitIncrementalHole(MCFixed diameter, MCFixed depth,
   auto radius = (diameter - m_tool.diameter) / 2;
   auto depthIncr = depth / steps;
   commentF("Incremental hole: depth = %s, diameter = %s",
-           depth.inchesStr().c_str(), diameter.inchesStr().c_str());
+           formatLengthWithUnits(depth).c_str(),
+           formatLengthWithUnits(diameter).c_str());
   auto startPosition = m_currentPosition;
   setIncremental();
   if (heightAboveMaterial > 0) {
@@ -419,6 +435,32 @@ void GCodeWriter::write(string directory) const {
   o << "\r\n";
   for (const auto& l : m_lines) o << l << "\r\n";
   o.close();
+}
+
+Point GCodeWriter::outputPoint(Point p) const {
+  if (m_xyRotation == XYRotation::CounterClockwise) {
+    return Point(-p.Y, p.X, p.Z);
+  }
+  if (m_xyRotation == XYRotation::Clockwise) {
+    return Point(p.Y, -p.X, p.Z);
+  }
+  return p;
+}
+
+std::string GCodeWriter::formatLength(const MCFixed& value) const {
+  return m_units == GCodeUnits::Inches ? value.inchesStr() : value.mmStr();
+}
+
+std::string GCodeWriter::formatLengthWithUnits(const MCFixed& value) const {
+  return formatLength(value) + unitsSuffix();
+}
+
+const char* GCodeWriter::unitsName() const {
+  return m_units == GCodeUnits::Inches ? "inches" : "millimeters";
+}
+
+const char* GCodeWriter::unitsSuffix() const {
+  return m_units == GCodeUnits::Inches ? "\"" : "mm";
 }
 
 }  // namespace MonkeyCAM
