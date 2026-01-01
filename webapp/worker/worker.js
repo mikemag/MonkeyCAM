@@ -19,7 +19,28 @@ const mcj = require('./MonkeyCAMJob');
 
 const stream = require('stream');
 
+const allow = new Set([
+    "https://monkeycam.org",
+    "https://www.monkeycam.org",
+    "http://localhost:3000",
+]);
+
+const cors = require("cors")({
+    origin: (origin, cb) => {
+        // allow non-browser tools (no Origin header), block unknown websites
+        if (!origin) return cb(null, true);
+        cb(null, allow.has(origin));
+    },
+    maxAge: 60 * 60,
+});
+
 const PORT = process.env.PORT || 8080;
+const development = process.env.NODE_ENV === 'development';
+let jobQueueTopic = 'MonkeyCAM-Job-Queue';
+
+if (development) {
+    jobQueueTopic = 'MonkeyCAM-Job-Queue-Test';
+}
 
 console.log(process.env)
 console.log(process.argv)
@@ -64,13 +85,132 @@ app.get('/', (req, res) => {
     res.status(200).send('OK');
 });
 
+app.post('/getJobStatus', getJobStatus);
+app.options("/getJobStatus", cors);
+app.post('/getJobFullResults', getJobFullResults);
+app.options("/getJobFullResults", cors);
+app.post('/getJobInputs', getJobInputs);
+app.options("/getJobInputs", cors);
+app.post('/addJob', addJob);
+app.options("/addJob", cors);
+
 app.listen(PORT, () => {
-    console.log(`Worker listening for Pub/Sub push messages on port ${PORT}`);
+    console.log(`Worker listening for messages on port ${PORT}`);
 });
 
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getJobStatus(req, res) {
+    cors(req, res, async () => {
+        if (req.body.jobid === undefined) {
+            res.status(400).send({ message: 'No jobid defined!' });
+            return;
+        }
+        try {
+            console.log('Get job status, jobid=', req.body.jobid);
+            const job = await mcj.MonkeyCAMJob.get(req.body.jobid);
+            res.json({
+                id: job.key.id,
+                inputsId: job.inputsId,
+                progress: job.progress,
+                state: job.stateName,
+                boardName: job.boardName,
+                jobCreatedTime: job.createdAt,
+                jobStartedTime: job.startedAt,
+                error: job.monkeyCAMResults ? job.monkeyCAMResults.error || null : null,
+                failureReason: job.failureReason
+            });
+        } catch (err) {
+            console.log('Error getting job status', err);
+            res.status(500).send({ message: err.message || err.toString() });
+        }
+    });
+}
+
+function getJobFullResults(req, res) {
+    cors(req, res, async () => {
+        if (req.body.jobid === undefined) {
+            res.status(400).send({ message: 'No jobid defined!' });
+            return;
+        }
+        try {
+            console.log('Get full results, jobid=', req.body.jobid);
+            const job = await mcj.MonkeyCAMJob.get(req.body.jobid);
+            console.log(job);
+            res.json({
+                jobFinishTime: Number(job.finishedAt),
+                // @TODO: clocks on different machines :) Created on laptop, run on server with
+                // time drift yields negative queue time.
+                jobRunTime: (job.finishedAt - job.startedAt) / 1000.0,
+                jobQueueTime: (job.startedAt - job.createdAt) / 1000.0,
+                monkeyCAMEngineVersion: job.monkeyCAMResults
+                    ? job.monkeyCAMResults.monkeyCAMVersion
+                    : null,
+                monkeyCAMEngineGitInfo: job.monkeyCAMResults
+                    ? job.monkeyCAMResults.gitInfo
+                    : null,
+                boardName: job.boardName,
+                ncFiles: job.monkeyCAMResults ? job.monkeyCAMResults.ncFiles : [],
+                overviewHTMLFileLink: job.overviewPublicURL,
+                allFilesLink: job.zipPublicURL
+            });
+        } catch (err) {
+            console.log('Error getting full results', err);
+            res.status(500).send({ message: err.message || err.toString() });
+        }
+    });
+}
+
+function getJobInputs(req, res) {
+    cors(req, res, async () => {
+        if (req.body.jobInputsId === undefined) {
+            res.status(400).send({ message: 'No jobInputsId defined!' });
+            return;
+        }
+        try {
+            console.log('Get job inputs, inputsid=', req.body.jobInputsId);
+            const jobInputs = await mcj.MonkeyCAMJobInputs.get(req.body.jobInputsId);
+            res.json({
+                id: req.params.inputsId,
+                boardConfig: jobInputs.boardConfig,
+                bindingConfig: jobInputs.bindingConfig,
+                machineConfig: jobInputs.machineConfig,
+                bindingDist: jobInputs.bindingDist
+            });
+        } catch (err) {
+            console.log('Error getting job inputs', err);
+            res.status(500).send({ message: err.message || err.toString() });
+        }
+    });
+}
+
+function addJob(req, res) {
+    cors(req, res, async () => {
+        if (
+            req.body.boardConfig === undefined ||
+            req.body.machineConfig === undefined
+        ) {
+            res.status(400).send({ message: 'Missing board or machine config' });
+            return;
+        }
+        try {
+            console.log('Adding job');
+            const jobId = await new mcj.MonkeyCAMJob(
+                req.body.boardConfig,
+                req.body.bindingConfig || {},
+                req.body.machineConfig,
+                req.body.bindingDist || 0
+            ).enqueue(jobQueueTopic);
+            console.log('Added jobid=', jobId);
+            res.send({ jobId: jobId });
+        } catch (err) {
+            console.log('Error adding new job', err);
+            res.status(500).send({ message: err.message || err.toString() });
+        }
+    });
 }
 
 async function setupJobDir(jobDir, boardConfig, bindingConfig, machineConfig) {
