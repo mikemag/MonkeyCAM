@@ -22,7 +22,6 @@ const stream = require('stream');
 const allow = new Set([
     "https://monkeycam.org",
     "https://www.monkeycam.org",
-    "http://localhost:3000",
 ]);
 
 const cors = require("cors")({
