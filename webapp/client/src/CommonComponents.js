@@ -8,11 +8,11 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 
-var development = process.env.NODE_ENV === 'development';
-var cfURLRoot = 'https://us-central1-monkeycam-web-app.cloudfunctions.net';
+const development = process.env.NODE_ENV === 'development';
+let cfURLRoot = 'https://monkeycam-worker-923789674618.us-central1.run.app';
 
 if (development) {
-  // cfURLRoot = 'http://localhost:3000';
+  cfURLRoot = ''; // Let the proxy setting in package.json take care of these when running locally
 }
 
 class BadJobNotice extends React.Component {

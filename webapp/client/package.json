@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/mikemag/MonkeyCAM.git"
   },
+  "proxy": "http://localhost:8080",
   "engines": {
     "node": "24.11.1"
   },
