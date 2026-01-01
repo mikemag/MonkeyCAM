@@ -122,9 +122,9 @@ MonkeyCAM engine currently depends on the following packages:
 
 The web app currently depends on the following packages:
 
-- Node.js, v8.15.0 for the cloud functions and client, and 24.11.1 for the worker.
+- Node.js v24.11.1 for the client and worker.
 - See the package.json files in the respective source directories for further dependencies. The major ones are React and Bootstrap on the UI side, and Google's cloud infra (Storage, Datastore, Pubsub) on the server side.
-- The web app is hosted on Google's cloud infra: App Engine, Cloud Functions, and Compute Engine.
+- The web app is hosted on Google's cloud infra: App Engine and Cloud Run
 
 ## Contributing
 
