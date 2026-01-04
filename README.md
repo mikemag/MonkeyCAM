@@ -35,6 +35,10 @@ You can help offset the server costs for running [MonkeyCAM.org](https://www.mon
 See the [MonkeyCAM v4 User’s Guide](https://github.com/mikemag/MonkeyCAM/blob/master/engine/docs/Users_Guide.md)
 for an overview of how to use and configure MonkeyCAM.
 
+## Questions
+
+Feel free to open a [discussion](https://github.com/mikemag/MonkeyCAM/discussions) on GitHub and I'll do my best to help you out.
+
 ## License
 
 MonkeyCAM is licensed under the Apache License, Version 2.0 except as
@@ -130,7 +134,7 @@ The web app currently depends on the following packages:
 
 If you're a software developer who is into ski and snowboard
 construction or CAM and you're interested in helping out on MonkeyCAM
-then let's chat. Open up an issue with what you want to work on and
+then let's chat. Open up an [issue](https://github.com/mikemag/MonkeyCAM/issues) or [discussion](https://github.com/mikemag/MonkeyCAM/discussions) with what you want to work on and
 we'll work out the details there, or fork the repo, make some changes
 and put up a pull request!
 

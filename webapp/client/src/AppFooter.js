@@ -19,11 +19,7 @@ const AppFooter = () => (
         Source on <a href="https://github.com/mikemag/MonkeyCAM">GitHub</a>
       </Col>
       <Col className="text-center" xs={12} sm={4}>
-        Contact: <a href="https://www.facebook.com/MonkeyCAMDev">Facebook</a>,{' '}
-        <a href="http://www.skibuilders.com/phpBB2/profile.php?mode=viewprofile&u=65">
-          Head Monkey
-        </a>{' '}
-        on SkiBuilders
+        Contact: <a href="https://github.com/mikemag/MonkeyCAM/discussions">MonkeyCAM Discussions</a>
       </Col>
     </Row>
     </Container>

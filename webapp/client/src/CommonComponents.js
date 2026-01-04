@@ -19,11 +19,8 @@ class BadJobNotice extends React.Component {
   render() {
     return (
       <Alert variant="info" className="text-left">
-        All server errors, slow jobs, and failed jobs are automatically logged
-        and reviewed frequently by the developers. Please feel free to report
-        this problem to{' '}
-        <a href="https://www.facebook.com/MonkeyCAMDev">MonkeyCAMDev</a> on
-        Facebook as well, especially if you see it occurring often!
+        Please report this problem at{' '}
+        <a href="https://github.com/mikemag/MonkeyCAM/discussions">MonkeyCAM Discussions</a>, especially if you see it occurring often!
       </Alert>
     );
   }
