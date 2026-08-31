@@ -46,10 +46,12 @@ cp monkeycam-dist/bin/MonkeyCAM webapp/worker/bin/linux
 
 ## Build the image
 
-From webapp/worker:
+From webapp/worker, replace the placeholder values and build the image:
 
 ```sh
-gcloud builds submit --project monkeycam-web-app --tag gcr.io/monkeycam-web-app/monkeycam-worker .
+gcloud builds submit \
+  --project=PROJECT_ID \
+  --tag=gcr.io/PROJECT_ID/WORKER_IMAGE .
 ```
 
 ## Deploy to Cloud Run
@@ -57,17 +59,63 @@ gcloud builds submit --project monkeycam-web-app --tag gcr.io/monkeycam-web-app/
 Deploy the built image to Cloud Run, from webapp/worker:
 
 ```sh
-gcloud run deploy monkeycam-worker \
-  --image gcr.io/monkeycam-web-app/monkeycam-worker \
-  --project monkeycam-web-app \
-  --region us-central1 \
-  --platform managed \
+gcloud run deploy WORKER_SERVICE \
+  --image=gcr.io/PROJECT_ID/WORKER_IMAGE \
+  --project=PROJECT_ID \
+  --region=REGION \
+  --platform=managed \
   --allow-unauthenticated \
   --max-instances=1 \
-  --service-account monkeycam-web-app@appspot.gserviceaccount.com \
-  --set-env-vars monkeycamPath=/app/bin/linux
+  --service-account=SERVICE_ACCOUNT_EMAIL \
+  --set-env-vars=monkeycamPath=/app/bin/linux
 ```
 
 The `monkeycamPath` environment variable ensures the worker uses the Linux binary bundled
 in the container. Cloud Run automatically sets the `PORT` environment variable, which the
 worker already respects.
+
+## Configure the Pub/Sub push subscription
+
+Production jobs are delivered to the worker through a Pub/Sub push subscription. The
+worker receives Pub/Sub's default wrapped JSON message format at `POST /pubsub`.
+
+Replace the placeholder values below, then create the subscription:
+
+```sh
+gcloud pubsub subscriptions create SUBSCRIPTION_ID \
+  --project=PROJECT_ID \
+  --topic=TOPIC_ID \
+  --push-endpoint=https://CLOUD_RUN_SERVICE_URL/pubsub \
+  --ack-deadline=600 \
+  --expiration-period=never
+```
+
+Do not add `--push-no-wrapper`; the handler expects the message payload in
+`body.message.data`.
+
+Verify the subscription:
+
+```sh
+gcloud pubsub subscriptions describe SUBSCRIPTION_ID \
+  --project=PROJECT_ID
+```
+
+If an existing subscription has the default expiration policy, make it persistent:
+
+```sh
+gcloud pubsub subscriptions update SUBSCRIPTION_ID \
+  --project=PROJECT_ID \
+  --expiration-period=never
+```
+
+Pub/Sub subscriptions expire after 31 days without subscriber activity by default.
+Successful pushes or subscription configuration changes restart the inactivity clock.
+To determine why a subscription disappeared, use Logs Explorer with:
+
+```
+protoPayload.methodName="google.pubsub.v1.Subscriber.DeleteSubscription"
+```
+
+An entry identifying `InternalExpireInactiveSubscription` indicates automatic
+expiration. Otherwise, inspect the audit-log principal to identify the user or service
+account that deleted it.
