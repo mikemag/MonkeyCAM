@@ -1281,10 +1281,21 @@ const GCodeWriter BoardShape::generateTopProfile(const Machine& machine,
   }
   addCoreCenterComment(g);
   g.spindleOn();
-  for (auto& pathSets : cutGroups) {
-    g.emitPathSets(pathSets, true, rapidHeight,
-                   machine.topProfileLeadinLength(),
-                   machine.topProfileTransitionSpeed());
+  if (roughing) {
+    // The experimental roughing implementation manages its own cut depths and
+    // is intentionally outside the scope of tool maximums and pass planning.
+    for (auto& pathSets : cutGroups) {
+      g.emitPathSets(pathSets, true, rapidHeight,
+                     machine.topProfileLeadinLength(),
+                     machine.topProfileTransitionSpeed());
+    }
+  } else {
+    auto minimumPasses = machine.topProfilePasses();
+    auto actualPasses = g.emitPathGroupsInLayers(
+        cutGroups, machine.coreBlankThickness(), minimumPasses,
+        tool.maxCutDepth, true, rapidHeight, machine.topProfileLeadinLength(),
+        machine.topProfileTransitionSpeed());
+    addCutDepthHeader(g, tool, minimumPasses, actualPasses);
   }
   g.spindleOff();
   g.close();

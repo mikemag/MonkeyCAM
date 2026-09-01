@@ -317,6 +317,97 @@ void GCodeWriter::emitPathSets(vector<vector<Path>>& pathSets, bool rapidMove,
   }
 }
 
+// Emit complete groups of 3D path sets at successive depth ceilings. The
+// final contour and lead-in paths are prepared once so each layer has the
+// same X/Y topology even when clamping Z changes 3D segment lengths.
+int GCodeWriter::emitPathGroupsInLayers(
+    const vector<vector<vector<Path>>>& pathGroups, MCFixed startDepth,
+    int minimumLevels, std::optional<MCFixed> maxCutDepth, bool rapidMove,
+    MCFixed rapidHeight, MCFixed leadInLength, int transitionSpeed) {
+  struct PreparedPath {
+    Path path;
+    Path leadIn;
+  };
+
+  vector<vector<vector<PreparedPath>>> preparedGroups;
+  std::optional<MCFixed> finalDepth;
+  for (const auto& pathSets : pathGroups) {
+    vector<vector<PreparedPath>> preparedPathSets;
+    for (const auto& pathSet : pathSets) {
+      vector<PreparedPath> preparedPathSet;
+      for (const auto& path : pathSet) {
+        PreparedPath prepared{path,
+                              PathUtils::SimpleLeadIn(
+                                  path, rapidHeight, leadInLength)};
+        PathUtils::RemoveShortLines(prepared.path,
+                                    MCFixed::fromInches(0.0005));
+        if (!prepared.leadIn.empty()) {
+          PathUtils::RemoveShortLines(prepared.leadIn,
+                                      MCFixed::fromInches(0.0005));
+        }
+        for (const auto& point : prepared.path) {
+          if (!finalDepth || point.Z < *finalDepth) finalDepth = point.Z;
+        }
+        preparedPathSet.push_back(std::move(prepared));
+      }
+      preparedPathSets.push_back(std::move(preparedPathSet));
+    }
+    preparedGroups.push_back(std::move(preparedPathSets));
+  }
+  assert(finalDepth);
+
+  auto levels =
+      planCutDepths(startDepth, *finalDepth, minimumLevels, maxCutDepth);
+  if (levels.size() == 1) {
+    // Preserve the exact legacy emission path when no additional layer is
+    // needed, including its established cleanup and lead-in behavior.
+    for (const auto& pathSets : pathGroups) {
+      auto pathSetsCopy = pathSets;
+      emitPathSets(pathSetsCopy, rapidMove, rapidHeight, leadInLength,
+                   transitionSpeed);
+    }
+    return 1;
+  }
+
+  auto clampPath = [](const Path& path, MCFixed level, bool finalLevel) {
+    Path clamped = path;
+    if (!finalLevel) {
+      for (auto& point : clamped) point.Z = std::max(point.Z, level);
+    }
+    return clamped;
+  };
+
+  for (size_t levelIndex = 0; levelIndex < levels.size(); ++levelIndex) {
+    const bool finalLevel = levelIndex == levels.size() - 1;
+    for (const auto& pathSets : preparedGroups) {
+      bool moveRapidly = rapidMove;
+      for (auto rit = std::rbegin(pathSets); rit != std::rend(pathSets);
+           ++rit) {
+        const auto& pathSet = *rit;
+        for (const auto& prepared : pathSet) {
+          auto path = clampPath(prepared.path, levels[levelIndex], finalLevel);
+          auto leadIn =
+              clampPath(prepared.leadIn, levels[levelIndex], finalLevel);
+          if (moveRapidly) {
+            moveRapidly = false;
+            if (!leadIn.empty()) {
+              rapidToPoint(leadIn.front());
+              for (const auto& point : leadIn) feedToPoint(point);
+            } else {
+              rapidToPoint(path.front());
+            }
+          }
+          feedToPoint(path.front(), transitionSpeed);
+          for (const auto& point : path) feedToPoint(point);
+          // Rapid between disconnected paths.
+          if (pathSet.size() > 1) moveRapidly = true;
+        }
+      }
+    }
+  }
+  return static_cast<int>(levels.size());
+}
+
 // Emit a 3D path, working down to it over the given number of passes.
 void GCodeWriter::emitSpiralPath(Path& path, MCFixed startDepth,
                                  int numberOfLevels) {

@@ -20,6 +20,7 @@
 #include <stdarg.h>
 
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -65,6 +66,11 @@ class GCodeWriter {
   void emitPathSets(std::vector<std::vector<Path>>& pathSets, bool rapidMove,
                     MCFixed rapidHeight, MCFixed leadInLength,
                     int transitionSpeed);
+  int emitPathGroupsInLayers(
+      const std::vector<std::vector<std::vector<Path>>>& pathGroups,
+      MCFixed startDepth, int minimumLevels,
+      std::optional<MCFixed> maxCutDepth, bool rapidMove,
+      MCFixed rapidHeight, MCFixed leadInLength, int transitionSpeed);
   void emitSpiralPath(Path& path, MCFixed startDepth, int numberOfLevels);
   int emitSpiralPath(Path& path, MCFixed startDepth, int minimumLevels,
                      MCFixed maxCutDepth);

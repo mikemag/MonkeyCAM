@@ -37,6 +37,7 @@
     "insert hole diameter": "0.373in",
 
     "top profile tool": 4,
+    "top profile passes": 1,
     "top profile transition speed": 20,
     "top profile deep speed": 50,
     "top profile overlap percentage": 0.50,
