@@ -56,6 +56,7 @@
 
     "edge trench width": "1.2894in",
     "edge trench extension": "3in",
+    "edge trench passes": 3,
 
     "splitboard center trench width": "0.5in",
     "splitboard center gap": "0.100in",

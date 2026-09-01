@@ -136,6 +136,26 @@ vector<vector<Path>> pocket(const Path& outerPath, const Tool& tool,
   return pathSets;
 }
 
+int emitSpiralPathWithToolLimit(GCodeWriter& g, Path& path,
+                                MCFixed startDepth, int minimumPasses,
+                                const Tool& tool) {
+  if (tool.maxCutDepth) {
+    return g.emitSpiralPath(path, startDepth, minimumPasses,
+                            *tool.maxCutDepth);
+  }
+  g.emitSpiralPath(path, startDepth, minimumPasses);
+  return minimumPasses;
+}
+
+void addCutDepthHeader(GCodeWriter& g, const Tool& tool, int minimumPasses,
+                       int actualPasses) {
+  if (!tool.maxCutDepth) return;
+  g.headerCommentF("* Maximum cut depth: %s",
+                   g.formatLengthWithUnits(*tool.maxCutDepth).c_str());
+  g.headerCommentF("* Cutting passes: %d, configured minimum: %d",
+                   actualPasses, minimumPasses);
+}
+
 // Build an overall board shape, which is the true finished shape of
 // the board.
 //
@@ -1531,10 +1551,15 @@ const GCodeWriter BoardShape::generateEdgeTrench(const Machine& machine) {
   addCoreCenterComment(g);
   g.rapidToPoint(t1[0]);
   g.spindleOn();
-  g.emitSpiralPath(t1, machine.coreBlankThickness(), 3);
+  auto minimumPasses = machine.edgeTrenchPasses();
+  auto actualPasses = emitSpiralPathWithToolLimit(
+      g, t1, machine.coreBlankThickness(), minimumPasses, tool);
   g.rapidToPoint(t1[0]);
   g.rapidToPoint(t2[0]);
-  g.emitSpiralPath(t2, machine.coreBlankThickness(), 3);
+  auto secondPasses = emitSpiralPathWithToolLimit(
+      g, t2, machine.coreBlankThickness(), minimumPasses, tool);
+  assert(actualPasses == secondPasses);
+  addCutDepthHeader(g, tool, minimumPasses, actualPasses);
   g.rapidToPoint(t2[0]);
   g.spindleOff();
   g.close();
@@ -1610,7 +1635,10 @@ const GCodeWriter BoardShape::generateSplitboardCenterTrench(
   addCoreCenterComment(g);
   g.rapidToPoint(cto[0]);
   g.spindleOn();
-  g.emitSpiralPath(cto, machine.coreBlankThickness(), 3);
+  auto minimumPasses = machine.edgeTrenchPasses();
+  auto actualPasses = emitSpiralPathWithToolLimit(
+      g, cto, machine.coreBlankThickness(), minimumPasses, tool);
+  addCutDepthHeader(g, tool, minimumPasses, actualPasses);
   g.rapidToPoint(cto[0]);
   g.spindleOff();
   g.close();
@@ -1675,8 +1703,10 @@ const GCodeWriter BoardShape::generateTopCutout(const Machine& machine) {
   addCoreCenterComment(g);
   g.rapidToPoint(profPath[0]);
   g.spindleOn();
-  g.emitSpiralPath(profPath, machine.coreBlankThickness(),
-                   machine.coreCutoutPasses());
+  auto minimumPasses = machine.coreCutoutPasses();
+  auto actualPasses = emitSpiralPathWithToolLimit(
+      g, profPath, machine.coreBlankThickness(), minimumPasses, tool);
+  addCutDepthHeader(g, tool, minimumPasses, actualPasses);
   g.rapidToPoint(profPath[0]);
   g.spindleOff();
   g.close();

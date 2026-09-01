@@ -66,6 +66,8 @@ class GCodeWriter {
                     MCFixed rapidHeight, MCFixed leadInLength,
                     int transitionSpeed);
   void emitSpiralPath(Path& path, MCFixed startDepth, int numberOfLevels);
+  int emitSpiralPath(Path& path, MCFixed startDepth, int minimumLevels,
+                     MCFixed maxCutDepth);
 
   void emitClockwiseArc(Point dest, MCFixed radius);
   void emitIncrementalCircle(MCFixed diameter);

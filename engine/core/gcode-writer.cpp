@@ -25,6 +25,7 @@
 
 #include "MonkeyCAMConfig.h"
 #include "activity-emitter.h"
+#include "cut-depth.h"
 using ae = MonkeyCAM::ActivityEmitter;
 #include "json.hpp"
 using json = nlohmann::json;
@@ -335,6 +336,28 @@ void GCodeWriter::emitSpiralPath(Path& path, MCFixed startDepth,
       feedToPoint(currentPoint);
     }
   }
+}
+
+// Emit a 3D path, working down to it in at least minimumLevels passes and
+// adding passes as necessary to honor maxCutDepth.
+int GCodeWriter::emitSpiralPath(Path& path, MCFixed startDepth,
+                                int minimumLevels, MCFixed maxCutDepth) {
+  PathUtils::RemoveShortLines(path, MCFixed::fromInches(0.0005));
+  auto minZ = std::min_element(
+      path.begin(), path.end(),
+      [](const Point& a, const Point& b) { return a.Z < b.Z; });
+  auto levels =
+      planCutDepths(startDepth, minZ->Z, minimumLevels, maxCutDepth);
+  for (size_t i = 0; i < levels.size(); ++i) {
+    for (const auto& p : path) {
+      auto currentPoint = p;
+      if (i < levels.size() - 1 && currentPoint.Z < levels[i]) {
+        currentPoint.Z = levels[i];
+      }
+      feedToPoint(currentPoint);
+    }
+  }
+  return static_cast<int>(levels.size());
 }
 
 void GCodeWriter::updateCurrentPosition(Point p) {

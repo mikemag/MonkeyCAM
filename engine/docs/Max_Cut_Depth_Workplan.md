@@ -10,7 +10,7 @@ depth of cut in MonkeyCAM's deep-cut core programs.
 | Slice | Status |
 | --- | --- |
 | 1. Tool Configuration and Depth Planner | Complete |
-| 2. Single-Path Deep-Cut Programs | Not started |
+| 2. Single-Path Deep-Cut Programs | Complete |
 | 3. Layered Top Profile Path Sets | Not started |
 | 4. Documentation, Examples, and End-to-End Verification | Not started |
 
