@@ -11,6 +11,7 @@ set(MONKEYCAM_CORE_SRCS
         arc-path.cpp
         bezier-path.cpp
         board-profile.cpp
+        cut-depth.cpp
         ellipse-path.cpp
         gcode-writer.cpp
         insert-pack.cpp

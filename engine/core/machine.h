@@ -18,6 +18,7 @@
 #define incl_machine_H_
 
 #include <map>
+#include <optional>
 #include <string>
 
 #include "config.h"
@@ -35,12 +36,17 @@ enum class XYRotation { None, CounterClockwise, Clockwise };
 
 struct Tool {
   Tool() : name(""), diameter(0), gcodeToolNumber(0) {}
-  Tool(std::string name, MCFixed diameter, int toolNumber)
-      : name(name), diameter(diameter), gcodeToolNumber(toolNumber) {}
+  Tool(std::string name, MCFixed diameter, int toolNumber,
+       std::optional<MCFixed> maxDepth)
+      : name(name),
+        diameter(diameter),
+        gcodeToolNumber(toolNumber),
+        maxCutDepth(maxDepth) {}
 
   std::string name;
   MCFixed diameter;
   int gcodeToolNumber;
+  std::optional<MCFixed> maxCutDepth;
 };
 
 //------------------------------------------------------------------------------
@@ -97,7 +103,6 @@ class Machine {
   MPI(topProfileRoughingOffset, "top profile roughing offset")
   MPI(topProfileRoughingFuzz, "top profile roughing fuzz")
   MPT(coreCutoutTool, int, "core cutout tool")
-  MPT(coreCutoutPasses, int, "core cutout passes")
   MPI(spacerEndOverhang, "spacer end overhang")
   MPI(spacerSideOverhang, "spacer side overhang")
   MPI(sidewallOverhang, "sidewall overhang")
@@ -120,10 +125,20 @@ class Machine {
 #undef MPT
 #undef MPI
 
+  const int coreCutoutPasses() const { return m_coreCutoutPasses; }
+  const int edgeTrenchPasses() const { return m_edgeTrenchPasses; }
+  const int topProfilePasses() const { return m_topProfilePasses; }
+
  private:
+  int readPassCount(const char* key);
+  void failNonPositive(const char* key);
+
   Config& m_config;
   /*const*/ std::map<int, const Tool> m_tools;
   GCodeUnits m_gcodeUnits;
+  int m_coreCutoutPasses;
+  int m_edgeTrenchPasses;
+  int m_topProfilePasses;
 };
 
 }  // namespace MonkeyCAM

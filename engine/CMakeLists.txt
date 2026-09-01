@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(MonkeyCAM)
 
+include(CTest)
+
 set(MonkeyCAM_VERSION_MAJOR 4)
 set(MonkeyCAM_VERSION_MINOR 1)
 set(MonkeyCAM_VERSION_PATCH 0)
@@ -43,6 +45,9 @@ add_subdirectory(util)
 add_subdirectory(clipper)
 add_subdirectory(core)
 add_subdirectory(cli)
+if (BUILD_TESTING)
+    add_subdirectory(test)
+endif ()
 
 install(FILES "${PROJECT_BINARY_DIR}/../LICENSE" DESTINATION .)
 install(FILES "${PROJECT_BINARY_DIR}/../README.md" DESTINATION .)

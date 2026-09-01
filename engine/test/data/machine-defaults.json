@@ -1,0 +1,13 @@
+{
+  "machine": {
+    "tools": [
+      {
+        "id": 1,
+        "name": "Test Tool",
+        "diameter": "6mm",
+        "G-code #": 1,
+        "max cut depth": "2mm"
+      }
+    ]
+  }
+}

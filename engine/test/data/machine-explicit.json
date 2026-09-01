@@ -1,0 +1,15 @@
+{
+  "machine": {
+    "core cutout passes": 2,
+    "edge trench passes": 3,
+    "top profile passes": 4,
+    "tools": [
+      {
+        "id": 1,
+        "name": "Test Tool",
+        "diameter": "6mm",
+        "G-code #": 1
+      }
+    ]
+  }
+}
