@@ -16,8 +16,10 @@
 
 #include "machine.h"
 
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <limits>
 #include <map>
 #include <optional>
 #include <string>
@@ -66,9 +68,22 @@ Machine::Machine(Config& config) : m_config(config) {
 }
 
 int Machine::readPassCount(const char* key) {
-  auto passes = m_config.get<int>(key, 1);
-  if (passes <= 0) failNonPositive(key);
-  return passes;
+  auto configured = m_config.getOptional<json>(key);
+  if (!configured) return 1;
+
+  if (configured->is_number_unsigned()) {
+    auto passes = configured->get<uint64_t>();
+    if (passes > 0 && passes <= std::numeric_limits<int>::max()) {
+      return static_cast<int>(passes);
+    }
+  } else if (configured->is_number_integer()) {
+    auto passes = configured->get<int64_t>();
+    if (passes > 0 && passes <= std::numeric_limits<int>::max()) {
+      return static_cast<int>(passes);
+    }
+  }
+  failInvalidPassCount(key);
+  return 1;  // Unreachable; failInvalidPassCount exits.
 }
 
 void Machine::failNonPositive(const char* key) {
@@ -81,6 +96,19 @@ void Machine::failNonPositive(const char* key) {
          {"configName", "Machine Configuration"},
          {"key", key},
          {"message", "value must be greater than zero"}}}});
+  std::exit(1);
+}
+
+void Machine::failInvalidPassCount(const char* key) {
+  printf("Invalid parameter in Machine Configuration: '%s' must be a "
+         "positive integer\n",
+         key);
+  ae::emitter().write(
+      {{"error",
+        {{"kind", "Invalid Parameter"},
+         {"configName", "Machine Configuration"},
+         {"key", key},
+         {"message", "value must be a positive integer"}}}});
   std::exit(1);
 }
 

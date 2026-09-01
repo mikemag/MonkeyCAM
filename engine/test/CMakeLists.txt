@@ -26,6 +26,14 @@ add_test(NAME machine-config-invalid-pass
          COMMAND machine-config-test
                  ${CMAKE_CURRENT_SOURCE_DIR}/data/machine-invalid-pass.json)
 set_tests_properties(machine-config-invalid-pass PROPERTIES WILL_FAIL true)
+add_test(NAME machine-config-negative-pass
+         COMMAND machine-config-test
+                 ${CMAKE_CURRENT_SOURCE_DIR}/data/machine-negative-pass.json)
+set_tests_properties(machine-config-negative-pass PROPERTIES WILL_FAIL true)
+add_test(NAME machine-config-fractional-pass
+         COMMAND machine-config-test
+                 ${CMAKE_CURRENT_SOURCE_DIR}/data/machine-fractional-pass.json)
+set_tests_properties(machine-config-fractional-pass PROPERTIES WILL_FAIL true)
 add_test(NAME machine-config-invalid-max-depth
          COMMAND machine-config-test
                  ${CMAKE_CURRENT_SOURCE_DIR}/data/machine-invalid-max-depth.json)

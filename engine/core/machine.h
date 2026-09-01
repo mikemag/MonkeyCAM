@@ -132,6 +132,7 @@ class Machine {
  private:
   int readPassCount(const char* key);
   void failNonPositive(const char* key);
+  void failInvalidPassCount(const char* key);
 
   Config& m_config;
   /*const*/ std::map<int, const Tool> m_tools;
