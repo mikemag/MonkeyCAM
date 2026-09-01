@@ -2,7 +2,7 @@
 
 ## Status
 
-Design agreed; implementation is in progress.
+Implementation and automated verification are complete.
 
 This document tracks the design and implementation plan for limiting the
 depth of cut in MonkeyCAM's deep-cut core programs.
@@ -12,7 +12,7 @@ depth of cut in MonkeyCAM's deep-cut core programs.
 | 1. Tool Configuration and Depth Planner | Complete |
 | 2. Single-Path Deep-Cut Programs | Complete |
 | 3. Layered Top Profile Path Sets | Complete |
-| 4. Documentation, Examples, and End-to-End Verification | Not started |
+| 4. Documentation, Examples, and End-to-End Verification | Complete |
 
 ## Goals
 
@@ -294,8 +294,8 @@ The existing behavior within each level remains unchanged:
 - Add a repeatable comparison script that generates output into temporary
   directories, normalizes expected metadata, and compares both normalized text
   and parsed G-Code motion coordinates.
-- Build the engine with the Docker build and run the board, ski, and splitboard
-  examples.
+- Build the engine with the Docker build or a supported local toolchain and run
+  the board, ski, and splitboard examples.
 - Compare no-option output against the current G-Code, ignoring only expected
   generated metadata such as timestamps.
 - For configured output, verify calculated level counts, maximum depth between
@@ -461,3 +461,27 @@ The feature is complete when:
 - The coordinate-level regression cases in this document pass.
 - The engine builds and all board, ski, and splitboard verification cases pass.
 - User-facing configuration and program documentation is updated.
+
+## Repeatable Verification
+
+The end-to-end checks are registered with CTest when a Python 3 interpreter
+is available. After building the engine, run:
+
+```sh
+ctest --test-dir engine/build --output-on-failure
+```
+
+The regression can also be run directly against a specific engine binary:
+
+```sh
+python3 engine/test/verify-max-cut-depth.py \
+  --monkeycam engine/build/cli/MonkeyCAM \
+  --repo-root .
+```
+
+It generates all test output in a temporary directory and removes it after
+the checks complete. It covers the canonical snowboard, ski, and splitboard;
+non-binding limits on every sample tool; all pass-count/maximum precedence
+combinations; legacy spiral schedule parity; binding limits and exact final
+geometry; canonical Top Profile feed and rapid X/Y topology at every layer;
+and different maximums on the small cutout and large profiling tools.

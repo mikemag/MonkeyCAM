@@ -897,6 +897,18 @@ Each of these effects the [Top Profile program](G-Code_Program_Guide.md#top-prof
 
 The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to profile the core.
 
+#### Top Profile Passes
+
+"top profile passes": `number`
+
+*Optional; defaults to `1`.*
+
+The minimum number of complete depth layers used to profile the top of
+the core. MonkeyCAM cuts every inside-out profiling contour at one depth
+layer before proceeding to the next layer. If the selected tool also has
+a `max cut depth`, MonkeyCAM adds layers when necessary but never removes
+layers specified here. The value must be a positive integer.
+
 #### Top Profile Transition Speed
 
 "top profile transition speed": `number`
@@ -937,6 +949,16 @@ Each of these effects the [Top Cutout program](G-Code_Program_Guide.md#top-cutou
 "core cutout tool": `tool number`
 
 The tool, defined in the [`tools` section](Configuration_Guide.md#tools), which will be used to cut out the core.
+
+#### Core Cutout Passes
+
+"core cutout passes": `number`
+
+*Optional; defaults to `1`.*
+
+The minimum number of passes used to cut out the core. If the selected
+tool also has a `max cut depth`, MonkeyCAM adds passes when necessary but
+never removes passes specified here. The value must be a positive integer.
 
 #### Sidewall Overhang
 
@@ -994,6 +1016,17 @@ Currently this measurement is a bit of trial-and-error, though a value
 of about `3` inches is typically sufficient. See the [issue](
 https://github.com/mikemag/MonkeyCAM/issues/6) about improving this.
 
+#### Edge Trench Passes
+
+"edge trench passes": `number`
+
+*Optional; defaults to `1`.*
+
+The minimum number of passes used by both the Edge Trench and Splitboard
+Center Trench programs. If the selected tool also has a `max cut depth`,
+MonkeyCAM adds passes when necessary but never removes passes specified
+here. The value must be a positive integer.
+
 ### Splitboard Parameters
 
 Each of these effects every program generated, as the core is widended
@@ -1042,7 +1075,8 @@ used to reference the tool from other parameters, and is called the
         "id": 1,
         "name": "Quarter Inch Upcut Spiral",
         "diameter": 0.247,
-        "G-code #": 1
+        "G-code #": 1,
+        "max cut depth": "3mm"
     },
     {
         "id": 2,
@@ -1084,3 +1118,27 @@ The tool number, as defined in your CNC controller, which will be
 emitted via `G43`. I.e., `G43 H1 T4` if the number is `4`. This is for
 CNC machines with automatic tool changers, or for those who configure
 tool height offsets in the CNC controller.
+
+#### Maximum Cut Depth
+
+"max cut depth": `number` | `string`
+
+*Optional.*
+
+The maximum amount of material this cutter should remove between
+corresponding depth passes. The value must be positive. Unitless values
+default to inches, but explicit units such as `"2mm"` are strongly
+recommended for this safety-related setting.
+
+This cutter property is selectively honored by the Edge Trench,
+Splitboard Center Trench, Core Top Cutout, and Core Top Profile programs.
+It is not a global limit on every program that uses the tool. Programs
+such as Edge Groove, holes, alignment marks, Base Cutout, and Nose Tail
+Spacer Cutout keep their existing cutting behavior.
+
+The pass option for each supported program is a minimum. The effective
+number of passes is the larger of that minimum and the number required by
+`max cut depth`. If the pass option is omitted it defaults to one; if
+`max cut depth` is omitted, the pass count alone controls the operation.
+Generated files that use a maximum include header comments showing the
+configured maximum and calculated pass count.

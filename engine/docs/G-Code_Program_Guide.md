@@ -82,6 +82,11 @@ rest of the core, so everything matches perfectly.
 This program uses a straight cutter, typically 0.250”. It cuts all the
 way thru the core.
 
+The optional `edge trench passes` machine setting specifies a minimum
+number of passes. If this program's tool has a `max cut depth`, MonkeyCAM
+adds passes as necessary to remain within that limit. With neither option,
+the trench is cut in one pass.
+
 
 ## Center Trench
 
@@ -95,6 +100,11 @@ rest of the core, so everything matches perfectly.
 
 This program uses a straight cutter, typically 0.250”. It cuts all the
 way thru the core.
+
+The Center Trench uses the same optional `edge trench passes` minimum as
+the Edge Trench. It also honors the selected tool's optional
+`max cut depth`, adding passes when necessary. With neither option, the
+trench is cut in one pass.
 
 
 ## Edge Groove
@@ -153,6 +163,13 @@ MonkeyWiki.
 This program also includes a lead-in ramp whenever the cutter plunges
 into the core blank to reduce load on the router.
 
+The optional `top profile passes` machine setting specifies a minimum
+number of complete depth layers. If the Top Profile tool has a
+`max cut depth`, MonkeyCAM adds layers as necessary. At each layer it
+cuts the complete existing inside-out contour sequence before descending
+to the next layer; this avoids leaving a full-height wall beside the next
+contour. The final layer retains the exact configured 3D core profile.
+
 
 ## Top Cutout
 
@@ -170,6 +187,11 @@ thru the tabs to release the core.
 
 This program uses a straight cutter, typically 0.250”, and cuts all
 the way thru the core blank.
+
+The optional `core cutout passes` machine setting specifies a minimum
+number of passes. If this program's tool has a `max cut depth`, MonkeyCAM
+adds passes as necessary while preserving the final cut-through and tab
+heights. With neither option, the core is cut out in one pass.
 
 
 ## Base Cutout
@@ -228,6 +250,8 @@ the cutter will move in any axis. This is computed from the generated
 G-Code in a separate step from the math which generated it as a safety
 measure. If the bounding box looks odd, don’t run the program without
 simulating it carefully.
+* For a program that honors a tool's configured `max cut depth`, the
+  maximum and the calculated/configured pass counts.
 
 
 ### Program Start

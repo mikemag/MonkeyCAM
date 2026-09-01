@@ -30,3 +30,13 @@ add_test(NAME machine-config-invalid-max-depth
          COMMAND machine-config-test
                  ${CMAKE_CURRENT_SOURCE_DIR}/data/machine-invalid-max-depth.json)
 set_tests_properties(machine-config-invalid-max-depth PROPERTIES WILL_FAIL true)
+
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if (Python3_Interpreter_FOUND)
+    add_test(NAME max-cut-depth-regression
+             COMMAND ${Python3_EXECUTABLE}
+                     ${CMAKE_CURRENT_SOURCE_DIR}/verify-max-cut-depth.py
+                     --monkeycam $<TARGET_FILE:MonkeyCAM>
+                     --repo-root ${MonkeyCAM_SOURCE_DIR}/..)
+    set_tests_properties(max-cut-depth-regression PROPERTIES TIMEOUT 120)
+endif ()
