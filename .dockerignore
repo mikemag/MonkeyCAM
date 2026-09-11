@@ -1,0 +1,15 @@
+# The engine Dockerfile only consumes these source and metadata paths.
+**
+!engine/
+!engine/**
+!example/
+!example/**
+!LICENSE
+!README.md
+
+# Exclude native/IDE output nested under the included engine tree.
+engine/.idea/
+engine/build/
+engine/build-*/
+engine/cmake-build-debug/
+engine/util/MonkeyCAMConfig.h

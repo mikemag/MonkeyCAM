@@ -9,7 +9,8 @@
     "url": "https://github.com/mikemag/MonkeyCAM.git"
   },
   "scripts": {
-    "start": "node worker.js"
+    "start": "node worker.js",
+    "check": "node --check worker.js && node --check MonkeyCAMJob.js && node --check config.js"
   },
   "engines": {
     "node": ">=24.11.1"

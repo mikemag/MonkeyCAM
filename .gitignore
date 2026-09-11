@@ -26,7 +26,8 @@ CPackSourceConfig.cmake
 _CPack_Packages
 *.vscode
 engine/build
+engine/build-*/
 
 # CLion IDE config file
 .idea/
-
+.DS_Store

@@ -1,5 +1,5 @@
-# Use an LTS version of Node compatible with the worker's minimum requirement
-FROM node:20-slim
+# Match the version used for local worker and client development.
+FROM node:24.11.1-slim
 
 # Create app directory
 WORKDIR /app

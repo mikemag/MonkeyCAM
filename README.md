@@ -140,3 +140,10 @@ and put up a pull request!
 
 - [Design Overview](https://github.com/mikemag/MonkeyCAM/wiki/Design-Overview): details on the internal design of MonkeyCAM and how it creates shapes and G-Code programs.
 - [Current issues and enhancements](https://github.com/mikemag/MonkeyCAM/issues)
+
+## Developer Documentation
+
+- [Development overview and release path](DEVELOPING.md)
+- [Engine build, test, Docker, and G-Code validation](engine/README.md)
+- [Cloud Run worker development and deployment](webapp/worker/README.md)
+- [Web client development and App Engine deployment](webapp/client/README.md)
